@@ -1,0 +1,1509 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ENLACE — Conéctate de verdad</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --azul: #2563EB;
+    --morado: #7C3AED;
+    --rosa: #EC4899;
+    --naranja: #F97316;
+    --grad: linear-gradient(135deg, #2563EB 0%, #7C3AED 35%, #EC4899 65%, #F97316 100%);
+    --oscuro: #0A0A0F;
+    --gris: #1A1A2E;
+    --gris2: #252540;
+    --texto: #F0F0FF;
+    --texto2: #9999BB;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--oscuro);
+    color: var(--texto);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* FONDO ANIMADO */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: 
+      radial-gradient(ellipse at 20% 20%, rgba(37,99,235,0.15) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 80%, rgba(249,115,22,0.12) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 50%, rgba(124,58,237,0.08) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(10,10,15,0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.4rem;
+    background: var(--grad);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.02em;
+  }
+
+  .nav-btn {
+    background: var(--grad);
+    border: none;
+    border-radius: 50px;
+    padding: 0.5rem 1.2rem;
+    color: white;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.2s;
+  }
+  .nav-btn:hover { opacity: 0.85; transform: scale(1.03); }
+
+  /* PANTALLAS */
+  .screen {
+    display: none;
+    min-height: 100vh;
+    position: relative;
+    z-index: 1;
+  }
+  .screen.active { display: flex; flex-direction: column; }
+
+  /* ===== PANTALLA INICIO ===== */
+  #screen-inicio {
+    align-items: center;
+    justify-content: center;
+    padding: 6rem 1.5rem 3rem;
+    text-align: center;
+  }
+
+  .hero-logo {
+    width: 90px;
+    height: 90px;
+    margin: 0 auto 2rem;
+    animation: flotar 3s ease-in-out infinite;
+  }
+
+  @keyframes flotar {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+
+  .hero-logo svg { width: 100%; height: 100%; }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 3rem;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    background: var(--grad);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 1rem;
+  }
+
+  .hero-sub {
+    font-size: 1.05rem;
+    color: var(--texto2);
+    max-width: 280px;
+    margin: 0 auto 2.5rem;
+    line-height: 1.6;
+    font-weight: 300;
+  }
+
+  .btn-principal {
+    width: 100%;
+    max-width: 320px;
+    padding: 1rem;
+    background: var(--grad);
+    border: none;
+    border-radius: 16px;
+    color: white;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1.05rem;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 8px 30px rgba(124,58,237,0.4);
+    margin-bottom: 1rem;
+  }
+  .btn-principal:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(124,58,237,0.5); }
+  .btn-principal:active { transform: translateY(0); }
+
+  .btn-secundario {
+    width: 100%;
+    max-width: 320px;
+    padding: 1rem;
+    background: transparent;
+    border: 1.5px solid rgba(255,255,255,0.15);
+    border-radius: 16px;
+    color: var(--texto);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .btn-secundario:hover { border-color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.05); }
+
+  .features-preview {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 2.5rem;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+    scrollbar-width: none;
+    max-width: 400px;
+  }
+  .features-preview::-webkit-scrollbar { display: none; }
+
+  .feat-chip {
+    flex-shrink: 0;
+    background: var(--gris2);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 50px;
+    padding: 0.4rem 0.9rem;
+    font-size: 0.75rem;
+    color: var(--texto2);
+    white-space: nowrap;
+  }
+
+  /* ===== PANTALLA REGISTRO ===== */
+  #screen-registro {
+    padding: 5rem 1.5rem 2rem;
+  }
+
+  .form-header {
+    margin-bottom: 2rem;
+  }
+
+  .back-btn {
+    background: none;
+    border: none;
+    color: var(--texto2);
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0;
+    margin-bottom: 1.5rem;
+    display: block;
+  }
+
+  h2 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 2rem;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.4rem;
+  }
+
+  .form-sub {
+    color: var(--texto2);
+    font-size: 0.9rem;
+    font-weight: 300;
+  }
+
+  .form-group {
+    margin-bottom: 1.2rem;
+  }
+
+  label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--texto2);
+    margin-bottom: 0.4rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  input, textarea, select {
+    width: 100%;
+    background: var(--gris);
+    border: 1.5px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 0.85rem 1rem;
+    color: var(--texto);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  input:focus, textarea:focus, select:focus {
+    border-color: var(--morado);
+  }
+  input::placeholder, textarea::placeholder {
+    color: rgba(153,153,187,0.4);
+  }
+  select option { background: var(--gris); }
+  textarea { resize: none; height: 80px; }
+
+  .intereses-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+
+  .interes-btn {
+    background: var(--gris);
+    border: 1.5px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
+    padding: 0.6rem 0.3rem;
+    color: var(--texto2);
+    font-size: 0.8rem;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+  }
+  .interes-btn.selected {
+    background: rgba(124,58,237,0.2);
+    border-color: var(--morado);
+    color: var(--texto);
+  }
+  .interes-btn span { display: block; font-size: 1.2rem; margin-bottom: 0.2rem; }
+
+  /* ===== PANTALLA PRINCIPAL (HOME) ===== */
+  #screen-home {
+    padding-top: 4rem;
+  }
+
+  .tabs {
+    display: flex;
+    background: var(--gris);
+    margin: 0.75rem 1rem;
+    border-radius: 12px;
+    padding: 0.3rem;
+    gap: 0.2rem;
+  }
+
+  .tab {
+    flex: 1;
+    padding: 0.6rem;
+    background: none;
+    border: none;
+    color: var(--texto2);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 9px;
+    transition: all 0.2s;
+    text-align: center;
+  }
+  .tab.active {
+    background: var(--grad);
+    color: white;
+  }
+
+  /* TAB DISCOVER */
+  .discover-section { padding: 0 1rem; }
+
+  .card-stack {
+    position: relative;
+    height: 420px;
+    margin: 1rem 0;
+  }
+
+  .perfil-card {
+    position: absolute;
+    inset: 0;
+    background: var(--gris);
+    border-radius: 24px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.06);
+    transition: transform 0.3s, opacity 0.3s;
+    cursor: grab;
+  }
+
+  .perfil-card:nth-child(2) {
+    transform: scale(0.95) translateY(10px);
+    z-index: 1;
+  }
+  .perfil-card:nth-child(3) {
+    transform: scale(0.9) translateY(20px);
+    z-index: 0;
+  }
+  .perfil-card:first-child { z-index: 2; }
+
+  .card-img {
+    width: 100%;
+    height: 260px;
+    object-fit: cover;
+    background: linear-gradient(135deg, var(--gris2) 0%, #2A2A4A 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 5rem;
+  }
+
+  .card-alma-badge {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 50px;
+    padding: 0.3rem 0.8rem;
+    font-size: 0.7rem;
+    color: var(--texto);
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  .alma-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--naranja);
+    animation: pulsar 1.5s infinite;
+  }
+  @keyframes pulsar {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .card-timer {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 50px;
+    padding: 0.3rem 0.8rem;
+    font-size: 0.7rem;
+    color: var(--rosa);
+    font-weight: 600;
+  }
+
+  .card-info {
+    padding: 1rem;
+  }
+
+  .card-nombre {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1.3rem;
+    margin-bottom: 0.2rem;
+  }
+
+  .card-bio {
+    color: var(--texto2);
+    font-size: 0.85rem;
+    line-height: 1.5;
+    margin-bottom: 0.7rem;
+  }
+
+  .card-tags {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+  }
+
+  .tag {
+    background: var(--gris2);
+    border-radius: 50px;
+    padding: 0.2rem 0.6rem;
+    font-size: 0.7rem;
+    color: var(--texto2);
+  }
+
+  .acciones-card {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    padding: 0.5rem 1rem 1rem;
+  }
+
+  .accion-btn {
+    width: 58px; height: 58px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    font-size: 1.4rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .accion-btn:hover { transform: scale(1.1); }
+  .accion-btn:active { transform: scale(0.95); }
+
+  .btn-nope { background: var(--gris2); box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+  .btn-super { background: linear-gradient(135deg, #2563EB, #7C3AED); box-shadow: 0 4px 20px rgba(124,58,237,0.4); }
+  .btn-like { background: linear-gradient(135deg, #EC4899, #F97316); box-shadow: 0 4px 20px rgba(249,115,22,0.4); }
+
+  /* TAB PLANES */
+  .planes-section { padding: 0 1rem; }
+
+  .planes-titulo {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 1rem 0 0.75rem;
+  }
+
+  .planes-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .plan-card {
+    background: var(--gris);
+    border: 1.5px solid rgba(255,255,255,0.06);
+    border-radius: 16px;
+    padding: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+  }
+  .plan-card:hover, .plan-card.activo {
+    border-color: var(--morado);
+    background: rgba(124,58,237,0.1);
+  }
+  .plan-card.activo { box-shadow: 0 0 20px rgba(124,58,237,0.3); }
+
+  .plan-emoji { font-size: 2rem; margin-bottom: 0.4rem; }
+  .plan-nombre { font-weight: 600; font-size: 0.85rem; }
+  .plan-match { font-size: 0.7rem; color: var(--texto2); margin-top: 0.2rem; }
+
+  /* TAB MATCHES */
+  .matches-section { padding: 0 1rem; }
+
+  .match-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.9rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .match-avatar {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gris2), #2A2A4A);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  .match-avatar::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 50%;
+    background: var(--grad);
+    z-index: -1;
+  }
+
+  .match-timer-badge {
+    position: absolute;
+    bottom: -2px; right: -2px;
+    background: var(--rosa);
+    border-radius: 50px;
+    padding: 0.1rem 0.35rem;
+    font-size: 0.55rem;
+    font-weight: 700;
+    color: white;
+  }
+
+  .match-info { flex: 1; }
+  .match-nombre { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.2rem; }
+  .match-preview { font-size: 0.8rem; color: var(--texto2); }
+
+  .match-hora { font-size: 0.7rem; color: var(--texto2); }
+
+  /* MODO HOGUERA */
+  .hoguera-banner {
+    background: linear-gradient(135deg, rgba(249,115,22,0.15), rgba(236,72,153,0.15));
+    border: 1px solid rgba(249,115,22,0.3);
+    border-radius: 16px;
+    padding: 1rem;
+    margin: 0.75rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+  }
+  .hoguera-icon { font-size: 2rem; }
+  .hoguera-texto h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-bottom: 0.2rem;
+  }
+  .hoguera-texto p { font-size: 0.75rem; color: var(--texto2); }
+  .hoguera-badge {
+    margin-left: auto;
+    background: var(--naranja);
+    border-radius: 50px;
+    padding: 0.2rem 0.6rem;
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: white;
+    white-space: nowrap;
+  }
+
+  /* TAB PERFIL */
+  .perfil-section { padding: 0 1rem 3rem; }
+
+  .mi-perfil-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1.5rem 0 1rem;
+    text-align: center;
+  }
+
+  .mi-avatar {
+    width: 90px; height: 90px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gris2), #2A2A4A);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    position: relative;
+    margin-bottom: 1rem;
+  }
+
+  .mi-avatar::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    background: var(--grad);
+    z-index: -1;
+  }
+
+  .mi-nombre {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 800;
+    margin-bottom: 0.3rem;
+  }
+
+  .reputacion {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--naranja);
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+    margin: 1.5rem 0;
+  }
+
+  .stat-box {
+    background: var(--gris);
+    border-radius: 14px;
+    padding: 0.9rem 0.5rem;
+    text-align: center;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .stat-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 800;
+    background: var(--grad);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .stat-label { font-size: 0.65rem; color: var(--texto2); margin-top: 0.2rem; }
+
+  .perfil-opcion {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    cursor: pointer;
+  }
+  .perfil-opcion-left { display: flex; align-items: center; gap: 0.75rem; }
+  .perfil-opcion-icon {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    background: var(--gris2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+  }
+  .perfil-opcion-texto { font-size: 0.9rem; font-weight: 500; }
+  .perfil-opcion-arrow { color: var(--texto2); font-size: 0.9rem; }
+
+  /* BOTTOM NAV */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: rgba(10,10,15,0.95);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(255,255,255,0.06);
+    display: flex;
+    padding: 0.5rem 0 0.8rem;
+    z-index: 100;
+  }
+
+  .nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.3rem 0;
+    color: var(--texto2);
+    font-size: 0.6rem;
+    font-family: 'DM Sans', sans-serif;
+    transition: color 0.2s;
+  }
+  .nav-item.active { color: var(--texto); }
+  .nav-item .nav-icon { font-size: 1.3rem; }
+  .nav-item.active .nav-icon {
+    filter: drop-shadow(0 0 8px rgba(124,58,237,0.8));
+  }
+
+  /* MODAL CHAT */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 200;
+    align-items: flex-end;
+  }
+  .modal-overlay.show { display: flex; }
+
+  .chat-modal {
+    background: var(--gris);
+    border-radius: 24px 24px 0 0;
+    width: 100%;
+    height: 85vh;
+    display: flex;
+    flex-direction: column;
+    animation: slideUp 0.3s ease;
+  }
+  @keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+
+  .chat-header {
+    padding: 1rem 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .chat-avatar {
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    background: var(--gris2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+  }
+
+  .chat-nombre { font-weight: 700; font-size: 0.95rem; }
+  .chat-estado { font-size: 0.72rem; color: var(--texto2); }
+
+  .chat-close {
+    margin-left: auto;
+    background: var(--gris2);
+    border: none;
+    border-radius: 50%;
+    width: 32px; height: 32px;
+    color: var(--texto);
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .chat-timer-bar {
+    background: rgba(236,72,153,0.1);
+    padding: 0.4rem 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.72rem;
+    color: var(--rosa);
+    font-weight: 600;
+  }
+
+  .chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    scrollbar-width: none;
+  }
+  .chat-messages::-webkit-scrollbar { display: none; }
+
+  .msg {
+    max-width: 80%;
+    padding: 0.7rem 0.9rem;
+    border-radius: 16px;
+    font-size: 0.88rem;
+    line-height: 1.5;
+  }
+  .msg.recibido {
+    background: var(--gris2);
+    align-self: flex-start;
+    border-bottom-left-radius: 4px;
+  }
+  .msg.enviado {
+    background: linear-gradient(135deg, var(--morado), var(--rosa));
+    align-self: flex-end;
+    border-bottom-right-radius: 4px;
+  }
+
+  .msg-audio {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+  }
+  .play-btn {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    border-radius: 50%;
+    width: 28px; height: 28px;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .audio-wave {
+    display: flex;
+    gap: 2px;
+    align-items: center;
+    height: 20px;
+  }
+  .wave-bar {
+    width: 3px;
+    background: rgba(255,255,255,0.5);
+    border-radius: 2px;
+    animation: wave 1s ease-in-out infinite;
+  }
+  .wave-bar:nth-child(1) { height: 8px; animation-delay: 0s; }
+  .wave-bar:nth-child(2) { height: 14px; animation-delay: 0.1s; }
+  .wave-bar:nth-child(3) { height: 10px; animation-delay: 0.2s; }
+  .wave-bar:nth-child(4) { height: 16px; animation-delay: 0.3s; }
+  .wave-bar:nth-child(5) { height: 8px; animation-delay: 0.4s; }
+  @keyframes wave {
+    0%, 100% { transform: scaleY(1); }
+    50% { transform: scaleY(0.5); }
+  }
+
+  .dado-btn {
+    background: var(--gris2);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 0.5rem 0.75rem;
+    color: var(--texto);
+    font-size: 0.8rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    align-self: center;
+  }
+
+  .chat-input-area {
+    padding: 0.75rem 1rem;
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    border-top: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .chat-input {
+    flex: 1;
+    background: var(--gris2);
+    border: 1.5px solid rgba(255,255,255,0.08);
+    border-radius: 50px;
+    padding: 0.7rem 1rem;
+    color: var(--texto);
+    font-size: 0.9rem;
+    outline: none;
+    height: auto;
+  }
+
+  .audio-btn, .send-btn {
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+  .audio-btn { background: var(--gris2); }
+  .send-btn { background: var(--grad); }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    top: 5rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(-20px);
+    background: var(--gris2);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 50px;
+    padding: 0.6rem 1.2rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    z-index: 300;
+    opacity: 0;
+    transition: all 0.3s;
+    white-space: nowrap;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* MATCH ANIMATION */
+  .match-explosion {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 400;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    text-align: center;
+  }
+  .match-explosion.show { display: flex; animation: aparecer 0.3s ease; }
+  @keyframes aparecer {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  .match-explosion h2 {
+    font-size: 2.5rem;
+    background: var(--grad);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 1rem 0 0.5rem;
+  }
+  .match-explosion p { color: var(--texto2); margin-bottom: 2rem; }
+  .match-avatars {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+  .match-av {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: var(--gris2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    border: 3px solid transparent;
+    background-clip: padding-box;
+    position: relative;
+  }
+  .match-av::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    background: var(--grad);
+    z-index: -1;
+  }
+  .match-corazon { font-size: 2rem; animation: latir 0.8s ease-in-out infinite; }
+  @keyframes latir {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.3); }
+  }
+
+  /* SCROLLABLE CONTENT */
+  .scroll-content {
+    overflow-y: auto;
+    flex: 1;
+    padding-bottom: 5rem;
+    scrollbar-width: none;
+  }
+  .scroll-content::-webkit-scrollbar { display: none; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">ENLACE</div>
+  <button class="nav-btn" onclick="irA('registro')">Entrar</button>
+</nav>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- ===== PANTALLA INICIO ===== -->
+<div class="screen active" id="screen-inicio">
+  <div class="hero-logo">
+    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#2563EB"/>
+          <stop offset="35%" stop-color="#7C3AED"/>
+          <stop offset="65%" stop-color="#EC4899"/>
+          <stop offset="100%" stop-color="#F97316"/>
+        </linearGradient>
+      </defs>
+      <circle cx="30" cy="18" r="10" fill="#2563EB"/>
+      <circle cx="70" cy="18" r="10" fill="#F97316"/>
+      <path d="M5 55 Q5 35 25 35 Q40 35 50 50 Q60 35 75 35 Q95 35 95 55 Q95 75 75 75 Q60 75 50 60 Q40 75 25 75 Q5 75 5 55Z" fill="url(#g1)"/>
+    </svg>
+  </div>
+
+  <h1>Conéctate<br>de verdad</h1>
+  <p class="hero-sub">La app española donde las conexiones son auténticas. Sin filtros falsos, sin ghosting.</p>
+
+  <button class="btn-principal" onclick="irA('registro')">Crear mi perfil gratis</button>
+  <button class="btn-secundario" onclick="irA('registro')">Ya tengo cuenta → Entrar</button>
+
+  <div class="features-preview">
+    <div class="feat-chip">🎭 Modo Alma</div>
+    <div class="feat-chip">⏳ Match 72h</div>
+    <div class="feat-chip">🎤 Audio obligatorio</div>
+    <div class="feat-chip">🔥 Modo Hoguera</div>
+    <div class="feat-chip">🎯 Match por planes</div>
+    <div class="feat-chip">🛡️ 0 perfiles falsos</div>
+  </div>
+</div>
+
+<!-- ===== PANTALLA REGISTRO ===== -->
+<div class="screen" id="screen-registro">
+  <div class="scroll-content" style="padding: 5rem 1.5rem 2rem;">
+    <button class="back-btn" onclick="irA('inicio')">←</button>
+    <div class="form-header">
+      <h2>Hola 👋<br>¿Quién eres?</h2>
+      <p class="form-sub">Tu perfil es lo que te hace único/a</p>
+    </div>
+
+    <div class="form-group">
+      <label>Nombre</label>
+      <input type="text" placeholder="¿Cómo te llaman?" id="inp-nombre">
+    </div>
+
+    <div class="form-group">
+      <label>Edad</label>
+      <input type="number" placeholder="Tu edad" min="18" max="99">
+    </div>
+
+    <div class="form-group">
+      <label>Ciudad</label>
+      <input type="text" placeholder="¿Dónde vives?">
+    </div>
+
+    <div class="form-group">
+      <label>Sobre ti</label>
+      <textarea placeholder="Cuéntanos algo interesante de ti... (sin clichés 😄)"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Tus intereses</label>
+      <div class="intereses-grid">
+        <button class="interes-btn" onclick="toggleInteres(this)"><span>🎵</span>Música</button>
+        <button class="interes-btn" onclick="toggleInteres(this)"><span>🏃</span>Deporte</button>
+        <button class="interes-btn" onclick="toggleInteres(this)"><span>🎬</span>Cine</button>
+        <button class="interes-btn" onclick="toggleInteres(this)"><span>✈️</span>Viajes</button>
+        <button class="interes-btn" onclick="toggleInteres(this)"><span>🍕</span>Gastronomía</button>
+        <button class="interes-btn" onclick="toggleInteres(this)"><span>📚</span>Lectura</button>
+        <button class="interes-btn" onclick="toggleInteres(this)"><span>🎮</span>Gaming</button>
+        <button class="interes-btn" onclick="toggleInteres(this)"><span>🎨</span>Arte</button>
+        <button class="interes-btn" onclick="toggleInteres(this)"><span>🐶</span>Mascotas</button>
+      </div>
+    </div>
+
+    <button class="btn-principal" onclick="entrarApp()" style="margin-top: 1rem;">
+      ¡Empezar a conectar! 🔗
+    </button>
+  </div>
+</div>
+
+<!-- ===== PANTALLA HOME ===== -->
+<div class="screen" id="screen-home">
+  <div class="tabs">
+    <button class="tab active" onclick="cambiarTab('discover', this)">✨ Descubrir</button>
+    <button class="tab" onclick="cambiarTab('planes', this)">🎯 Planes</button>
+    <button class="tab" onclick="cambiarTab('matches', this)">💬 Chats</button>
+    <button class="tab" onclick="cambiarTab('perfil', this)">👤 Yo</button>
+  </div>
+
+  <!-- TAB DISCOVER -->
+  <div class="scroll-content" id="tab-discover">
+    <div class="discover-section">
+      <div class="card-stack" id="card-stack">
+        <div class="perfil-card">
+          <div class="card-img">🧑</div>
+          <div class="card-alma-badge"><div class="alma-dot"></div> Modo Alma · 18h restantes</div>
+          <div class="card-timer">⏳ 71h</div>
+          <div class="card-info">
+            <div class="card-nombre">Carlos, 27 · Madrid</div>
+            <div class="card-bio">"Me gusta el café con conversaciones interesantes. Pregúntame por mi viaje a Japón 🗾"</div>
+            <div class="card-tags">
+              <span class="tag">✈️ Viajes</span>
+              <span class="tag">🎵 Música</span>
+              <span class="tag">☕ Café</span>
+            </div>
+          </div>
+        </div>
+        <div class="perfil-card">
+          <div class="card-img">👩</div>
+          <div class="card-alma-badge"><div class="alma-dot"></div> Modo Alma · 6h restantes</div>
+          <div class="card-timer">⏳ 48h</div>
+          <div class="card-info">
+            <div class="card-nombre">Laura, 25 · Barcelona</div>
+            <div class="card-bio">"Diseñadora de día, lectora de noche. Busco a alguien con quien perderme por librerías 📚"</div>
+            <div class="card-tags">
+              <span class="tag">📚 Libros</span>
+              <span class="tag">🎨 Arte</span>
+              <span class="tag">🌿 Naturaleza</span>
+            </div>
+          </div>
+        </div>
+        <div class="perfil-card">
+          <div class="card-img">🧔</div>
+          <div class="card-alma-badge"><div class="alma-dot"></div> Modo Alma</div>
+          <div class="card-info">
+            <div class="card-nombre">Alejandro, 30 · Valencia</div>
+            <div class="card-bio">"Chef amateur obsesionado con la paella auténtica. Sí, también discuto sobre ella 😄"</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="acciones-card">
+        <button class="accion-btn btn-nope" onclick="swipeCard('nope')" title="No me interesa">✕</button>
+        <button class="accion-btn btn-super" onclick="swipeCard('super')" title="Super like">⭐</button>
+        <button class="accion-btn btn-like" onclick="swipeCard('like')" title="Me gusta">♥</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB PLANES -->
+  <div class="scroll-content" id="tab-planes" style="display:none; padding: 0 1rem 3rem;">
+    <p class="planes-titulo">¿Qué te apetece hoy?</p>
+    <p style="font-size:0.8rem; color:var(--texto2); margin-bottom:1rem;">Elige un plan y te buscamos a alguien que quiera lo mismo ahora mismo 🔥</p>
+    <div class="planes-grid">
+      <div class="plan-card" onclick="activarPlan(this)">
+        <div class="plan-emoji">☕</div>
+        <div class="plan-nombre">Tomar un café</div>
+        <div class="plan-match">3 personas cerca</div>
+      </div>
+      <div class="plan-card" onclick="activarPlan(this)">
+        <div class="plan-emoji">🎬</div>
+        <div class="plan-nombre">Ir al cine</div>
+        <div class="plan-match">7 personas cerca</div>
+      </div>
+      <div class="plan-card" onclick="activarPlan(this)">
+        <div class="plan-emoji">🏃</div>
+        <div class="plan-nombre">Salir a correr</div>
+        <div class="plan-match">5 personas cerca</div>
+      </div>
+      <div class="plan-card" onclick="activarPlan(this)">
+        <div class="plan-emoji">🍕</div>
+        <div class="plan-nombre">Cenar algo</div>
+        <div class="plan-match">12 personas cerca</div>
+      </div>
+      <div class="plan-card" onclick="activarPlan(this)">
+        <div class="plan-emoji">🎮</div>
+        <div class="plan-nombre">Jugar online</div>
+        <div class="plan-match">9 personas cerca</div>
+      </div>
+      <div class="plan-card" onclick="activarPlan(this)">
+        <div class="plan-emoji">🚶</div>
+        <div class="plan-nombre">Pasear</div>
+        <div class="plan-match">4 personas cerca</div>
+      </div>
+    </div>
+
+    <div class="hoguera-banner" onclick="mostrarToast('🔥 Modo Hoguera empieza en 23 minutos. ¡Prepárate!')">
+      <div class="hoguera-icon">🔥</div>
+      <div class="hoguera-texto">
+        <h3>Modo Hoguera</h3>
+        <p>Chat grupal con 10 personas compatibles. Cada semana.</p>
+      </div>
+      <div class="hoguera-badge">Hoy 21:00</div>
+    </div>
+  </div>
+
+  <!-- TAB MATCHES -->
+  <div class="scroll-content" id="tab-matches" style="display:none; padding: 0 1rem 3rem;">
+    <p style="font-family:'Syne',sans-serif; font-size:1.1rem; font-weight:700; margin: 1rem 0 0.75rem;">Tus conexiones</p>
+
+    <div class="match-item" onclick="abrirChat('Sara', '👩‍🦰', '71h')">
+      <div class="match-avatar" style="position:relative;">👩‍🦰<div class="match-timer-badge">71h</div></div>
+      <div class="match-info">
+        <div class="match-nombre">Sara</div>
+        <div class="match-preview">🎤 Mensaje de voz · hace 5min</div>
+      </div>
+      <div class="match-hora">ahora</div>
+    </div>
+
+    <div class="match-item" onclick="abrirChat('Miguel', '🧑‍🦱', '23h')">
+      <div class="match-avatar" style="position:relative;">🧑‍🦱<div class="match-timer-badge" style="background:var(--naranja)">23h</div></div>
+      <div class="match-info">
+        <div class="match-nombre">Miguel</div>
+        <div class="match-preview">¿Te apetece ese café?</div>
+      </div>
+      <div class="match-hora">2h</div>
+    </div>
+
+    <div class="match-item" onclick="abrirChat('Ana', '👱‍♀️', '48h')">
+      <div class="match-avatar" style="position:relative;">👱‍♀️<div class="match-timer-badge">48h</div></div>
+      <div class="match-info">
+        <div class="match-nombre">Ana</div>
+        <div class="match-preview">Jajaja sí, exactamente!</div>
+      </div>
+      <div class="match-hora">ayer</div>
+    </div>
+
+    <div style="margin-top:1.5rem; padding: 1rem; background: var(--gris); border-radius:16px; border:1px solid rgba(255,255,255,0.06);">
+      <div style="font-size:0.8rem; color:var(--texto2); margin-bottom:0.5rem;">💡 Recuerda</div>
+      <div style="font-size:0.85rem; line-height:1.6;">Los matches caducan en <span style="color:var(--rosa); font-weight:600;">72 horas</span>. ¡No dejes que se vayan sin decir nada!</div>
+    </div>
+  </div>
+
+  <!-- TAB PERFIL -->
+  <div class="scroll-content" id="tab-perfil" style="display:none;">
+    <div class="perfil-section">
+      <div class="mi-perfil-header">
+        <div class="mi-avatar">😊</div>
+        <div class="mi-nombre" id="display-nombre">Tu nombre</div>
+        <div class="reputacion">⭐ 4.9 · Reputación Excelente</div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-box">
+          <div class="stat-num">12</div>
+          <div class="stat-label">Conexiones</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num">3</div>
+          <div class="stat-label">Planes activos</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num">0</div>
+          <div class="stat-label">Ghostings</div>
+        </div>
+      </div>
+
+      <div class="perfil-opcion" onclick="mostrarToast('🎭 Modo Alma: tu foto se revela tras 24h de conversación')">
+        <div class="perfil-opcion-left">
+          <div class="perfil-opcion-icon">🎭</div>
+          <div class="perfil-opcion-texto">Modo Alma activo</div>
+        </div>
+        <div class="perfil-opcion-arrow">›</div>
+      </div>
+
+      <div class="perfil-opcion" onclick="mostrarToast('🛡️ Verificación completada. Eres una persona real 💙')">
+        <div class="perfil-opcion-left">
+          <div class="perfil-opcion-icon">🛡️</div>
+          <div class="perfil-opcion-texto">Perfil verificado</div>
+        </div>
+        <div class="perfil-opcion-arrow">›</div>
+      </div>
+
+      <div class="perfil-opcion" onclick="mostrarToast('🎲 ¡El dado está listo para tu próxima conversación!')">
+        <div class="perfil-opcion-left">
+          <div class="perfil-opcion-icon">🎲</div>
+          <div class="perfil-opcion-texto">El Dado — planes aleatorios</div>
+        </div>
+        <div class="perfil-opcion-arrow">›</div>
+      </div>
+
+      <div class="perfil-opcion" onclick="mostrarToast('⚙️ Configuración próximamente')">
+        <div class="perfil-opcion-left">
+          <div class="perfil-opcion-icon">⚙️</div>
+          <div class="perfil-opcion-texto">Configuración</div>
+        </div>
+        <div class="perfil-opcion-arrow">›</div>
+      </div>
+
+      <div class="perfil-opcion" onclick="irA('inicio')">
+        <div class="perfil-opcion-left">
+          <div class="perfil-opcion-icon">🚪</div>
+          <div class="perfil-opcion-texto">Cerrar sesión</div>
+        </div>
+        <div class="perfil-opcion-arrow">›</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav">
+    <button class="nav-item active" onclick="cambiarTab('discover', null, this)">
+      <span class="nav-icon">✨</span>Descubrir
+    </button>
+    <button class="nav-item" onclick="cambiarTab('planes', null, this)">
+      <span class="nav-icon">🎯</span>Planes
+    </button>
+    <button class="nav-item" onclick="cambiarTab('matches', null, this)">
+      <span class="nav-icon">💬</span>Chats
+    </button>
+    <button class="nav-item" onclick="cambiarTab('perfil', null, this)">
+      <span class="nav-icon">👤</span>Yo
+    </button>
+  </div>
+</div>
+
+<!-- MODAL CHAT -->
+<div class="modal-overlay" id="chat-modal">
+  <div class="chat-modal">
+    <div class="chat-header">
+      <div class="chat-avatar" id="chat-avatar">👩‍🦰</div>
+      <div>
+        <div class="chat-nombre" id="chat-nombre">Sara</div>
+        <div class="chat-estado">🟢 En línea · Modo Alma activo</div>
+      </div>
+      <button class="chat-close" onclick="cerrarChat()">✕</button>
+    </div>
+    <div class="chat-timer-bar">
+      ⏳ Este match caduca en <span id="chat-timer">71h 23min</span> — ¡No lo dejes escapar!
+    </div>
+    <div class="chat-messages" id="chat-messages">
+      <div class="msg recibido">
+        <div class="msg-audio">
+          <button class="play-btn" onclick="mostrarToast('▶️ Reproduciendo audio...')">▶</button>
+          <div class="audio-wave">
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+          </div>
+          <span>0:08</span>
+        </div>
+      </div>
+      <div class="msg recibido">Hola! He escuchado tu audio y me ha parecido súper interesante lo del viaje 😄</div>
+      <div class="msg enviado">¡Gracias! Sí, fue una experiencia increíble. ¿Tú has viajado mucho?</div>
+      <div class="msg recibido">Bastante! Sobre todo por Europa. ¿Te gustaría tomar ese café del que hablaste en tu plan?</div>
+      <button class="dado-btn" onclick="tirarDado()">🎲 Tirar El Dado — plan sorpresa</button>
+    </div>
+    <div class="chat-input-area">
+      <input class="chat-input" type="text" placeholder="Escribe algo..." id="chat-input-text">
+      <button class="audio-btn" onclick="mostrarToast('🎤 Mantén pulsado para grabar audio')">🎤</button>
+      <button class="send-btn" onclick="enviarMensaje()">➤</button>
+    </div>
+  </div>
+</div>
+
+<!-- MATCH EXPLOSION -->
+<div class="match-explosion" id="match-explosion">
+  <div class="match-avatars">
+    <div class="match-av">😊</div>
+    <div class="match-corazon">💜</div>
+    <div class="match-av" id="match-av2">🧑</div>
+  </div>
+  <h2>¡ENLACE!</h2>
+  <p>Os habéis gustado mutuamente 🎉<br>Tienes 72h para iniciar la conversación</p>
+  <button class="btn-principal" style="max-width:250px;" onclick="cerrarMatch()">Enviar audio ahora 🎤</button>
+  <button class="btn-secundario" style="max-width:250px; margin-top:0.5rem;" onclick="cerrarMatch()">Más tarde</button>
+</div>
+
+<script>
+  let tabActual = 'discover';
+  let cardIndex = 0;
+  const emojis = ['🧑', '👩', '🧔', '👱‍♀️', '🧑‍🦱', '👨‍🦰'];
+  const nombres = ['Carlos', 'Laura', 'Alejandro', 'María', 'Javier', 'Elena'];
+
+  function irA(pantalla) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-' + pantalla).classList.add('active');
+    window.scrollTo(0, 0);
+  }
+
+  function toggleInteres(btn) {
+    btn.classList.toggle('selected');
+  }
+
+  function entrarApp() {
+    const nombre = document.getElementById('inp-nombre').value || 'Tú';
+    document.getElementById('display-nombre').textContent = nombre;
+    irA('home');
+    mostrarToast('¡Bienvenido/a a ENLACE, ' + nombre + '! 🎉');
+  }
+
+  function cambiarTab(tab, btnTab, btnNav) {
+    tabActual = tab;
+    document.querySelectorAll('[id^="tab-"]').forEach(t => t.style.display = 'none');
+    document.getElementById('tab-' + tab).style.display = 'block';
+
+    if (btnTab) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      btnTab.classList.add('active');
+    }
+    if (btnNav) {
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      btnNav.classList.add('active');
+    }
+  }
+
+  function swipeCard(tipo) {
+    const stack = document.getElementById('card-stack');
+    const cards = stack.querySelectorAll('.perfil-card');
+    if (cards.length === 0) return;
+
+    const topCard = cards[0];
+    if (tipo === 'like') {
+      topCard.style.transform = 'translateX(120%) rotate(15deg)';
+      topCard.style.opacity = '0';
+      setTimeout(() => {
+        topCard.remove();
+        if (Math.random() > 0.4) mostrarMatch();
+        else mostrarToast('💙 Le has dado like!');
+      }, 300);
+    } else if (tipo === 'nope') {
+      topCard.style.transform = 'translateX(-120%) rotate(-15deg)';
+      topCard.style.opacity = '0';
+      setTimeout(() => {
+        topCard.remove();
+        mostrarToast('Siguiente persona ➡️');
+      }, 300);
+    } else if (tipo === 'super') {
+      topCard.style.transform = 'translateY(-120%)';
+      topCard.style.opacity = '0';
+      setTimeout(() => {
+        topCard.remove();
+        mostrarToast('⭐ Super like enviado!');
+      }, 300);
+    }
+  }
+
+  function mostrarMatch() {
+    const idx = Math.floor(Math.random() * emojis.length);
+    document.getElementById('match-av2').textContent = emojis[idx];
+    document.getElementById('match-explosion').classList.add('show');
+  }
+
+  function cerrarMatch() {
+    document.getElementById('match-explosion').classList.remove('show');
+    cambiarTab('matches');
+  }
+
+  function activarPlan(card) {
+    document.querySelectorAll('.plan-card').forEach(c => c.classList.remove('activo'));
+    card.classList.add('activo');
+    const nombre = card.querySelector('.plan-nombre').textContent;
+    setTimeout(() => mostrarToast('🎯 Buscando alguien para: ' + nombre), 200);
+    setTimeout(() => mostrarToast('✨ ¡Encontramos a alguien compatible!'), 2500);
+  }
+
+  function abrirChat(nombre, avatar, timer) {
+    document.getElementById('chat-nombre').textContent = nombre;
+    document.getElementById('chat-avatar').textContent = avatar;
+    document.getElementById('chat-timer').textContent = timer;
+    document.getElementById('chat-modal').classList.add('show');
+  }
+
+  function cerrarChat() {
+    document.getElementById('chat-modal').classList.remove('show');
+  }
+
+  function enviarMensaje() {
+    const input = document.getElementById('chat-input-text');
+    const texto = input.value.trim();
+    if (!texto) return;
+
+    const msgs = document.getElementById('chat-messages');
+    const msg = document.createElement('div');
+    msg.className = 'msg enviado';
+    msg.textContent = texto;
+    msgs.appendChild(msg);
+    input.value = '';
+    msgs.scrollTop = msgs.scrollHeight;
+
+    setTimeout(() => {
+      const respuestas = [
+        '¡Qué interesante! 😊',
+        'Totalmente de acuerdo contigo',
+        'Jajaja sí, exactamente!',
+        '¿Y tú qué opinas sobre eso?',
+        '¡Me alegra que lo digas! 💙'
+      ];
+      const resp = document.createElement('div');
+      resp.className = 'msg recibido';
+      resp.textContent = respuestas[Math.floor(Math.random() * respuestas.length)];
+      msgs.appendChild(resp);
+      msgs.scrollTop = msgs.scrollHeight;
+    }, 1200);
+  }
+
+  function tirarDado() {
+    const planes = [
+      '📸 Mandaos una foto de lo que estáis comiendo ahora',
+      '😅 Contad el momento más vergonzoso de vuestra vida',
+      '🌍 Si pudierais ir a cualquier lugar ahora mismo, ¿dónde?',
+      '🎵 Compartid la canción que más os representa',
+      '☕ Quedada en vuestro café favorito esta semana'
+    ];
+    const plan = planes[Math.floor(Math.random() * planes.length)];
+    const msgs = document.getElementById('chat-messages');
+    const msg = document.createElement('div');
+    msg.className = 'msg enviado';
+    msg.textContent = '🎲 El Dado dice: ' + plan;
+    msgs.appendChild(msg);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  function mostrarToast(texto) {
+    const toast = document.getElementById('toast');
+    toast.textContent = texto;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2500);
+  }
+
+  document.getElementById('chat-input-text').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') enviarMensaje();
+  });
+</script>
+</body>
+</html>
