@@ -3,18 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ENLACE - Conexiones Reales</title>
+  <title>Enlace</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    body { font-family: system-ui, sans-serif; max-width: 420px; margin: 40px auto; padding: 20px; background: #f8f9fa; }
-    h1 { text-align: center; color: #0070f3; }
-    .tabs { display: flex; margin-bottom: 20px; }
-    .tab { flex: 1; padding: 12px; text-align: center; font-weight: bold; border-bottom: 3px solid transparent; }
-    .tab.active { border-bottom: 3px solid #0070f3; color: #0070f3; }
-    input, textarea, button { width: 100%; padding: 14px; margin: 8px 0; border: 1px solid #ddd; border-radius: 12px; font-size: 16px; }
-    button { background: #0070f3; color: white; font-weight: bold; border: none; cursor: pointer; }
-    button:hover { background: #0051cc; }
-    #message { text-align: center; margin: 15px 0; font-weight: bold; min-height: 20px; }
+    body { font-family: system-ui, -apple-system, sans-serif; max-width: 420px; margin: 0 auto; padding: 20px; background: #f8f9fa; }
+    h1 { text-align: center; color: #0070f3; margin-bottom: 30px; }
+    .tabs { display: flex; background: white; border-radius: 12px; padding: 4px; margin-bottom: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .tab { flex: 1; padding: 14px; text-align: center; font-weight: 600; border-radius: 10px; cursor: pointer; }
+    .tab.active { background: #0070f3; color: white; }
+    
+    input, textarea { width: 100%; padding: 14px; margin: 8px 0; border: 1px solid #ddd; border-radius: 12px; font-size: 16px; box-sizing: border-box; }
+    button { width: 100%; padding: 16px; background: #0070f3; color: white; border: none; border-radius: 12px; font-size: 17px; font-weight: bold; margin-top: 10px; }
+    
+    #message { text-align: center; margin: 20px 0; font-weight: bold; min-height: 24px; }
   </style>
 </head>
 <body>
@@ -25,7 +26,7 @@
     <div class="tab" id="tab-login">Iniciar Sesión</div>
   </div>
 
-  <!-- Formulario de Registro -->
+  <!-- Registro -->
   <form id="registerForm">
     <input type="email" id="reg-email" placeholder="Correo electrónico" required>
     <input type="password" id="reg-password" placeholder="Contraseña" required>
@@ -37,7 +38,7 @@
     <button type="submit">Crear cuenta</button>
   </form>
 
-  <!-- Formulario de Login -->
+  <!-- Login -->
   <form id="loginForm" style="display: none;">
     <input type="email" id="login-email" placeholder="Correo electrónico" required>
     <input type="password" id="login-password" placeholder="Contraseña" required>
@@ -47,30 +48,32 @@
   <p id="message"></p>
 
   <script>
-    const supabaseUrl = 'https://TU-PROJECT.supabase.co';     // ← CAMBIA ESTO
-    const supabaseAnonKey = 'TU-ANON-KEY-AQUÍ';               // ← CAMBIA ESTO
+    const supabaseUrl = 'https://TU-PROJECT.supabase.co';   // ← CAMBIA ESTO
+    const supabaseAnonKey = 'TU-ANON-KEY-AQUÍ';             // ← CAMBIA ESTO
 
     const supabase = Supabase.createClient(supabaseUrl, supabaseAnonKey);
 
-    // Cambiar entre pestañas
-    document.getElementById('tab-register').addEventListener('click', () => {
-      document.getElementById('registerForm').style.display = 'block';
-      document.getElementById('loginForm').style.display = 'none';
+    // Cambiar pestañas
+    function switchTab(tab) {
       document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      document.getElementById('tab-register').classList.add('active');
-    });
+      tab.classList.add('active');
 
-    document.getElementById('tab-login').addEventListener('click', () => {
-      document.getElementById('registerForm').style.display = 'none';
-      document.getElementById('loginForm').style.display = 'block';
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      document.getElementById('tab-login').classList.add('active');
-    });
+      if (tab.id === 'tab-register') {
+        document.getElementById('registerForm').style.display = 'block';
+        document.getElementById('loginForm').style.display = 'none';
+      } else {
+        document.getElementById('registerForm').style.display = 'none';
+        document.getElementById('loginForm').style.display = 'block';
+      }
+    }
+
+    document.getElementById('tab-register').addEventListener('click', () => switchTab(document.getElementById('tab-register')));
+    document.getElementById('tab-login').addEventListener('click', () => switchTab(document.getElementById('tab-login')));
 
     // Registro
     document.getElementById('registerForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const message = document.getElementById('message');
+      const msg = document.getElementById('message');
 
       const { error } = await supabase.auth.signUp({
         email: document.getElementById('reg-email').value,
@@ -78,7 +81,7 @@
         options: {
           data: {
             nombre: document.getElementById('reg-nombre').value,
-            edad: document.getElementById('reg-edad').value,
+            edad: document.getElementById('reg-edad').value || null,
             ciudad: document.getElementById('reg-ciudad').value,
             bio: document.getElementById('reg-bio').value,
             objetivo: document.getElementById('reg-objetivo').value
@@ -87,18 +90,18 @@
       });
 
       if (error) {
-        message.style.color = 'red';
-        message.textContent = '❌ ' + error.message;
+        msg.style.color = 'red';
+        msg.textContent = '❌ ' + error.message;
       } else {
-        message.style.color = 'green';
-        message.textContent = '✅ ¡Registro exitoso! Revisa tu correo para confirmar.';
+        msg.style.color = 'green';
+        msg.textContent = '✅ Registro exitoso. Revisa tu correo para confirmar.';
       }
     });
 
-    // Login
+    // Inicio de sesión
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const message = document.getElementById('message');
+      const msg = document.getElementById('message');
 
       const { error } = await supabase.auth.signInWithPassword({
         email: document.getElementById('login-email').value,
@@ -106,12 +109,12 @@
       });
 
       if (error) {
-        message.style.color = 'red';
-        message.textContent = '❌ ' + error.message;
+        msg.style.color = 'red';
+        msg.textContent = '❌ ' + error.message;
       } else {
-        message.style.color = 'green';
-        message.textContent = '✅ ¡Sesión iniciada! Redirigiendo...';
-        setTimeout(() => window.location.href = '/dashboard.html', 1500); // Cambia si tienes otra página
+        msg.style.color = 'green';
+        msg.textContent = '✅ ¡Bienvenido! Sesión iniciada.';
+        // Aquí puedes redirigir a otra página más adelante
       }
     });
   </script>
