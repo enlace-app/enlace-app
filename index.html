@@ -3,67 +3,115 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ENLACE - Regístrate</title>
+  <title>ENLACE - Conexiones Reales</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    body { font-family: system-ui, -apple-system, sans-serif; max-width: 420px; margin: 40px auto; padding: 20px; background: #f8f9fa; }
+    body { font-family: system-ui, sans-serif; max-width: 420px; margin: 40px auto; padding: 20px; background: #f8f9fa; }
     h1 { text-align: center; color: #0070f3; }
-    input, textarea, button { width: 100%; padding: 14px; margin: 10px 0; border: 1px solid #ddd; border-radius: 12px; font-size: 16px; }
+    .tabs { display: flex; margin-bottom: 20px; }
+    .tab { flex: 1; padding: 12px; text-align: center; font-weight: bold; border-bottom: 3px solid transparent; }
+    .tab.active { border-bottom: 3px solid #0070f3; color: #0070f3; }
+    input, textarea, button { width: 100%; padding: 14px; margin: 8px 0; border: 1px solid #ddd; border-radius: 12px; font-size: 16px; }
     button { background: #0070f3; color: white; font-weight: bold; border: none; cursor: pointer; }
     button:hover { background: #0051cc; }
-    #message { text-align: center; margin-top: 15px; font-weight: bold; }
+    #message { text-align: center; margin: 15px 0; font-weight: bold; min-height: 20px; }
   </style>
 </head>
 <body>
-  <h1>Regístrate en Enlace</h1>
-  
+  <h1>Enlace</h1>
+
+  <div class="tabs">
+    <div class="tab active" id="tab-register">Registrarse</div>
+    <div class="tab" id="tab-login">Iniciar Sesión</div>
+  </div>
+
+  <!-- Formulario de Registro -->
   <form id="registerForm">
-    <input type="email" id="email" placeholder="Correo electrónico" required>
-    <input type="password" id="password" placeholder="Contraseña" required>
-    <input type="text" id="nombre" placeholder="Nombre completo" required>
-    <input type="number" id="edad" placeholder="Edad">
-    <input type="text" id="ciudad" placeholder="Ciudad">
-    <textarea id="bio" placeholder="Bio (opcional)" rows="3"></textarea>
-    <input type="text" id="objetivo" placeholder="¿Cuál es tu objetivo?" >
-    
+    <input type="email" id="reg-email" placeholder="Correo electrónico" required>
+    <input type="password" id="reg-password" placeholder="Contraseña" required>
+    <input type="text" id="reg-nombre" placeholder="Nombre completo" required>
+    <input type="number" id="reg-edad" placeholder="Edad">
+    <input type="text" id="reg-ciudad" placeholder="Ciudad">
+    <textarea id="reg-bio" placeholder="Bio (opcional)" rows="2"></textarea>
+    <input type="text" id="reg-objetivo" placeholder="¿Cuál es tu objetivo?">
     <button type="submit">Crear cuenta</button>
+  </form>
+
+  <!-- Formulario de Login -->
+  <form id="loginForm" style="display: none;">
+    <input type="email" id="login-email" placeholder="Correo electrónico" required>
+    <input type="password" id="login-password" placeholder="Contraseña" required>
+    <button type="submit">Iniciar Sesión</button>
   </form>
 
   <p id="message"></p>
 
   <script>
-    // ←←← CAMBIA ESTAS DOS LÍNEAS CON TUS DATOS DE SUPABASE
-    const supabaseUrl = 'https://TU-PROJECT.supabase.co';
-    const supabaseAnonKey = 'TU-ANON-KEY-AQUÍ';
+    const supabaseUrl = 'https://TU-PROJECT.supabase.co';     // ← CAMBIA ESTO
+    const supabaseAnonKey = 'TU-ANON-KEY-AQUÍ';               // ← CAMBIA ESTO
 
     const supabase = Supabase.createClient(supabaseUrl, supabaseAnonKey);
 
+    // Cambiar entre pestañas
+    document.getElementById('tab-register').addEventListener('click', () => {
+      document.getElementById('registerForm').style.display = 'block';
+      document.getElementById('loginForm').style.display = 'none';
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.getElementById('tab-register').classList.add('active');
+    });
+
+    document.getElementById('tab-login').addEventListener('click', () => {
+      document.getElementById('registerForm').style.display = 'none';
+      document.getElementById('loginForm').style.display = 'block';
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.getElementById('tab-login').classList.add('active');
+    });
+
+    // Registro
     document.getElementById('registerForm').addEventListener('submit', async (e) => {
       e.preventDefault();
+      const message = document.getElementById('message');
 
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-      const nombre = document.getElementById('nombre').value;
-      const edad = document.getElementById('edad').value;
-      const ciudad = document.getElementById('ciudad').value;
-      const bio = document.getElementById('bio').value;
-      const objetivo = document.getElementById('objetivo').value;
-
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
+      const { error } = await supabase.auth.signUp({
+        email: document.getElementById('reg-email').value,
+        password: document.getElementById('reg-password').value,
         options: {
-          data: { nombre, edad, ciudad, bio, objetivo }
+          data: {
+            nombre: document.getElementById('reg-nombre').value,
+            edad: document.getElementById('reg-edad').value,
+            ciudad: document.getElementById('reg-ciudad').value,
+            bio: document.getElementById('reg-bio').value,
+            objetivo: document.getElementById('reg-objetivo').value
+          }
         }
       });
 
-      const msg = document.getElementById('message');
       if (error) {
-        msg.style.color = 'red';
-        msg.textContent = '❌ Error: ' + error.message;
+        message.style.color = 'red';
+        message.textContent = '❌ ' + error.message;
       } else {
-        msg.style.color = 'green';
-        msg.textContent = '✅ ¡Registro exitoso! Revisa tu correo para confirmar la cuenta.';
+        message.style.color = 'green';
+        message.textContent = '✅ ¡Registro exitoso! Revisa tu correo para confirmar.';
+      }
+    });
+
+    // Login
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const message = document.getElementById('message');
+
+      const { error } = await supabase.auth.signInWithPassword({
+        email: document.getElementById('login-email').value,
+        password: document.getElementById('login-password').value
+      });
+
+      if (error) {
+        message.style.color = 'red';
+        message.textContent = '❌ ' + error.message;
+      } else {
+        message.style.color = 'green';
+        message.textContent = '✅ ¡Sesión iniciada! Redirigiendo...';
+        setTimeout(() => window.location.href = '/dashboard.html', 1500); // Cambia si tienes otra página
       }
     });
   </script>
