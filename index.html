@@ -637,10 +637,8 @@ async function guardarPerfil() {
 async function iniciarApp() {
   mostrar('screen-app');
   actualizarUI();
-  await Promise.all([
-    cargarPerfilesDescubrir(),
-    cargarMatches(),
-  ]);
+  cargarPerfilesDescubrir().catch(e => console.log(e));
+  cargarMatches().catch(e => console.log(e));
 }
 
 function actualizarUI() {
