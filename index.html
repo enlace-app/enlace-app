@@ -565,7 +565,7 @@ async function registro() {
     options: { data: { nombre } }
   });
   if (error) {
-    mostrarError(error.message === 'User already registered' ? 'Este email ya está registrado' : 'Error al registrar. Inténtalo de nuevo.');
+    mostrarError('Error: ' + error.message);
     btn.disabled = false; btn.textContent = 'Crear cuenta gratis →';
   } else {
     toast('✅ ¡Cuenta creada! Revisa tu email para verificarla.');
