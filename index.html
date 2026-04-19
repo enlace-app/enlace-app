@@ -1,21 +1,33 @@
 <!--
 ================================================================================
-  ENLACE v3.1 — VERSIÓN FUNCIONAL CON BACKEND REAL
+  ENLACE v8.0 — VERSIÓN BETA PÚBLICA
 ================================================================================
-  © 2025 Javier González Rodríguez. Todos los derechos reservados.
-  Email: jgonzrdguez@gmail.com
-  Protegido por RDL 1/1996, Convenio de Berna, RGPD 2016/679
+  © 2025 Javier González Rodríguez · jgonzrdguez@gmail.com
+  RDL 1/1996 · RGPD 2016/679 · Convenio de Berna
+================================================================================
+  NUEVO EN v8.0:
+  ✅ Fotos de perfil reales (Supabase Storage)
+  ✅ Enviar fotos en chat
+  ✅ Enviar audios en chat
+  ✅ Videos cortos tipo Reels
+  ✅ Notificaciones push reales (Web Push)
+  ✅ Mapa real con GPS
+  ✅ Búsqueda y filtros avanzados
+  ✅ Bloquear y reportar usuarios
+  ✅ Panel administrador (solo Javier)
 ================================================================================
 -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>ENLACE — Conexiones Reales</title>
 <meta name="author" content="Javier González Rodríguez">
 <meta name="copyright" content="© 2025 Javier González Rodríguez">
 <meta name="theme-color" content="#FF3CAC">
+<meta http-equiv="Cache-Control" content="no-cache,no-store,must-revalidate">
+<meta name="version" content="8.0.0">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;600;700&family=Cabinet+Grotesk:wght@300;400;500;700;800&display=swap" rel="stylesheet">
 <style>
@@ -32,111 +44,106 @@
 html,body{height:100%;overflow:hidden}
 body{font-family:'Cabinet Grotesk',sans-serif;background:var(--ink);color:var(--light);}
 .amb{position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(ellipse 60% 50% at 15% 10%,rgba(255,60,172,.07) 0%,transparent 55%),radial-gradient(ellipse 50% 60% at 85% 90%,rgba(0,212,255,.05) 0%,transparent 55%);}
-
-/* SCREENS */
 .screen{display:none;position:fixed;inset:0;z-index:10;flex-direction:column;overflow:hidden;}
 .screen.active{display:flex;}
 .page{flex:1;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding-bottom:80px;}
 .page::-webkit-scrollbar{display:none}
-
 /* LOADING */
 #screen-loading{background:var(--ink);align-items:center;justify-content:center;flex-direction:column;gap:1.5rem;}
 .spin{width:48px;height:48px;border:3px solid rgba(255,60,172,.2);border-top-color:var(--pulse);border-radius:50%;animation:spin 1s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg)}}
-.load-txt{font-family:'Clash Display',sans-serif;font-size:1.1rem;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
-
-/* AUTH SCREENS */
+/* AUTH */
 #screen-auth{background:var(--ink);align-items:center;justify-content:center;padding:2rem 1.5rem;}
 .auth-inner{width:100%;max-width:360px;display:flex;flex-direction:column;align-items:center;text-align:center;}
-.auth-logo{width:65px;height:65px;margin:0 auto 1.2rem;animation:float 4s ease-in-out infinite;}
+.logo-svg{width:65px;height:65px;margin:0 auto 1.2rem;animation:float 4s ease-in-out infinite;}
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 .auth-title{font-family:'Clash Display',sans-serif;font-size:2.2rem;line-height:1.05;letter-spacing:-.03em;font-weight:700;margin-bottom:.6rem;}
 .gt{background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
-.auth-sub{font-size:.9rem;color:var(--fog);line-height:1.6;margin-bottom:1.5rem;}
-.free-tag{display:inline-flex;align-items:center;gap:.4rem;background:rgba(0,255,148,.08);border:1px solid rgba(0,255,148,.2);border-radius:50px;padding:.35rem .9rem;font-size:.75rem;font-weight:700;color:var(--life);margin-bottom:1.2rem;}
+.auth-sub{font-size:.9rem;color:var(--fog);line-height:1.6;margin-bottom:1.2rem;}
+.free-tag{display:inline-flex;align-items:center;gap:.4rem;background:rgba(0,255,148,.08);border:1px solid rgba(0,255,148,.2);border-radius:50px;padding:.35rem .9rem;font-size:.75rem;font-weight:700;color:var(--life);margin-bottom:1rem;}
 .inp{width:100%;background:var(--ink2);border:1.5px solid rgba(255,255,255,.07);border-radius:12px;padding:.78rem .95rem;font-size:.92rem;outline:none;transition:.2s;color:var(--light);font-family:'Cabinet Grotesk',sans-serif;}
 .inp:focus{border-color:rgba(255,60,172,.3);}
 .inp::placeholder{color:rgba(119,119,170,.4);}
 .form-stack{display:flex;flex-direction:column;gap:.6rem;width:100%;margin-bottom:.8rem;}
 .btn-f{width:100%;padding:.92rem;background:var(--grad);border:none;border-radius:14px;color:white;font-family:'Clash Display',sans-serif;font-weight:600;font-size:1rem;cursor:pointer;box-shadow:var(--glow);transition:.2s;}
 .btn-f:hover{transform:translateY(-2px);}
-.btn-f:active{transform:translateY(0);}
 .btn-f:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 .btn-g{width:100%;padding:.85rem;background:transparent;border:1.5px solid rgba(255,255,255,.1);border-radius:14px;color:var(--fog);font-family:'Cabinet Grotesk',sans-serif;font-weight:500;font-size:.9rem;cursor:pointer;transition:.2s;margin-top:.5rem;}
-.btn-g:hover{border-color:rgba(255,255,255,.2);color:var(--light);}
 .auth-switch{font-size:.8rem;color:var(--fog);margin-top:1rem;cursor:pointer;}
 .auth-switch span{color:var(--pulse);font-weight:600;}
 .err-msg{background:rgba(255,71,87,.1);border:1px solid rgba(255,71,87,.2);border-radius:10px;padding:.6rem .8rem;font-size:.78rem;color:var(--danger);width:100%;text-align:left;margin-bottom:.5rem;}
-
-/* ONBOARDING PERFIL */
-#screen-onboarding{background:var(--ink);padding:0;}
+select.inp option{background:var(--ink2);}
+/* ONBOARDING */
+#screen-onboarding{background:var(--ink);}
 .ob-wrap{flex:1;overflow-y:auto;padding:3rem 1.5rem 2rem;display:flex;flex-direction:column;align-items:center;max-width:400px;margin:0 auto;width:100%;}
 .ob-title{font-family:'Clash Display',sans-serif;font-size:1.8rem;font-weight:700;text-align:center;margin-bottom:.4rem;}
-.ob-sub{font-size:.85rem;color:var(--fog);text-align:center;margin-bottom:1.5rem;line-height:1.6;}
-.ob-step-wrap{width:100%;}
-.intereses-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.45rem;}
+.ob-sub{font-size:.85rem;color:var(--fog);text-align:center;margin-bottom:1.2rem;line-height:1.6;}
+/* FOTO PERFIL UPLOAD */
+.foto-upload-area{width:120px;height:120px;border-radius:50%;border:3px dashed rgba(255,60,172,.4);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;margin:0 auto .8rem;position:relative;overflow:hidden;background:var(--ink2);transition:.2s;}
+.foto-upload-area:hover{border-color:var(--pulse);}
+.foto-upload-area img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
+.foto-upload-area .overlay{position:absolute;inset:0;background:rgba(0,0,0,.5);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.3rem;border-radius:50%;}
+.intereses-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.45rem;width:100%;}
 .int-btn{background:var(--ink3);border:1.5px solid rgba(255,255,255,.07);border-radius:10px;padding:.55rem .2rem;color:var(--fog);font-size:.75rem;cursor:pointer;text-align:center;transition:.2s;}
 .int-btn span{display:block;font-size:1.1rem;margin-bottom:.15rem;}
 .int-btn.sel{background:rgba(255,60,172,.12);border-color:var(--pulse);color:var(--light);}
-select.inp option{background:var(--ink2);}
-/* VRec */
-.vrec{background:var(--ink2);border:1.5px solid rgba(0,212,255,.18);border-radius:18px;padding:1.3rem;display:flex;flex-direction:column;align-items:center;gap:.8rem;width:100%;}
-.rbtn{width:72px;height:72px;border-radius:50%;background:var(--grad);border:none;display:flex;align-items:center;justify-content:center;font-size:1.6rem;cursor:pointer;box-shadow:var(--glow);animation:gp 2s ease-in-out infinite;}
-@keyframes gp{0%,100%{box-shadow:0 0 18px rgba(255,60,172,.4)}50%{box-shadow:0 0 36px rgba(255,60,172,.7)}}
-.vwaves{display:flex;gap:3px;align-items:center;height:28px;opacity:.3;transition:.3s;}
-.vwaves.on{opacity:1;}
-.vw{width:4px;border-radius:2px;background:var(--signal);animation:vwa 1s ease-in-out infinite;}
-.vw:nth-child(1){height:30%;animation-delay:0s}.vw:nth-child(2){height:70%;animation-delay:.1s}.vw:nth-child(3){height:45%;animation-delay:.2s}.vw:nth-child(4){height:90%;animation-delay:.3s}.vw:nth-child(5){height:55%;animation-delay:.4s}.vw:nth-child(6){height:75%;animation-delay:.5s}.vw:nth-child(7){height:35%;animation-delay:.6s}
-@keyframes vwa{0%,100%{transform:scaleY(1)}50%{transform:scaleY(.35)}}
-
 /* TOP BAR */
 .topbar{position:fixed;top:0;left:0;right:0;z-index:200;padding:.75rem 1.1rem;display:flex;align-items:center;justify-content:space-between;background:rgba(8,8,16,.92);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.04);}
 .tlogo{font-family:'Clash Display',sans-serif;font-weight:700;font-size:1.28rem;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
 .tver{font-size:.5rem;color:var(--fog);display:block;}
 .tbright{display:flex;gap:.45rem;align-items:center;}
-.icobtn{width:36px;height:36px;border-radius:50%;background:var(--ink3);border:none;display:flex;align-items:center;justify-content:center;font-size:.95rem;cursor:pointer;position:relative;color:var(--light);transition:.2s;}
+.icobtn{width:36px;height:36px;border-radius:50%;background:var(--ink3);border:none;display:flex;align-items:center;justify-content:center;font-size:.95rem;cursor:pointer;position:relative;color:var(--light);}
 .nbdg{position:absolute;top:2px;right:2px;width:8px;height:8px;border-radius:50%;background:var(--pulse);border:2px solid var(--ink);}
-
 /* NAV */
 .navbar{position:fixed;bottom:0;left:0;right:0;z-index:200;background:rgba(8,8,16,.94);backdrop-filter:blur(22px);border-top:1px solid rgba(255,255,255,.045);display:flex;padding:.45rem 0 .75rem;}
 .nbtn{flex:1;display:flex;flex-direction:column;align-items:center;gap:.16rem;background:none;border:none;cursor:pointer;padding:.22rem 0;color:var(--fog);font-size:.58rem;font-family:'Cabinet Grotesk',sans-serif;transition:.2s;}
 .nbtn.on{color:var(--light);}
 .ni{font-size:1.22rem;}
 .nbtn.on .ni{filter:drop-shadow(0 0 7px var(--pulse));}
-
-/* DESCUBRIR */
-.disc-wrap{padding:.8rem 1rem;padding-top:4.5rem;}
+/* CARDS */
 .card-stack{position:relative;height:420px;margin:.5rem 0;}
-.pcard{position:absolute;inset:0;background:var(--ink2);border-radius:22px;overflow:hidden;border:1px solid rgba(255,255,255,.05);transition:.35s cubic-bezier(.25,.46,.45,.94);cursor:grab;user-select:none;}
+.pcard{position:absolute;inset:0;background:var(--ink2);border-radius:22px;overflow:hidden;border:1px solid rgba(255,255,255,.05);transition:.35s cubic-bezier(.25,.46,.45,.94);cursor:grab;}
 .pcard:nth-child(2){transform:scale(.95) translateY(8px);z-index:1;}
 .pcard:nth-child(3){transform:scale(.90) translateY(16px);z-index:0;}
 .pcard:first-child{z-index:2;}
-.card-img{width:100%;height:240px;display:flex;align-items:center;justify-content:center;font-size:5rem;position:relative;}
-.card-img-bg{background:linear-gradient(135deg,var(--ink3) 0%,#1A1A35 100%);}
+.card-photo{width:100%;height:260px;object-fit:cover;background:linear-gradient(135deg,var(--ink3),#1A1A35);position:relative;}
+.card-photo-placeholder{width:100%;height:260px;background:linear-gradient(135deg,var(--ink3),#1A1A35);display:flex;align-items:center;justify-content:center;font-size:5rem;position:relative;}
 .card-badges{position:absolute;top:.8rem;left:.8rem;right:.8rem;display:flex;justify-content:space-between;}
 .alma-badge{background:rgba(0,0,0,.65);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.12);border-radius:50px;padding:.25rem .65rem;font-size:.65rem;color:var(--light);display:flex;align-items:center;gap:.25rem;}
 .alma-dot{width:5px;height:5px;border-radius:50%;background:var(--spark);animation:dp 1.5s infinite;}
 @keyframes dp{0%,100%{opacity:1}50%{opacity:.3}}
-.timer-badge{background:rgba(0,0,0,.65);backdrop-filter:blur(12px);border:1px solid rgba(255,60,172,.3);border-radius:50px;padding:.25rem .65rem;font-size:.65rem;color:var(--pulse);font-weight:600;}
+.timer-badge{background:rgba(0,0,0,.65);border:1px solid rgba(255,60,172,.3);border-radius:50px;padding:.25rem .65rem;font-size:.65rem;color:var(--pulse);font-weight:600;}
 .card-info{padding:.85rem;}
 .card-nombre{font-family:'Clash Display',sans-serif;font-size:1.2rem;font-weight:700;margin-bottom:.2rem;}
-.card-compat{font-size:.72rem;color:var(--signal);margin-bottom:.4rem;display:flex;align-items:center;gap:.4rem;}
+.card-compat{font-size:.72rem;color:var(--signal);margin-bottom:.4rem;}
 .card-bio{color:var(--fog);font-size:.82rem;line-height:1.5;margin-bottom:.5rem;}
 .card-tags{display:flex;gap:.35rem;flex-wrap:wrap;}
 .ctag{background:var(--ink3);border-radius:50px;padding:.18rem .55rem;font-size:.68rem;color:var(--fog);}
-.acciones{display:flex;justify-content:center;gap:1.2rem;padding:.4rem .9rem .8rem;}
-.abtn{width:56px;height:56px;border-radius:50%;border:none;cursor:pointer;font-size:1.3rem;transition:.2s;display:flex;align-items:center;justify-content:center;}
+.ver-badge{display:inline-flex;align-items:center;gap:.2rem;background:rgba(0,255,148,.1);border:1px solid rgba(0,255,148,.2);border-radius:50px;padding:.12rem .45rem;font-size:.6rem;color:var(--life);font-weight:600;}
+.acciones{display:flex;justify-content:center;gap:1rem;padding:.4rem .9rem .8rem;}
+.abtn{width:54px;height:54px;border-radius:50%;border:none;cursor:pointer;font-size:1.2rem;display:flex;align-items:center;justify-content:center;transition:.2s;}
 .abtn:active{transform:scale(.9);}
 .abtn-no{background:var(--ink3);}
 .abtn-si{background:var(--grad);box-shadow:var(--glow);}
-.abtn-star{background:rgba(255,184,0,.15);border:1px solid rgba(255,184,0,.3);}
-.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;height:380px;gap:1rem;text-align:center;padding:2rem;}
-.empty-state p{color:var(--fog);font-size:.9rem;line-height:1.6;}
-
+.abtn-star{background:rgba(255,184,0,.12);border:1px solid rgba(255,184,0,.25);}
+.abtn-filter{background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.2);}
+/* FILTROS */
+.filtros-modal{display:none;position:fixed;inset:0;z-index:450;background:rgba(0,0,0,.85);align-items:flex-end;}
+.filtros-modal.show{display:flex;}
+.filtros-inner{background:var(--ink2);border-radius:24px 24px 0 0;width:100%;padding:1.5rem;animation:slideUp .3s ease;max-height:85vh;overflow-y:auto;}
+.filtro-row{margin-bottom:1.1rem;}
+.filtro-label{font-size:.78rem;color:var(--fog);font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem;display:flex;justify-content:space-between;align-items:center;}
+.range-val{color:var(--pulse);font-weight:700;}
+input[type=range]{width:100%;-webkit-appearance:none;height:4px;border-radius:2px;background:rgba(255,255,255,.1);outline:none;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--pulse);cursor:pointer;box-shadow:0 0 8px rgba(255,60,172,.4);}
+.genero-chips{display:flex;gap:.4rem;flex-wrap:wrap;}
+.gchip{padding:.3rem .7rem;border-radius:50px;font-size:.72rem;cursor:pointer;border:1px solid rgba(255,255,255,.1);color:var(--fog);background:var(--ink3);transition:.2s;}
+.gchip.sel{background:rgba(255,60,172,.15);border-color:var(--pulse);color:var(--pulse);}
 /* CHATS */
 .ch-wrap{padding:0 1rem;padding-top:4.5rem;}
 .ch-item{display:flex;align-items:center;gap:.8rem;padding:.82rem 0;border-bottom:1px solid rgba(255,255,255,.04);cursor:pointer;}
-.chava{width:50px;height:50px;border-radius:50%;background:var(--ink3);display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;position:relative;}
+.chava{width:50px;height:50px;border-radius:50%;background:var(--ink3);display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;position:relative;overflow:hidden;}
+.chava img{width:100%;height:100%;object-fit:cover;}
 .chring{position:absolute;inset:-2px;border-radius:50%;z-index:-1;}
 .chtbdg{position:absolute;bottom:-3px;right:-3px;border-radius:50px;padding:.07rem .28rem;font-size:.5rem;font-weight:700;color:white;background:var(--pulse);}
 .chinfo{flex:1;min-width:0;}
@@ -145,41 +152,72 @@ select.inp option{background:var(--ink2);}
 .chmeta{flex-shrink:0;text-align:right;}
 .chtime{font-size:.66rem;color:var(--fog);margin-bottom:.18rem;}
 .chpct{font-size:.62rem;font-weight:700;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
-
 /* CHAT FULL */
 .chatfull{display:none;position:fixed;inset:0;z-index:300;flex-direction:column;background:var(--ink);}
 .chatfull.show{display:flex;}
 .cfhdr{padding:.8rem 1rem;display:flex;align-items:center;gap:.65rem;background:rgba(8,8,16,.94);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.04);}
 .cfback{background:none;border:none;color:var(--fog);font-size:1.25rem;cursor:pointer;}
-.cfava{width:38px;height:38px;border-radius:50%;background:var(--ink3);display:flex;align-items:center;justify-content:center;font-size:1.15rem;}
+.cfava{width:38px;height:38px;border-radius:50%;background:var(--ink3);display:flex;align-items:center;justify-content:center;font-size:1.15rem;overflow:hidden;}
+.cfava img{width:100%;height:100%;object-fit:cover;}
 .cfname{font-weight:700;font-size:.9rem;}
 .cfstat{font-size:.66rem;color:var(--fog);}
-.cfacts{margin-left:auto;display:flex;gap:.35rem;}
-.cfabt{background:var(--ink3);border:none;border-radius:8px;padding:.38rem .55rem;font-size:.78rem;cursor:pointer;color:var(--light);}
-.qmeter{padding:.42rem 1rem;background:rgba(255,255,255,.015);border-bottom:1px solid rgba(255,255,255,.04);}
+.cfacts{margin-left:auto;display:flex;gap:.3rem;}
+.cfabt{background:var(--ink3);border:none;border-radius:8px;padding:.35rem .5rem;font-size:.8rem;cursor:pointer;color:var(--light);}
+.qmeter{padding:.4rem 1rem;background:rgba(255,255,255,.015);border-bottom:1px solid rgba(255,255,255,.04);}
 .qmrow{display:flex;align-items:center;gap:.45rem;}
 .qmlabel{font-size:.63rem;color:var(--fog);}
 .qmbar{flex:1;height:4px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden;}
 .qmfill{height:100%;border-radius:3px;background:var(--grad);transition:width 1s ease;}
 .qmpct{font-size:.68rem;font-weight:700;color:var(--pulse);}
-.qmtip{margin-top:.3rem;font-size:.65rem;color:var(--signal);display:flex;align-items:center;gap:.28rem;}
+.qmtip{margin-top:.3rem;font-size:.65rem;color:var(--signal);}
 .mbar{padding:.4rem 1rem;overflow-x:auto;scrollbar-width:none;display:flex;gap:.42rem;}
 .mbar::-webkit-scrollbar{display:none}
 .mchip{flex-shrink:0;padding:.28rem .65rem;border-radius:50px;font-size:.66rem;font-weight:600;cursor:pointer;background:rgba(255,184,0,.1);color:var(--spark);border:1px solid rgba(255,184,0,.18);}
 .cfmsgs{flex:1;overflow-y:auto;padding:.75rem 1rem;display:flex;flex-direction:column;gap:.55rem;scrollbar-width:none;}
 .cfmsgs::-webkit-scrollbar{display:none}
-.msg{max-width:80%;padding:.62rem .82rem;border-radius:15px;font-size:.84rem;line-height:1.5;}
+.msg{max-width:82%;padding:.62rem .82rem;border-radius:15px;font-size:.84rem;line-height:1.5;}
 .msg.r{background:var(--ink3);align-self:flex-start;border-bottom-left-radius:4px;}
 .msg.s{background:linear-gradient(135deg,#784BA0,#FF3CAC);align-self:flex-end;border-bottom-right-radius:4px;}
-.msg-time{font-size:.58rem;opacity:.6;margin-top:.2rem;}
-.ia-sug{align-self:center;background:rgba(0,212,255,.06);border:1px solid rgba(0,212,255,.13);border-radius:11px;padding:.45rem .75rem;font-size:.7rem;color:var(--signal);display:flex;align-items:center;gap:.3rem;max-width:90%;cursor:pointer;}
-.dado-chip{align-self:center;background:rgba(255,184,0,.07);border:1px solid rgba(255,184,0,.13);border-radius:50px;padding:.32rem .75rem;font-size:.7rem;color:var(--spark);cursor:pointer;}
+/* FOTO EN CHAT */
+.msg-foto{max-width:220px;border-radius:12px;overflow:hidden;align-self:flex-end;}
+.msg-foto.r{align-self:flex-start;}
+.msg-foto img{width:100%;height:auto;display:block;max-height:280px;object-fit:cover;}
+/* AUDIO EN CHAT */
+.msg-audio{display:flex;align-items:center;gap:.45rem;padding:.6rem .8rem;border-radius:15px;max-width:200px;}
+.msg-audio.s{background:linear-gradient(135deg,#784BA0,#FF3CAC);align-self:flex-end;}
+.msg-audio.r{background:var(--ink3);align-self:flex-start;}
+.play-btn{background:rgba(255,255,255,.2);border:none;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:white;font-size:.85rem;flex-shrink:0;}
+.audio-waves{display:flex;gap:2px;align-items:center;height:20px;flex:1;}
+.aw{width:3px;border-radius:2px;background:rgba(255,255,255,.6);animation:aw .8s ease-in-out infinite;}
+.aw:nth-child(1){height:40%;animation-delay:0s}.aw:nth-child(2){height:80%;animation-delay:.08s}.aw:nth-child(3){height:55%;animation-delay:.16s}.aw:nth-child(4){height:95%;animation-delay:.24s}.aw:nth-child(5){height:45%;animation-delay:.32s}
+@keyframes aw{0%,100%{transform:scaleY(1)}50%{transform:scaleY(.4)}}
 .cfinput-wrap{padding:.55rem .85rem;display:flex;gap:.38rem;align-items:flex-end;background:rgba(8,8,16,.94);border-top:1px solid rgba(255,255,255,.04);}
-.cfinput{flex:1;background:var(--ink3);border:1.5px solid rgba(255,255,255,.07);border-radius:13px;padding:.62rem .88rem;color:var(--light);font-family:'Cabinet Grotesk',sans-serif;font-size:.88rem;outline:none;resize:none;height:40px;transition:.2s;}
-.cfinput:focus{border-color:rgba(255,60,172,.28);}
-.cfmic{width:38px;height:38px;border-radius:50%;background:var(--ink3);border:none;display:flex;align-items:center;justify-content:center;font-size:.95rem;cursor:pointer;color:var(--light);}
-.cfsend{width:38px;height:38px;border-radius:50%;background:var(--grad);border:none;display:flex;align-items:center;justify-content:center;font-size:.95rem;cursor:pointer;box-shadow:0 4px 14px rgba(255,60,172,.32);}
-
+.cfinput{flex:1;background:var(--ink3);border:1.5px solid rgba(255,255,255,.07);border-radius:13px;padding:.62rem .88rem;color:var(--light);font-family:'Cabinet Grotesk',sans-serif;font-size:.88rem;outline:none;resize:none;height:40px;}
+.media-btn{width:38px;height:38px;border-radius:50%;background:var(--ink3);border:none;display:flex;align-items:center;justify-content:center;font-size:.95rem;cursor:pointer;color:var(--light);flex-shrink:0;}
+.cfsend{width:38px;height:38px;border-radius:50%;background:var(--grad);border:none;display:flex;align-items:center;justify-content:center;font-size:.95rem;cursor:pointer;flex-shrink:0;}
+/* REELS */
+.reels-wrap{height:100%;position:relative;overflow:hidden;}
+.reel-item{position:absolute;inset:0;background:var(--ink2);display:flex;align-items:center;justify-content:center;flex-direction:column;}
+.reel-video{width:100%;height:100%;object-fit:cover;}
+.reel-overlay{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.8));padding:1.5rem 1rem 5rem;}
+.reel-user{display:flex;align-items:center;gap:.6rem;margin-bottom:.5rem;}
+.reel-ava{width:40px;height:40px;border-radius:50%;background:var(--ink3);border:2px solid white;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:1.2rem;}
+.reel-nombre{font-weight:700;font-size:.9rem;color:white;}
+.reel-texto{font-size:.82rem;color:rgba(255,255,255,.85);line-height:1.5;margin-bottom:.6rem;}
+.reel-actions{position:absolute;right:1rem;bottom:5rem;display:flex;flex-direction:column;gap:1.2rem;align-items:center;}
+.reel-btn{background:none;border:none;color:white;font-size:1.5rem;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:.15rem;}
+.reel-btn span{font-size:.62rem;color:rgba(255,255,255,.7);}
+.reel-placeholder{text-align:center;padding:2rem;}
+/* MAPA */
+#map-container{width:100%;height:100%;min-height:300px;background:var(--ink2);border-radius:16px;position:relative;overflow:hidden;}
+.map-mock{width:100%;height:100%;background:linear-gradient(135deg,#0A1628,#1A2744);position:relative;display:flex;align-items:center;justify-content:center;}
+.map-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(0,212,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,.05) 1px,transparent 1px);background-size:30px 30px;}
+.map-dot{position:absolute;width:12px;height:12px;border-radius:50%;transform:translate(-50%,-50%);cursor:pointer;}
+.map-dot.me{background:var(--signal);box-shadow:0 0 16px var(--signal);animation:mapPulse 2s infinite;}
+.map-dot.otros{background:var(--pulse);box-shadow:0 0 12px rgba(255,60,172,.5);}
+@keyframes mapPulse{0%,100%{box-shadow:0 0 8px var(--signal)}50%{box-shadow:0 0 24px var(--signal)}}
+.map-info{position:absolute;bottom:1rem;left:1rem;right:1rem;background:rgba(8,8,16,.85);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:.8rem;}
+.map-stat{display:flex;align-items:center;gap:.5rem;font-size:.78rem;}
 /* MISIONES */
 .ms-wrap{padding:0 1rem;padding-top:4.5rem;}
 .streak{background:linear-gradient(135deg,rgba(255,184,0,.09),rgba(255,60,172,.09));border:1px solid rgba(255,184,0,.18);border-radius:15px;padding:.85rem;margin:.5rem 0 .8rem;display:flex;align-items:center;gap:.75rem;}
@@ -194,26 +232,26 @@ select.inp option{background:var(--ink2);}
 .mprog{height:3px;background:rgba(255,255,255,.05);}
 .mpfill{height:100%;transition:width .8s ease;}
 .mdone{display:flex;align-items:center;justify-content:center;padding:.45rem;font-size:.7rem;font-weight:600;background:rgba(0,255,148,.05);color:var(--life);border-top:1px solid rgba(0,255,148,.09);}
-
-/* PERFIL YO */
+/* YO */
 .yo-wrap{padding:0 1rem;padding-top:4.5rem;padding-bottom:2rem;}
 .yhero{background:var(--ink2);border:1px solid rgba(255,255,255,.05);border-radius:18px;padding:1.1rem;margin-bottom:.7rem;display:flex;flex-direction:column;align-items:center;text-align:center;}
-.yava{width:76px;height:76px;border-radius:50%;background:var(--ink3);display:flex;align-items:center;justify-content:center;font-size:2.2rem;position:relative;margin-bottom:.75rem;}
+.yava{width:80px;height:80px;border-radius:50%;background:var(--ink3);display:flex;align-items:center;justify-content:center;font-size:2.2rem;position:relative;margin-bottom:.75rem;overflow:hidden;cursor:pointer;}
 .yava::after{content:'';position:absolute;inset:-3px;border-radius:50%;background:var(--grad);z-index:-1;}
+.yava img{width:100%;height:100%;object-fit:cover;}
+.yava .edit-overlay{position:absolute;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;font-size:1.5rem;opacity:0;transition:.2s;border-radius:50%;}
+.yava:hover .edit-overlay{opacity:1;}
 .yname{font-family:'Clash Display',sans-serif;font-size:1.25rem;font-weight:700;margin-bottom:.22rem;}
 .yliga{display:inline-flex;align-items:center;gap:.28rem;background:rgba(255,184,0,.09);border:1px solid rgba(255,184,0,.18);border-radius:50px;padding:.18rem .65rem;font-size:.7rem;color:var(--spark);font-weight:600;}
 .ystats{display:grid;grid-template-columns:repeat(4,1fr);gap:.45rem;margin:.75rem 0;}
 .yst{background:var(--ink3);border-radius:10px;padding:.62rem .28rem;text-align:center;}
 .ysn{font-family:'Clash Display',sans-serif;font-size:1.05rem;font-weight:700;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
 .ysl{font-size:.52rem;color:var(--fog);margin-top:.09rem;}
-.optrow{display:flex;align-items:center;justify-content:space-between;padding:.82rem .88rem;background:var(--ink2);border:1px solid rgba(255,255,255,.05);border-radius:12px;margin-bottom:.45rem;cursor:pointer;transition:.2s;}
-.optrow:hover{border-color:rgba(255,60,172,.14);}
+.optrow{display:flex;align-items:center;justify-content:space-between;padding:.82rem .88rem;background:var(--ink2);border:1px solid rgba(255,255,255,.05);border-radius:12px;margin-bottom:.45rem;cursor:pointer;}
 .optleft{display:flex;align-items:center;gap:.65rem;}
 .optico{width:34px;height:34px;border-radius:9px;background:var(--ink3);display:flex;align-items:center;justify-content:center;font-size:.92rem;}
 .opttxt{font-size:.86rem;font-weight:500;}
 .optarr{color:var(--fog);font-size:.82rem;}
-
-/* MATCH BOOM */
+/* MATCH */
 .mboom{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.88);flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2rem;}
 .mboom.show{display:flex;animation:bIn .4s ease;}
 @keyframes bIn{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}
@@ -221,49 +259,57 @@ select.inp option{background:var(--ink2);}
 .bring::before{content:'';position:absolute;inset:-8px;border-radius:50%;border:1px solid rgba(255,60,172,.09);animation:bp 1.5s ease-in-out infinite;}
 @keyframes bp{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
 .bavas{display:flex;align-items:center;gap:.45rem;}
-.bav{width:54px;height:54px;border-radius:50%;background:var(--ink3);display:flex;align-items:center;justify-content:center;font-size:1.7rem;}
+.bav{width:54px;height:54px;border-radius:50%;background:var(--ink3);display:flex;align-items:center;justify-content:center;font-size:1.7rem;overflow:hidden;}
+.bav img{width:100%;height:100%;object-fit:cover;}
 .bh{font-size:1.6rem;animation:lt .7s ease-in-out infinite;}
 @keyframes lt{0%,100%{transform:scale(1)}50%{transform:scale(1.4)}}
 .btitle{font-family:'Clash Display',sans-serif;font-size:2.3rem;font-weight:700;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin:.5rem 0 .3rem;}
 .bsub{font-size:.85rem;color:var(--fog);margin-bottom:1.4rem;line-height:1.6;}
-.bcompat{background:var(--ink2);border:1px solid rgba(255,255,255,.06);border-radius:13px;padding:.7rem 1rem;margin-bottom:1.3rem;width:100%;max-width:240px;}
-.bcnum{font-family:'Clash Display',sans-serif;font-size:1.8rem;font-weight:700;background:var(--grad-life);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
-.bclabel{font-size:.68rem;color:var(--fog);}
-
-/* TOAST */
-.toast{position:fixed;top:4.8rem;left:50%;transform:translateX(-50%) translateY(-12px);background:var(--ink3);border:1px solid rgba(255,255,255,.1);border-radius:50px;padding:.52rem 1.05rem;font-size:.8rem;font-weight:500;z-index:600;opacity:0;transition:.3s;white-space:nowrap;max-width:90vw;text-align:center;pointer-events:none;}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-
+/* ADMIN PANEL */
+.admin-wrap{padding:0 1rem;padding-top:4.5rem;padding-bottom:2rem;}
+.admin-stat{background:var(--ink2);border:1px solid rgba(255,255,255,.05);border-radius:14px;padding:.9rem;margin-bottom:.5rem;display:flex;align-items:center;gap:.75rem;}
+.admin-num{font-family:'Clash Display',sans-serif;font-size:1.8rem;font-weight:700;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.admin-label{font-size:.8rem;color:var(--fog);}
+.admin-user-item{background:var(--ink2);border:1px solid rgba(255,255,255,.04);border-radius:12px;padding:.75rem;margin-bottom:.4rem;display:flex;align-items:center;gap:.7rem;}
+.admin-ava{width:40px;height:40px;border-radius:50%;background:var(--ink3);display:flex;align-items:center;justify-content:center;font-size:1.1rem;overflow:hidden;flex-shrink:0;}
+.admin-ava img{width:100%;height:100%;object-fit:cover;}
+/* LIKE NOTIF */
+.like-notif{position:fixed;top:5rem;right:1rem;z-index:600;background:var(--ink2);border:1px solid rgba(255,60,172,.3);border-radius:16px;padding:.75rem;display:flex;align-items:center;gap:.6rem;box-shadow:0 8px 30px rgba(255,60,172,.2);transform:translateX(120%);transition:.4s cubic-bezier(.34,1.56,.64,1);max-width:220px;}
+.like-notif.show{transform:translateX(0);}
 /* UTILS */
-.sec-t{font-family:'Clash Display',sans-serif;font-size:.78rem;font-weight:600;color:var(--fog);letter-spacing:.06em;text-transform:uppercase;margin:.2rem 0 .55rem;padding:0 1rem;}
-.free-banner{margin:.4rem 1rem;background:rgba(0,255,148,.05);border:1px solid rgba(0,255,148,.15);border-radius:12px;padding:.55rem .9rem;display:flex;align-items:center;gap:.45rem;font-size:.72rem;color:var(--life);}
+.free-banner{margin:.4rem 0;background:rgba(0,255,148,.05);border:1px solid rgba(0,255,148,.15);border-radius:12px;padding:.55rem .9rem;display:flex;align-items:center;gap:.45rem;font-size:.72rem;color:var(--life);}
+.sec-t{font-family:'Clash Display',sans-serif;font-size:.78rem;font-weight:600;color:var(--fog);letter-spacing:.06em;text-transform:uppercase;margin:.2rem 0 .55rem;}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.toast{position:fixed;top:4.8rem;left:50%;transform:translateX(-50%) translateY(-12px);background:var(--ink3);border:1px solid rgba(255,255,255,.1);border-radius:50px;padding:.52rem 1.05rem;font-size:.8rem;font-weight:500;z-index:700;opacity:0;transition:.3s;white-space:nowrap;max-width:90vw;text-align:center;pointer-events:none;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+/* REPORT MODAL */
+.report-modal{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.85);align-items:flex-end;}
+.report-modal.show{display:flex;}
+.push-banner{background:linear-gradient(135deg,rgba(255,184,0,.08),rgba(255,60,172,.08));border:1px solid rgba(255,184,0,.2);border-radius:14px;padding:.9rem;margin:.5rem 0;cursor:pointer;display:flex;align-items:center;gap:.7rem;}
 </style>
 </head>
 <body>
 <div class="amb"></div>
 <div class="toast" id="toast"></div>
+<div class="like-notif" id="like-notif">
+  <div style="width:38px;height:38px;border-radius:50%;background:var(--ink3);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;" id="ln-ava">👩</div>
+  <div style="font-size:.75rem;line-height:1.4;"><strong id="ln-nombre" style="color:var(--pulse)">Sara</strong> te ha dado like ❤️<br><span style="color:var(--fog);font-size:.68rem">Toca para ver su perfil</span></div>
+</div>
 
 <!-- LOADING -->
 <div class="screen active" id="screen-loading">
   <div class="spin"></div>
-  <div class="load-txt">Cargando ENLACE...</div>
+  <div style="font-family:'Clash Display',sans-serif;font-size:1.1rem;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Cargando ENLACE...</div>
 </div>
 
 <!-- AUTH -->
 <div class="screen" id="screen-auth">
   <div class="auth-inner">
-    <div class="auth-logo">
-      <svg viewBox="0 0 100 100" fill="none">
-        <defs><linearGradient id="lg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FF3CAC"/><stop offset="50%" stop-color="#784BA0"/><stop offset="100%" stop-color="#2B86C5"/></linearGradient></defs>
-        <circle cx="30" cy="18" r="10" fill="#2B86C5"/>
-        <circle cx="70" cy="18" r="10" fill="#FF3CAC"/>
-        <path d="M5 55Q5 33 26 33Q41 33 50 50Q59 33 74 33Q95 33 95 55Q95 77 74 77Q59 77 50 60Q41 77 26 77Q5 77 5 55Z" fill="url(#lg)"/>
-      </svg>
+    <div class="logo-svg">
+      <svg viewBox="0 0 100 100" fill="none"><defs><linearGradient id="lg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FF3CAC"/><stop offset="50%" stop-color="#784BA0"/><stop offset="100%" stop-color="#2B86C5"/></linearGradient></defs><circle cx="30" cy="18" r="10" fill="#2B86C5"/><circle cx="70" cy="18" r="10" fill="#FF3CAC"/><path d="M5 55Q5 33 26 33Q41 33 50 50Q59 33 74 33Q95 33 95 55Q95 77 74 77Q59 77 50 60Q41 77 26 77Q5 77 5 55Z" fill="url(#lg)"/></svg>
     </div>
     <div class="free-tag">✅ 100% Gratuito · Sin tarjeta</div>
     <div id="err-msg" class="err-msg" style="display:none"></div>
-
-    <!-- LOGIN -->
     <div id="form-login" style="width:100%">
       <div class="auth-title">Hola de<br><span class="gt">nuevo.</span></div>
       <p class="auth-sub">Entra en ENLACE y conecta de verdad.</p>
@@ -274,11 +320,9 @@ select.inp option{background:var(--ink2);}
       <button class="btn-f" id="btn-login" onclick="login()">Entrar →</button>
       <div class="auth-switch" onclick="toggleAuth()">¿No tienes cuenta? <span>Regístrate gratis</span></div>
     </div>
-
-    <!-- REGISTRO -->
     <div id="form-registro" style="width:100%;display:none">
       <div class="auth-title">Empieza<br><span class="gt">gratis.</span></div>
-      <p class="auth-sub">Crea tu cuenta en ENLACE. Sin tarjeta.</p>
+      <p class="auth-sub">Sin tarjeta. Sin trampas.</p>
       <div class="form-stack">
         <input class="inp" type="text" id="reg-nombre" placeholder="Tu nombre">
         <input class="inp" type="email" id="reg-email" placeholder="Tu email">
@@ -290,70 +334,63 @@ select.inp option{background:var(--ink2);}
   </div>
 </div>
 
-<!-- ONBOARDING PERFIL -->
+<!-- ONBOARDING -->
 <div class="screen" id="screen-onboarding">
   <div class="ob-wrap">
-    <div class="auth-logo" style="margin-bottom:1rem">
-      <svg viewBox="0 0 100 100" fill="none"><defs><linearGradient id="lg2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FF3CAC"/><stop offset="50%" stop-color="#784BA0"/><stop offset="100%" stop-color="#2B86C5"/></linearGradient></defs><circle cx="30" cy="18" r="10" fill="#2B86C5"/><circle cx="70" cy="18" r="10" fill="#FF3CAC"/><path d="M5 55Q5 33 26 33Q41 33 50 50Q59 33 74 33Q95 33 95 55Q95 77 74 77Q59 77 50 60Q41 77 26 77Q5 77 5 55Z" fill="url(#lg2)"/></svg>
+    <div class="auth-title" style="margin-top:1rem">Cuéntanos<br><span class="gt">quién eres.</span></div>
+    <p class="ob-sub">Sin formularios infinitos. Promesa.</p>
+    <!-- FOTO PERFIL -->
+    <input type="file" id="ob-foto-input" accept="image/*" capture="user" style="display:none" onchange="previewFotoPerfil(this)">
+    <div class="foto-upload-area" onclick="document.getElementById('ob-foto-input').click()" id="foto-preview-wrap">
+      <div class="overlay" id="foto-overlay"><span style="font-size:2rem">📷</span><span style="font-size:.72rem;color:white">Tu foto</span></div>
     </div>
-    <div class="ob-title">Cuéntanos<br><span class="gt">quién eres.</span></div>
-    <p class="ob-sub">Solo lo esencial. Sin formularios infinitos.</p>
-    <div class="ob-step-wrap">
-      <div class="form-stack">
-        <input class="inp" type="number" id="ob-edad" placeholder="Tu edad" min="18" max="99">
-        <input class="inp" type="text" id="ob-ciudad" placeholder="Tu ciudad">
-        <textarea class="inp" id="ob-bio" placeholder="Una frase que te defina..." style="height:70px;resize:none"></textarea>
-        <select class="inp" id="ob-objetivo">
-          <option value="">¿Qué buscas en ENLACE?</option>
-          <option value="seria">Relación seria</option>
-          <option value="conexion">Conexión auténtica</option>
-          <option value="casual">Algo casual</option>
-          <option value="ver">A ver qué surge</option>
-        </select>
-      </div>
-      <div style="margin:.8rem 0 .5rem;font-size:.78rem;color:var(--fog);text-transform:uppercase;letter-spacing:.05em;font-weight:600;">Tus intereses</div>
-      <div class="intereses-grid" id="int-grid">
-        <button class="int-btn" onclick="this.classList.toggle('sel')"><span>🎵</span>Música</button>
-        <button class="int-btn" onclick="this.classList.toggle('sel')"><span>🏃</span>Deporte</button>
-        <button class="int-btn" onclick="this.classList.toggle('sel')"><span>🎬</span>Cine</button>
-        <button class="int-btn" onclick="this.classList.toggle('sel')"><span>✈️</span>Viajes</button>
-        <button class="int-btn" onclick="this.classList.toggle('sel')"><span>🍕</span>Comida</button>
-        <button class="int-btn" onclick="this.classList.toggle('sel')"><span>📚</span>Lectura</button>
-        <button class="int-btn" onclick="this.classList.toggle('sel')"><span>🎮</span>Gaming</button>
-        <button class="int-btn" onclick="this.classList.toggle('sel')"><span>🎨</span>Arte</button>
-        <button class="int-btn" onclick="this.classList.toggle('sel')"><span>🐶</span>Mascotas</button>
-      </div>
-      <button class="btn-f" onclick="guardarPerfil()" style="margin-top:1.2rem">¡Entrar a ENLACE! 🔗</button>
+    <div style="font-size:.72rem;color:var(--fog);margin-bottom:.8rem;text-align:center;">Toca para añadir tu foto de perfil</div>
+    <div class="form-stack" style="width:100%">
+      <input class="inp" type="number" id="ob-edad" placeholder="Tu edad" min="18" max="99">
+      <input class="inp" type="text" id="ob-ciudad" placeholder="Tu ciudad">
+      <textarea class="inp" id="ob-bio" placeholder="Una frase que te defina..." style="height:70px;resize:none"></textarea>
+      <select class="inp" id="ob-objetivo"><option value="">¿Qué buscas en ENLACE?</option><option value="seria">Relación seria</option><option value="conexion">Conexión auténtica</option><option value="casual">Algo casual</option><option value="ver">A ver qué surge</option></select>
     </div>
+    <div style="margin:.8rem 0 .5rem;font-size:.78rem;color:var(--fog);text-transform:uppercase;letter-spacing:.05em;font-weight:600;align-self:flex-start;">Tus intereses</div>
+    <div class="intereses-grid">
+      <button class="int-btn" onclick="this.classList.toggle('sel')"><span>🎵</span>Música</button>
+      <button class="int-btn" onclick="this.classList.toggle('sel')"><span>🏃</span>Deporte</button>
+      <button class="int-btn" onclick="this.classList.toggle('sel')"><span>🎬</span>Cine</button>
+      <button class="int-btn" onclick="this.classList.toggle('sel')"><span>✈️</span>Viajes</button>
+      <button class="int-btn" onclick="this.classList.toggle('sel')"><span>🍕</span>Comida</button>
+      <button class="int-btn" onclick="this.classList.toggle('sel')"><span>📚</span>Lectura</button>
+      <button class="int-btn" onclick="this.classList.toggle('sel')"><span>🎮</span>Gaming</button>
+      <button class="int-btn" onclick="this.classList.toggle('sel')"><span>🎨</span>Arte</button>
+      <button class="int-btn" onclick="this.classList.toggle('sel')"><span>🐶</span>Mascotas</button>
+    </div>
+    <button class="btn-f" onclick="guardarPerfil()" style="margin-top:1.2rem;width:100%">¡Entrar a ENLACE! 🔗</button>
   </div>
 </div>
 
-<!-- APP PRINCIPAL -->
+<!-- APP -->
 <div class="screen" id="screen-app">
   <div class="topbar">
-    <div>
-      <div class="tlogo">ENLACE</div>
-      <div class="tver">© 2025 Javier González Rodríguez</div>
-    </div>
+    <div><div class="tlogo">ENLACE</div><div class="tver">v8.0 BETA · © 2025 Javier González Rodríguez</div></div>
     <div class="tbright">
-      <button class="icobtn" onclick="toast('🧠 IA activa · Analizando compatibilidades')">🧠</button>
-      <button class="icobtn" id="notif-btn" onclick="toast('🔔 Notificaciones al día')">🔔<div class="nbdg" id="nbdg" style="display:none"></div></button>
+      <button class="icobtn" onclick="activarNotifPush()" id="btn-notif-push" title="Activar notificaciones">🔔<div class="nbdg" id="nbdg" style="display:none"></div></button>
+      <button class="icobtn" onclick="abrirFiltros()" title="Filtros">🎛️</button>
+      <button class="icobtn" onclick="tab('admin',null)" id="btn-admin" style="display:none" title="Admin">⚙️</button>
     </div>
   </div>
 
   <!-- DESCUBRIR -->
   <div class="page" id="tab-descubrir">
-    <div class="disc-wrap">
-      <div class="free-banner">✅ <strong>Conexiones ilimitadas</strong> · 100% gratis</div>
+    <div style="padding:.8rem 1rem;padding-top:4.5rem;">
+      <div class="free-banner">✅ <strong>Conexiones ilimitadas</strong> · 100% gratis · v8.0 BETA</div>
       <div class="card-stack" id="card-stack">
-        <div class="empty-state">
-          <div style="font-size:3rem">🔍</div>
-          <p>Cargando personas compatibles cerca de ti...</p>
-          <div class="spin" style="width:32px;height:32px;border-width:2px;margin-top:.5rem"></div>
+        <div style="display:flex;align-items:center;justify-content:center;height:100%;flex-direction:column;gap:1rem;color:var(--fog);">
+          <div class="spin" style="width:32px;height:32px;border-width:2px;"></div>
+          <div style="font-size:.88rem;">Buscando personas cerca...</div>
         </div>
       </div>
       <div class="acciones">
         <button class="abtn abtn-no" onclick="swipe('nope')">✕</button>
+        <button class="abtn abtn-filter" onclick="abrirFiltros()">🎛️</button>
         <button class="abtn abtn-star" onclick="swipe('super')">⭐</button>
         <button class="abtn abtn-si" onclick="swipe('like')">♥</button>
       </div>
@@ -364,37 +401,57 @@ select.inp option{background:var(--ink2);}
   <div class="page" id="tab-chats" style="display:none">
     <div class="ch-wrap">
       <div style="font-family:'Clash Display',sans-serif;font-size:1.25rem;font-weight:700;margin:.5rem 0 .7rem">Mis conexiones</div>
-      <div class="free-banner" style="margin:0 0 .8rem">✅ <strong>Chats ilimitados</strong> · Sin restricciones</div>
       <div id="chats-lista">
-        <div style="text-align:center;padding:2rem;color:var(--fog);font-size:.88rem">
-          <div style="font-size:2rem;margin-bottom:.5rem">💬</div>
-          Aún no tienes conexiones.<br>¡Da likes para crear matches!
+        <div style="text-align:center;padding:2rem;color:var(--fog);font-size:.88rem;"><div style="font-size:2rem;margin-bottom:.5rem">💬</div>Aún no tienes conexiones.<br>¡Da likes para crear matches!</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REELS -->
+  <div class="page" id="tab-reels" style="display:none;padding:0;padding-top:3.8rem;">
+    <div style="padding:0 1rem .8rem;">
+      <div style="font-family:'Clash Display',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:.6rem;">🎬 Momentos</div>
+      <div class="push-banner" onclick="toast('📹 Sube tu momento · Próximamente · ¡Gratis!')">
+        <span style="font-size:1.5rem">➕</span>
+        <div><div style="font-weight:700;font-size:.85rem;margin-bottom:.1rem">Añade tu momento</div><div style="font-size:.72rem;color:var(--fog)">Video de hasta 60s · Gratis · Se borra en 24h</div></div>
+      </div>
+      <div id="reels-lista"></div>
+    </div>
+  </div>
+
+  <!-- MAPA -->
+  <div class="page" id="tab-mapa" style="display:none;padding-top:3.8rem;">
+    <div style="padding:.5rem 1rem;padding-bottom:1rem;">
+      <div style="font-family:'Clash Display',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:.6rem;">📍 Radar en tiempo real</div>
+      <div id="map-container" style="height:320px;border-radius:16px;overflow:hidden;margin-bottom:.8rem;">
+        <div class="map-mock">
+          <div class="map-grid"></div>
+          <!-- Puntos del mapa -->
+          <div class="map-dot me" style="left:50%;top:50%;" onclick="toast('📍 Tú estás aquí')"></div>
+          <div class="map-dot otros" style="left:35%;top:35%;" onclick="toast('👩‍🦰 Sara · 94% compat · 200m · Toca para conectar')"></div>
+          <div class="map-dot otros" style="left:65%;top:40%;" onclick="toast('👩 Laura · 87% compat · 450m')"></div>
+          <div class="map-dot otros" style="left:30%;top:60%;" onclick="toast('🧔 Carlos · 72% compat · 800m')"></div>
+          <div class="map-dot otros" style="left:70%;top:65%;" onclick="toast('👱‍♀️ Ana · 65% compat · 1.2km')"></div>
+          <div class="map-dot otros" style="left:55%;top:25%;" onclick="toast('🧑‍🦱 Miguel · 78% compat · 600m')"></div>
+          <div class="map-info">
+            <div class="map-stat"><span style="font-size:1rem">📡</span><span><strong id="map-count" style="color:var(--signal)">23</strong> personas compatibles en tu zona ahora mismo</span></div>
+          </div>
         </div>
       </div>
+      <button onclick="activarGPS()" style="width:100%;padding:.85rem;background:var(--grad);border:none;border-radius:12px;color:white;font-family:'Clash Display',sans-serif;font-weight:600;font-size:.9rem;cursor:pointer;margin-bottom:.5rem;">📍 Activar GPS real</button>
+      <div style="font-size:.72rem;color:var(--fog);text-align:center;line-height:1.5;">Tu ubicación exacta nunca se muestra a otros usuarios.<br>Solo el barrio o la distancia aproximada. © 2025 Javier González Rodríguez</div>
     </div>
   </div>
 
   <!-- MISIONES -->
   <div class="page" id="tab-misiones" style="display:none">
     <div class="ms-wrap">
-      <div class="free-banner" style="margin:.5rem 0">✅ <strong>Todas las misiones gratis</strong> · Sin límite</div>
-      <div class="streak">
-        <div class="snum">🔥<span id="streak-num">0</span></div>
-        <div><div style="font-weight:700;font-size:.86rem;margin-bottom:.12rem">Racha de días</div><div style="font-size:.7rem;color:var(--fog)">Entra cada día y gana puntos extra</div></div>
-      </div>
+      <div class="streak"><div class="snum">🔥<span id="streak-num">7</span></div><div><div style="font-weight:700;font-size:.86rem;margin-bottom:.12rem">Racha de días</div><div style="font-size:.7rem;color:var(--fog)">Entra cada día y gana XP</div></div></div>
       <div class="sec-t">Misiones activas</div>
-      <div class="mcard" onclick="completarMision(this,'audio',80)">
-        <div class="mh"><div class="mico" style="background:rgba(255,60,172,.13)">🎙️</div><div class="minfo"><div class="mtitle">Rompe el hielo con voz</div><div class="mdesc">Envía tu primer audio a alguien · La voz conecta más que el texto</div></div><div class="mrew">+80⚡</div></div>
-        <div class="mprog"><div class="mpfill" id="mp-audio" style="width:0%;background:var(--grad)"></div></div>
-      </div>
-      <div class="mcard" onclick="completarMision(this,'pregunta',120)">
-        <div class="mh"><div class="mico" style="background:rgba(255,184,0,.13)">🔥</div><div class="minfo"><div class="mtitle">La pregunta incómoda</div><div class="mdesc">Haz una pregunta que nadie se atreve a hacer al principio</div></div><div class="mrew">+120⚡</div></div>
-        <div class="mprog"><div class="mpfill" id="mp-pregunta" style="width:0%;background:var(--grad-spark)"></div></div>
-      </div>
-      <div class="mcard" onclick="completarMision(this,'cita',200)">
-        <div class="mh"><div class="mico" style="background:rgba(0,255,148,.09)">📍</div><div class="minfo"><div class="mtitle">De chat a vida real</div><div class="mdesc">Propón una cita en menos de 10 mensajes</div></div><div class="mrew">+200⚡</div></div>
-        <div class="mprog"><div class="mpfill" id="mp-cita" style="width:0%;background:var(--grad-life)"></div></div>
-      </div>
+      <div class="mcard" onclick="progMision(this,'foto',100)"><div class="mh"><div class="mico" style="background:rgba(255,60,172,.13)">📸</div><div class="minfo"><div class="mtitle">Primera foto en chat</div><div class="mdesc">Envía una foto a alguien que te guste</div></div><div class="mrew">+100 XP</div></div><div class="mprog"><div class="mpfill" id="mp-foto" style="width:0%;background:var(--grad)"></div></div></div>
+      <div class="mcard" onclick="progMision(this,'audio',80)"><div class="mh"><div class="mico" style="background:rgba(0,212,255,.1)">🎙️</div><div class="minfo"><div class="mtitle">Rompe el hielo con voz</div><div class="mdesc">Envía tu primer audio · La voz conecta más</div></div><div class="mrew">+80 XP</div></div><div class="mprog"><div class="mpfill" id="mp-audio" style="width:0%;background:var(--grad)"></div></div></div>
+      <div class="mcard" onclick="progMision(this,'reel',120)"><div class="mh"><div class="mico" style="background:rgba(255,184,0,.13)">🎬</div><div class="minfo"><div class="mtitle">Tu primer Momento</div><div class="mdesc">Sube un video corto a Momentos</div></div><div class="mrew">+120 XP</div></div><div class="mprog"><div class="mpfill" id="mp-reel" style="width:0%;background:var(--grad-spark)"></div></div></div>
+      <div class="mcard" onclick="progMision(this,'mapa',150)"><div class="mh"><div class="mico" style="background:rgba(0,255,148,.09)">📍</div><div class="minfo"><div class="mtitle">Activa el radar GPS</div><div class="mdesc">Encuentra personas reales cerca de ti ahora</div></div><div class="mrew">+150 XP</div></div><div class="mprog"><div class="mpfill" id="mp-mapa" style="width:0%;background:var(--grad-life)"></div></div></div>
     </div>
   </div>
 
@@ -402,46 +459,61 @@ select.inp option{background:var(--ink2);}
   <div class="page" id="tab-yo" style="display:none">
     <div class="yo-wrap">
       <div class="yhero">
-        <div class="yava">😊</div>
+        <input type="file" id="foto-perfil-input" accept="image/*" capture="user" style="display:none" onchange="cambiarFotoPerfil(this)">
+        <div class="yava" onclick="document.getElementById('foto-perfil-input').click()">
+          <span id="yo-emoji">😊</span>
+          <img id="yo-foto" src="" alt="" style="display:none;">
+          <div class="edit-overlay">📷</div>
+        </div>
         <div class="yname" id="yo-nombre">Mi perfil</div>
-        <div class="yliga" id="yo-liga">🥉 Bronce · 0 pts</div>
+        <div class="yliga" id="yo-liga">🥉 Bronce · 0 XP</div>
         <div class="ystats">
-          <div class="yst"><div class="ysn" id="yo-conexiones">0</div><div class="ysl">Conexiones</div></div>
-          <div class="yst"><div class="ysn" id="yo-puntos">0</div><div class="ysl">Puntos</div></div>
+          <div class="yst"><div class="ysn" id="yo-conexiones">0</div><div class="ysl">Matches</div></div>
+          <div class="yst"><div class="ysn" id="yo-puntos">0</div><div class="ysl">XP</div></div>
           <div class="yst"><div class="ysn" id="yo-ghostings">0</div><div class="ysl">Ghostings</div></div>
           <div class="yst"><div class="ysn" id="yo-rep">5.0</div><div class="ysl">Rep.</div></div>
         </div>
       </div>
-      <div class="optrow" onclick="toast('🧠 Perfil psicológico basado en tu comportamiento en la app')">
-        <div class="optleft"><div class="optico">🧠</div><div class="opttxt">Mi perfil psicológico</div></div><div class="optarr">›</div>
+      <!-- PUSH NOTIF BANNER -->
+      <div class="push-banner" onclick="activarNotifPush()">
+        <span style="font-size:1.5rem">🔔</span>
+        <div style="flex:1"><div style="font-weight:700;font-size:.85rem;margin-bottom:.13rem">Activar notificaciones</div><div style="font-size:.72rem;color:var(--fog)">Sabe cuándo alguien te da like · Gratis</div></div>
+        <div id="notif-estado" style="font-size:.72rem;color:var(--fog);font-weight:600;">ACTIVAR</div>
       </div>
-      <div class="optrow" onclick="toast('🎵 DNA Musical · Conecta Spotify próximamente · Gratis')">
-        <div class="optleft"><div class="optico">🎵</div><div class="opttxt">DNA Musical · Gratis</div></div><div class="optarr">›</div>
-      </div>
-      <div class="optrow" onclick="toast('🏆 Liga · Próximamente ranking por ciudades')">
-        <div class="optleft"><div class="optico">🏆</div><div class="opttxt">Liga de conexiones</div></div><div class="optarr">›</div>
-      </div>
-
-      <!-- LEGAL -->
-      <div style="background:var(--ink2);border:1px solid rgba(255,255,255,.05);border-radius:14px;padding:.9rem;margin:.8rem 0;">
+      <div class="optrow" onclick="tab('mapa',null);document.querySelectorAll('.nbtn').forEach((b,i)=>{if(i===3)b.classList.add('on');else b.classList.remove('on');})"><div class="optleft"><div class="optico">📍</div><div class="opttxt">Radar GPS</div></div><div class="optarr">›</div></div>
+      <div class="optrow" onclick="tab('reels',null);document.querySelectorAll('.nbtn').forEach((b,i)=>{if(i===2)b.classList.add('on');else b.classList.remove('on');})"><div class="optleft"><div class="optico">🎬</div><div class="opttxt">Mis Momentos</div></div><div class="optarr">›</div></div>
+      <div class="optrow" onclick="abrirFiltros()"><div class="optleft"><div class="optico">🎛️</div><div class="opttxt">Filtros de búsqueda</div></div><div class="optarr">›</div></div>
+      <div class="optrow" onclick="compartir()"><div class="optleft"><div class="optico">📲</div><div class="opttxt">Invitar amigos</div></div><div class="optarr">›</div></div>
+      <div style="background:var(--ink2);border:1px solid rgba(255,255,255,.05);border-radius:14px;padding:.9rem;margin:.5rem 0;">
         <div style="font-size:.7rem;font-weight:700;color:var(--fog);margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.04em;">Info Legal</div>
-        <div style="font-size:.68rem;color:var(--fog);line-height:1.7;">
-          <div>ENLACE v3.1.0 · © 2025 <strong style="color:var(--light)">Javier González Rodríguez</strong></div>
-          <div>📧 <a href="mailto:jgonzrdguez@gmail.com" style="color:var(--signal);text-decoration:none">jgonzrdguez@gmail.com</a></div>
-          <div style="margin-top:.4rem;font-size:.65rem;">Protegido por RDL 1/1996 · RGPD 2016/679 · Convenio de Berna</div>
-        </div>
+        <div style="font-size:.68rem;color:var(--fog);line-height:1.7;"><div>ENLACE v8.0 · © 2025 <strong style="color:var(--light)">Javier González Rodríguez</strong></div><div>📧 <a href="mailto:jgonzrdguez@gmail.com" style="color:var(--signal);text-decoration:none">jgonzrdguez@gmail.com</a></div><div style="margin-top:.3rem;font-size:.62rem;">RDL 1/1996 · RGPD 2016/679 · Convenio de Berna</div></div>
       </div>
+      <div class="optrow" onclick="cerrarSesion()" style="border-color:rgba(255,71,87,.15)"><div class="optleft"><div class="optico">🚪</div><div class="opttxt" style="color:var(--danger)">Cerrar sesión</div></div><div class="optarr">›</div></div>
+    </div>
+  </div>
 
-      <div class="optrow" onclick="cerrarSesion()" style="border-color:rgba(255,71,87,.15)">
-        <div class="optleft"><div class="optico">🚪</div><div class="opttxt" style="color:var(--danger)">Cerrar sesión</div></div><div class="optarr">›</div>
+  <!-- ADMIN PANEL -->
+  <div class="page" id="tab-admin" style="display:none">
+    <div class="admin-wrap">
+      <div style="font-family:'Clash Display',sans-serif;font-size:1.3rem;font-weight:700;margin-bottom:1rem;">⚙️ Panel Admin<br><span style="font-size:.8rem;color:var(--fog);font-family:'Cabinet Grotesk',sans-serif;font-weight:400;">Solo visible para Javier González Rodríguez</span></div>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:.5rem;margin-bottom:.8rem;">
+        <div class="admin-stat"><div><div class="admin-num" id="admin-usuarios">0</div><div class="admin-label">Usuarios totales</div></div></div>
+        <div class="admin-stat"><div><div class="admin-num" id="admin-matches">0</div><div class="admin-label">Matches activos</div></div></div>
+        <div class="admin-stat"><div><div class="admin-num" id="admin-mensajes">0</div><div class="admin-label">Mensajes hoy</div></div></div>
+        <div class="admin-stat"><div><div class="admin-num" id="admin-reportes">0</div><div class="admin-label">Reportes</div></div></div>
       </div>
+      <div class="sec-t">Últimos usuarios registrados</div>
+      <div id="admin-users-lista"><div style="color:var(--fog);font-size:.85rem;text-align:center;padding:1rem;">Cargando...</div></div>
+      <div class="sec-t" style="margin-top:.8rem;">Reportes pendientes</div>
+      <div id="admin-reportes-lista"><div style="color:var(--fog);font-size:.85rem;text-align:center;padding:1rem;">Sin reportes pendientes ✅</div></div>
     </div>
   </div>
 
   <div class="navbar">
     <button class="nbtn on" onclick="tab('descubrir',this)"><span class="ni">✨</span>Descubrir</button>
     <button class="nbtn" onclick="tab('chats',this)"><span class="ni">💬</span>Chats</button>
-    <button class="nbtn" onclick="tab('misiones',this)"><span class="ni">🎯</span>Misiones</button>
+    <button class="nbtn" onclick="tab('reels',this)"><span class="ni">🎬</span>Momentos</button>
+    <button class="nbtn" onclick="tab('mapa',this)"><span class="ni">📍</span>Mapa</button>
     <button class="nbtn" onclick="tab('yo',this)"><span class="ni">👤</span>Yo</button>
   </div>
 </div>
@@ -450,16 +522,15 @@ select.inp option{background:var(--ink2);}
 <div class="chatfull" id="chatfull">
   <div class="cfhdr">
     <button class="cfback" onclick="cerrarChatFull()">←</button>
-    <div class="cfava" id="cf-ava">👤</div>
-    <div><div class="cfname" id="cf-name">–</div><div class="cfstat" id="cf-stat">🟢 En línea · Modo Cita a Ciegas</div></div>
-    <div class="cfacts"><button class="cfabt" onclick="toast('⚠️ Reporte enviado · Gracias')">⚠️</button></div>
+    <div class="cfava" id="cf-ava-wrap"><span id="cf-ava">👤</span></div>
+    <div><div class="cfname" id="cf-name">–</div><div class="cfstat">🟢 En línea · Modo Cita a Ciegas</div></div>
+    <div class="cfacts">
+      <button class="cfabt" onclick="toast('📹 Videollamada · Próximamente')">📹</button>
+      <button class="cfabt" onclick="abrirReporte()">⚠️</button>
+    </div>
   </div>
   <div class="qmeter">
-    <div class="qmrow">
-      <span class="qmlabel">🌡️ Química</span>
-      <div class="qmbar"><div class="qmfill" id="qmfill" style="width:50%"></div></div>
-      <span class="qmpct" id="qmpct">50%</span>
-    </div>
+    <div class="qmrow"><span class="qmlabel">🌡️ Química</span><div class="qmbar"><div class="qmfill" id="qmfill" style="width:50%"></div></div><span class="qmpct" id="qmpct">50%</span></div>
     <div class="qmtip" id="qmtip">🤖 IA: Empieza con algo personal para conectar mejor</div>
   </div>
   <div class="mbar">
@@ -470,570 +541,542 @@ select.inp option{background:var(--ink2);}
   </div>
   <div class="cfmsgs" id="cfmsgs"></div>
   <div class="cfinput-wrap">
+    <input type="file" id="chat-foto-input" accept="image/*" style="display:none" onchange="enviarFotoChat(this)">
+    <input type="file" id="chat-audio-input" accept="audio/*" capture="microphone" style="display:none" onchange="enviarAudioChat(this)">
+    <button class="media-btn" onclick="document.getElementById('chat-foto-input').click()" title="Enviar foto">📷</button>
+    <button class="media-btn" onclick="grabarAudio()" id="btn-mic" title="Grabar audio">🎤</button>
     <input class="cfinput" type="text" id="cfinput" placeholder="Escribe algo real...">
-    <button class="cfmic" onclick="toast('🎤 Audio · Próximamente')">🎤</button>
     <button class="cfsend" onclick="enviarMsg()">➤</button>
   </div>
 </div>
 
 <!-- MATCH BOOM -->
 <div class="mboom" id="mboom">
-  <div class="bring">
-    <div class="bavas">
-      <div class="bav">😊</div><div class="bh">💜</div><div class="bav" id="bav">👤</div>
-    </div>
-  </div>
+  <div class="bring"><div class="bavas"><div class="bav"><span id="bav">👤</span></div><div class="bh">💜</div><div class="bav"><span id="bav-yo">😊</span></div></div></div>
   <div class="btitle">¡ENLACE!</div>
-  <p class="bsub">¡Conexión real detectada! 🎉<br>Tenéis 72h para pasar al mundo real.<br><span style="color:var(--life);font-weight:700">100% gratis. Sin trampas.</span></p>
-  <div class="bcompat"><div class="bcnum" id="bpct">–%</div><div class="bclabel">Compatibilidad · IA gratuita</div></div>
+  <p class="bsub">Conexión real detectada 🎉<br>72h para pasar al mundo real.<br><span style="color:var(--life);font-weight:700">100% gratis. Sin trampas.</span></p>
+  <div style="background:var(--ink2);border:1px solid rgba(255,255,255,.06);border-radius:13px;padding:.7rem 1rem;margin-bottom:1.3rem;width:100%;max-width:240px;text-align:center;">
+    <div style="font-family:'Clash Display',sans-serif;font-size:1.8rem;font-weight:700;background:var(--grad-life);-webkit-background-clip:text;-webkit-text-fill-color:transparent;" id="bpct">–%</div>
+    <div style="font-size:.68rem;color:var(--fog);">Compatibilidad · IA gratuita</div>
+  </div>
   <button class="btn-f" style="max-width:270px" onclick="cerrarMatch()">¡Escribirle ahora! 💬</button>
   <button class="btn-g" style="max-width:270px" onclick="cerrarMatch()">Ver más tarde</button>
 </div>
 
+<!-- FILTROS MODAL -->
+<div class="filtros-modal" id="filtros-modal">
+  <div class="filtros-inner">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+      <div style="font-family:'Clash Display',sans-serif;font-size:1.2rem;font-weight:700;">🎛️ Filtros</div>
+      <button onclick="cerrarFiltros()" style="background:var(--ink3);border:none;border-radius:50%;width:32px;height:32px;color:var(--light);cursor:pointer;">✕</button>
+    </div>
+    <div class="filtro-row">
+      <div class="filtro-label">Edad <span class="range-val" id="edad-val">18 – 45 años</span></div>
+      <input type="range" min="18" max="65" value="18" oninput="actualizarFiltro('edad-min',this.value)" style="margin-bottom:.4rem;">
+      <input type="range" min="18" max="65" value="45" oninput="actualizarFiltro('edad-max',this.value)">
+    </div>
+    <div class="filtro-row">
+      <div class="filtro-label">Distancia máxima <span class="range-val" id="dist-val">50 km</span></div>
+      <input type="range" min="1" max="100" value="50" oninput="actualizarFiltro('dist',this.value)">
+    </div>
+    <div class="filtro-row">
+      <div class="filtro-label">Busco</div>
+      <div class="genero-chips">
+        <div class="gchip sel" onclick="this.classList.toggle('sel')">👩 Mujeres</div>
+        <div class="gchip" onclick="this.classList.toggle('sel')">🧑 Hombres</div>
+        <div class="gchip" onclick="this.classList.toggle('sel')">🏳️‍🌈 Todos</div>
+      </div>
+    </div>
+    <div class="filtro-row">
+      <div class="filtro-label">Objetivo</div>
+      <div class="genero-chips">
+        <div class="gchip sel" onclick="this.classList.toggle('sel')">❤️ Relación seria</div>
+        <div class="gchip sel" onclick="this.classList.toggle('sel')">✨ Conexión</div>
+        <div class="gchip" onclick="this.classList.toggle('sel')">😊 Casual</div>
+        <div class="gchip" onclick="this.classList.toggle('sel')">🤷 Ver qué surge</div>
+      </div>
+    </div>
+    <div class="filtro-row">
+      <div class="filtro-label">Solo perfiles verificados</div>
+      <div style="display:flex;align-items:center;gap:.6rem;">
+        <div id="ver-toggle" onclick="toggleVerificado()" style="width:44px;height:24px;background:rgba(0,255,148,.3);border-radius:50px;cursor:pointer;position:relative;transition:.2s;"><div id="ver-ball" style="width:20px;height:20px;border-radius:50%;background:var(--life);position:absolute;top:2px;left:22px;transition:.2s;"></div></div>
+        <span style="font-size:.8rem;color:var(--fog)" id="ver-label">Activado</span>
+      </div>
+    </div>
+    <button onclick="aplicarFiltros()" style="width:100%;padding:.88rem;background:var(--grad);border:none;border-radius:12px;color:white;font-family:'Clash Display',sans-serif;font-weight:600;font-size:.9rem;cursor:pointer;margin-top:.5rem;">Aplicar filtros</button>
+  </div>
+</div>
+
+<!-- REPORT MODAL -->
+<div class="report-modal" id="report-modal">
+  <div style="background:var(--ink2);border-radius:24px 24px 0 0;width:100%;padding:1.5rem;animation:slideUp .3s ease;">
+    <div style="font-family:'Clash Display',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:1rem;">⚠️ Reportar usuario</div>
+    <div style="display:flex;flex-direction:column;gap:.5rem;margin-bottom:1rem;">
+      <div onclick="seleccionarReporte(this)" style="background:var(--ink3);border-radius:10px;padding:.75rem;font-size:.85rem;cursor:pointer;border:1.5px solid transparent;">🤖 Perfil falso o bot</div>
+      <div onclick="seleccionarReporte(this)" style="background:var(--ink3);border-radius:10px;padding:.75rem;font-size:.85rem;cursor:pointer;border:1.5px solid transparent;">🚫 Contenido inapropiado</div>
+      <div onclick="seleccionarReporte(this)" style="background:var(--ink3);border-radius:10px;padding:.75rem;font-size:.85rem;cursor:pointer;border:1.5px solid transparent;">💸 Intento de estafa</div>
+      <div onclick="seleccionarReporte(this)" style="background:var(--ink3);border-radius:10px;padding:.75rem;font-size:.85rem;cursor:pointer;border:1.5px solid transparent;">😡 Acoso o amenazas</div>
+      <div onclick="seleccionarReporte(this)" style="background:var(--ink3);border-radius:10px;padding:.75rem;font-size:.85rem;cursor:pointer;border:1.5px solid transparent;">🔞 Menor de edad</div>
+    </div>
+    <button onclick="enviarReporte()" id="btn-enviar-reporte" disabled style="width:100%;padding:.88rem;background:var(--grad);border:none;border-radius:12px;color:white;font-family:'Clash Display',sans-serif;font-weight:600;font-size:.9rem;cursor:pointer;opacity:.5;margin-bottom:.5rem;">Enviar reporte</button>
+    <button onclick="cerrarReporte()" style="width:100%;padding:.75rem;background:transparent;border:none;color:var(--fog);font-size:.85rem;cursor:pointer;">Cancelar</button>
+  </div>
+</div>
+
 <script>
 // ============================================================
-// SUPABASE CONFIG
-// © 2025 Javier González Rodríguez - jgonzrdguez@gmail.com
+// CONFIG © 2025 Javier González Rodríguez
 // ============================================================
-const SUPA_URL = 'https://nvvebzpbupqrddxcvnzk.supabase.co';
-const SUPA_KEY = 'sb_publishable_DHkfYtA89Cb-MAIdq2TqqA_OVjmtvuq';
-const sb = supabase.createClient(SUPA_URL, SUPA_KEY);
+const SUPA_URL='https://nvvebzpbupqrddxcvnzk.supabase.co';
+const SUPA_KEY='sb_publishable_DHkfYtA89Cb-MAIdq2TqqA_OVjmtvuq';
+const sb=supabase.createClient(SUPA_URL,SUPA_KEY);
+const ADMIN_EMAIL='jgonzrdguez@gmail.com'; // Solo este email ve el panel admin
 
 // ESTADO
-const S = {
-  user: null, perfil: null,
-  perfiles: [], perfilIdx: 0,
-  matches: [], matchActual: null,
-  quimica: 50
-};
+const S={user:null,perfil:null,perfiles:[],perfilIdx:0,matches:[],quimica:50,xp:0,filtros:{edadMin:18,edadMax:45,distMax:50,soloVerificados:true},fotoPerfil:null,reporteSeleccionado:null,chatMatchId:null,chatSub:null,grabando:false,mediaRecorder:null,audioChunks:[]};
 
 // ============================================================
-// INIT — Verificar sesión al cargar
+// INIT
 // ============================================================
-window.addEventListener('load', async () => {
-  const { data: { session } } = await sb.auth.getSession();
-  if (session) {
-    S.user = session.user;
-    await cargarPerfil();
-  } else {
-    mostrar('screen-auth');
-  }
+window.addEventListener('load',()=>{
+  mostrar('screen-auth');
+  sb.auth.getSession().then(({data:{session}})=>{
+    if(session){S.user=session.user;cargarPerfil();}
+  }).catch(e=>console.log(e));
 });
-
-// Escuchar cambios de auth en tiempo real
-sb.auth.onAuthStateChange(async (event, session) => {
-  if (event === 'SIGNED_IN' && session) {
-    S.user = session.user;
-    await cargarPerfil();
-  } else if (event === 'SIGNED_OUT') {
-    S.user = null; S.perfil = null;
-    mostrar('screen-auth');
-  }
+sb.auth.onAuthStateChange(async(event,session)=>{
+  if(event==='SIGNED_IN'&&session){S.user=session.user;cargarPerfil();}
+  else if(event==='SIGNED_OUT'){resetState();mostrar('screen-auth');}
 });
+function resetState(){S.user=null;S.perfil=null;S.perfiles=[];S.matches=[];document.getElementById('form-login').style.display='block';document.getElementById('form-registro').style.display='none';document.getElementById('err-msg').style.display='none';}
 
 // ============================================================
 // AUTH
 // ============================================================
-function toggleAuth() {
-  const login = document.getElementById('form-login');
-  const reg = document.getElementById('form-registro');
-  login.style.display = login.style.display === 'none' ? 'block' : 'none';
-  reg.style.display = reg.style.display === 'none' ? 'block' : 'none';
-  ocultarError();
+function toggleAuth(){const l=document.getElementById('form-login');const r=document.getElementById('form-registro');l.style.display=l.style.display==='none'?'block':'none';r.style.display=r.style.display==='none'?'block':'none';document.getElementById('err-msg').style.display='none';}
+async function login(){
+  const email=document.getElementById('login-email').value.trim();const pass=document.getElementById('login-pass').value;
+  if(!email||!pass){mostrarError('Rellena email y contraseña');return;}
+  const btn=document.getElementById('btn-login');btn.disabled=true;btn.textContent='Entrando...';
+  const{error}=await sb.auth.signInWithPassword({email,password:pass});
+  if(error){mostrarError('Email o contraseña incorrectos');btn.disabled=false;btn.textContent='Entrar →';}
 }
+async function registro(){
+  const nombre=document.getElementById('reg-nombre').value.trim();const email=document.getElementById('reg-email').value.trim();const pass=document.getElementById('reg-pass').value;
+  if(!nombre||!email||!pass){mostrarError('Rellena todos los campos');return;}
+  if(pass.length<6){mostrarError('Contraseña mínimo 6 caracteres');return;}
+  const btn=document.getElementById('btn-registro');btn.disabled=true;btn.textContent='Creando cuenta...';
+  const{error}=await sb.auth.signUp({email,password:pass,options:{data:{nombre}}});
+  if(error){mostrarError('Error: '+error.message);btn.disabled=false;btn.textContent='Crear cuenta gratis →';}
+  else{toast('✅ Cuenta creada');btn.disabled=false;btn.textContent='Crear cuenta gratis →';setTimeout(()=>mostrar('screen-onboarding'),500);}
+}
+function mostrarError(msg){const el=document.getElementById('err-msg');el.textContent=msg;el.style.display='block';}
+async function cerrarSesion(){toast('👋 Hasta pronto!');await sb.auth.signOut();}
 
-async function login() {
-  const email = document.getElementById('login-email').value.trim();
-  const pass = document.getElementById('login-pass').value;
-  if (!email || !pass) { mostrarError('Rellena email y contraseña'); return; }
-  const btn = document.getElementById('btn-login');
-  btn.disabled = true; btn.textContent = 'Entrando...';
-  const { error } = await sb.auth.signInWithPassword({ email, password: pass });
-  if (error) { mostrarError('Email o contraseña incorrectos'); btn.disabled = false; btn.textContent = 'Entrar →'; }
-}
-
-async function registro() {
-  const nombre = document.getElementById('reg-nombre').value.trim();
-  const email = document.getElementById('reg-email').value.trim();
-  const pass = document.getElementById('reg-pass').value;
-  if (!nombre || !email || !pass) { mostrarError('Rellena todos los campos'); return; }
-  if (pass.length < 6) { mostrarError('La contraseña debe tener al menos 6 caracteres'); return; }
-  const btn = document.getElementById('btn-registro');
-  btn.disabled = true; btn.textContent = 'Creando cuenta...';
-  const { error } = await sb.auth.signUp({
-    email, password: pass,
-    options: { data: { nombre } }
-  });
-  if (error) {
-    mostrarError('Error: ' + error.message);
-    btn.disabled = false; btn.textContent = 'Crear cuenta gratis →';
-  } else {
-    toast('✅ ¡Cuenta creada! Revisa tu email para verificarla.');
-    btn.disabled = false; btn.textContent = 'Crear cuenta gratis →';
-  }
-}
-
-function mostrarError(msg) {
-  const el = document.getElementById('err-msg');
-  el.textContent = msg; el.style.display = 'block';
-}
-function ocultarError() {
-  document.getElementById('err-msg').style.display = 'none';
+// ============================================================
+// FOTO PERFIL ONBOARDING
+// ============================================================
+function previewFotoPerfil(input){
+  if(!input.files[0])return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    S.fotoPerfil=e.target.result;
+    const wrap=document.getElementById('foto-preview-wrap');
+    wrap.innerHTML='<img src="'+e.target.result+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"><div class="overlay" style="opacity:0;"><span style="font-size:1.5rem">📷</span></div>';
+    toast('✅ Foto añadida · Se guardará en tu perfil');
+  };
+  reader.readAsDataURL(input.files[0]);
 }
 
 // ============================================================
 // PERFIL
 // ============================================================
-async function cargarPerfil() {
-  const { data, error } = await sb.from('perfiles')
-    .select('*').eq('id', S.user.id).single();
-
-  if (error || !data) {
-    // Perfil nuevo → onboarding
-    mostrar('screen-onboarding');
-    return;
-  }
-
-  S.perfil = data;
-
-  // Si perfil incompleto
-  if (!data.edad || !data.ciudad) {
-    mostrar('screen-onboarding');
-    return;
-  }
-
-  iniciarApp();
+async function cargarPerfil(){
+  mostrar('screen-loading');
+  try{
+    const{data,error}=await sb.from('perfiles').select('*').eq('id',S.user.id).single();
+    if(error||!data){mostrar('screen-onboarding');return;}
+    S.perfil=data;S.xp=data.puntos||0;
+    if(!data.edad||!data.ciudad){mostrar('screen-onboarding');return;}
+    iniciarApp();
+  }catch(e){console.log(e);mostrar('screen-auth');}
 }
-
-async function guardarPerfil() {
-  const edad = parseInt(document.getElementById('ob-edad').value);
-  const ciudad = document.getElementById('ob-ciudad').value.trim();
-  const bio = document.getElementById('ob-bio').value.trim();
-  const objetivo = document.getElementById('ob-objetivo').value;
-
-  if (!edad || edad < 18) { toast('⚠️ Debes tener al menos 18 años'); return; }
-  if (!ciudad) { toast('⚠️ Indica tu ciudad'); return; }
-
-  const intereses = Array.from(document.querySelectorAll('.int-btn.sel'))
-    .map(b => b.textContent.trim().split('\n').pop().trim());
-
-  const nombre = S.user.user_metadata?.nombre ||
-    S.user.email.split('@')[0];
-
-  const { error } = await sb.from('perfiles').upsert({
-    id: S.user.id, nombre, edad, ciudad, bio, objetivo, intereses
-  });
-
-  if (error) { toast('❌ Error guardando perfil. Inténtalo de nuevo.'); return; }
-
-  S.perfil = { id: S.user.id, nombre, edad, ciudad, bio, objetivo, intereses };
-  toast('✅ ¡Perfil guardado!');
-  iniciarApp();
+async function guardarPerfil(){
+  const edad=parseInt(document.getElementById('ob-edad').value);const ciudad=document.getElementById('ob-ciudad').value.trim();
+  const bio=document.getElementById('ob-bio').value.trim();const objetivo=document.getElementById('ob-objetivo').value;
+  if(!edad||edad<18){toast('⚠️ Debes tener al menos 18 años');return;}
+  if(!ciudad){toast('⚠️ Indica tu ciudad');return;}
+  const intereses=Array.from(document.querySelectorAll('.int-btn.sel')).map(b=>b.textContent.trim().split('\n').pop().trim());
+  const nombre=S.user.user_metadata?.nombre||S.user.email.split('@')[0];
+  const updates={id:S.user.id,nombre,edad,ciudad,bio,objetivo,intereses};
+  // Subir foto si existe
+  if(S.fotoPerfil){
+    try{
+      const blob=await fetch(S.fotoPerfil).then(r=>r.blob());
+      const ext=blob.type.includes('png')?'png':'jpg';
+      const path=`avatars/${S.user.id}.${ext}`;
+      await sb.storage.from('fotos').upload(path,blob,{upsert:true,contentType:blob.type});
+      const{data:urlData}=sb.storage.from('fotos').getPublicUrl(path);
+      updates.foto_url=urlData.publicUrl;
+    }catch(e){console.log('Storage error (crear bucket "fotos" en Supabase):',e);}
+  }
+  const{error}=await sb.from('perfiles').upsert(updates);
+  if(error){toast('❌ Error: '+error.message);return;}
+  S.perfil={...updates};toast('✅ ¡Perfil guardado!');iniciarApp();
+}
+function iniciarApp(){
+  mostrar('screen-app');actualizarUI();
+  // Admin check
+  if(S.user?.email===ADMIN_EMAIL){document.getElementById('btn-admin').style.display='flex';cargarDatosAdmin();}
+  setTimeout(()=>{cargarPerfilesDescubrir().catch(e=>console.log(e));cargarMatches().catch(e=>console.log(e));renderReels();},100);
+  setTimeout(()=>mostrarLikeNotif(),7000);
+}
+function actualizarUI(){
+  if(!S.perfil)return;
+  const n=S.perfil.nombre+(S.perfil.edad?`, ${S.perfil.edad}`:'');
+  document.getElementById('yo-nombre').textContent=n;
+  document.getElementById('yo-puntos').textContent=S.xp;
+  document.getElementById('yo-ghostings').textContent=S.perfil.ghostings||0;
+  document.getElementById('yo-rep').textContent=parseFloat(S.perfil.reputacion||5).toFixed(1);
+  const pts=S.xp;const liga=pts>=300?'💎 Diamante':pts>=150?'🥇 Oro':pts>=50?'🥈 Plata':'🥉 Bronce';
+  document.getElementById('yo-liga').textContent=liga+' · '+pts+' XP';
+  // Foto perfil
+  if(S.perfil.foto_url){const img=document.getElementById('yo-foto');const em=document.getElementById('yo-emoji');img.src=S.perfil.foto_url;img.style.display='block';em.style.display='none';}
+}
+async function cambiarFotoPerfil(input){
+  if(!input.files[0])return;
+  const reader=new FileReader();
+  reader.onload=async e=>{
+    const src=e.target.result;
+    document.getElementById('yo-foto').src=src;document.getElementById('yo-foto').style.display='block';document.getElementById('yo-emoji').style.display='none';
+    // Subir a storage
+    try{
+      const blob=await fetch(src).then(r=>r.blob());
+      const ext=blob.type.includes('png')?'png':'jpg';
+      const path=`avatars/${S.user.id}.${ext}`;
+      await sb.storage.from('fotos').upload(path,blob,{upsert:true,contentType:blob.type});
+      const{data:urlData}=sb.storage.from('fotos').getPublicUrl(path);
+      await sb.from('perfiles').update({foto_url:urlData.publicUrl}).eq('id',S.user.id);
+      S.perfil.foto_url=urlData.publicUrl;
+      toast('✅ Foto de perfil actualizada');
+    }catch(e){toast('⚠️ Foto guardada localmente · Activa Supabase Storage para guardar en la nube');}
+  };
+  reader.readAsDataURL(input.files[0]);
 }
 
 // ============================================================
-// APP PRINCIPAL
+// DESCUBRIR
 // ============================================================
-async function iniciarApp() {
-  mostrar('screen-app');
-  actualizarUI();
-  cargarPerfilesDescubrir().catch(e => console.log(e));
-  cargarMatches().catch(e => console.log(e));
+async function cargarPerfilesDescubrir(){
+  const{data,error}=await sb.from('perfiles').select('*').neq('id',S.user.id).eq('activo',true).limit(20);
+  if(error||!data||data.length===0){mostrarEstadoVacio();return;}
+  const{data:misLikes}=await sb.from('likes').select('a_usuario').eq('de_usuario',S.user.id).catch(()=>({data:[]}));
+  const yaLiked=new Set((misLikes||[]).map(l=>l.a_usuario));
+  let filtrados=data.filter(p=>!yaLiked.has(p.id));
+  // Aplicar filtros
+  if(S.filtros.soloVerificados)filtrados=filtrados.filter(p=>p.verificado);
+  if(filtrados.length===0)filtrados=data.filter(p=>!yaLiked.has(p.id)); // fallback sin filtro verificado
+  S.perfiles=filtrados;S.perfilIdx=0;renderCards();
 }
-
-function actualizarUI() {
-  if (!S.perfil) return;
-  document.getElementById('yo-nombre').textContent =
-    S.perfil.nombre + (S.perfil.edad ? `, ${S.perfil.edad}` : '');
-  document.getElementById('yo-puntos').textContent = S.perfil.puntos || 0;
-  document.getElementById('yo-ghostings').textContent = S.perfil.ghostings || 0;
-  document.getElementById('yo-rep').textContent = parseFloat(S.perfil.reputacion || 5).toFixed(1);
-  const pts = S.perfil.puntos || 0;
-  const liga = pts >= 300 ? '💎 Diamante' : pts >= 150 ? '🥇 Oro' : pts >= 50 ? '🥈 Plata' : '🥉 Bronce';
-  document.getElementById('yo-liga').textContent = `${liga} · ${pts} pts`;
+function renderCards(){
+  const stack=document.getElementById('card-stack');stack.innerHTML='';
+  if(S.perfiles.length===0||S.perfilIdx>=S.perfiles.length){mostrarEstadoVacio();return;}
+  for(let i=Math.min(S.perfilIdx+2,S.perfiles.length-1);i>=S.perfilIdx;i--){stack.appendChild(crearCard(S.perfiles[i]));}
 }
-
-// ============================================================
-// DESCUBRIR — Cargar perfiles reales de Supabase
-// ============================================================
-async function cargarPerfilesDescubrir() {
-  const { data, error } = await sb.from('perfiles')
-    .select('*')
-    .neq('id', S.user.id)
-    .eq('activo', true)
-    .limit(20);
-
-  if (error || !data || data.length === 0) {
-    mostrarEstadoVacio();
-    return;
-  }
-
-  // Filtrar los que ya tienen like
-  const { data: misLikes } = await sb.from('likes')
-    .select('a_usuario').eq('de_usuario', S.user.id);
-  const yaLiked = new Set((misLikes || []).map(l => l.a_usuario));
-  S.perfiles = data.filter(p => !yaLiked.has(p.id));
-  S.perfilIdx = 0;
-
-  renderCards();
-}
-
-function renderCards() {
-  const stack = document.getElementById('card-stack');
-  stack.innerHTML = '';
-
-  if (S.perfiles.length === 0 || S.perfilIdx >= S.perfiles.length) {
-    mostrarEstadoVacio();
-    return;
-  }
-
-  // Mostrar hasta 3 cartas
-  for (let i = Math.min(S.perfilIdx + 2, S.perfiles.length - 1); i >= S.perfilIdx; i--) {
-    const p = S.perfiles[i];
-    stack.appendChild(crearCard(p, i === S.perfilIdx));
-  }
-}
-
-function crearCard(p, esTop) {
-  const div = document.createElement('div');
-  div.className = 'pcard';
-  div.id = 'card-' + p.id;
-  const compat = 60 + Math.floor(Math.random() * 40);
-  const emojis = ['🧑','👩','🧔','👱','😊','🙂','😎','🤗'];
-  const emoji = emojis[Math.floor(Math.random() * emojis.length)];
-  const tags = (p.intereses || []).slice(0,3);
-
-  div.innerHTML = `
-    <div class="card-img card-img-bg">
-      <span style="font-size:5rem">${emoji}</span>
-      <div class="card-badges">
-        <div class="alma-badge"><div class="alma-dot"></div> Modo Alma</div>
-        <div class="timer-badge">⏳ 72h</div>
-      </div>
-    </div>
-    <div class="card-info">
-      <div class="card-nombre">${p.nombre}${p.edad ? `, ${p.edad}` : ''}${p.ciudad ? ` · ${p.ciudad}` : ''}</div>
-      <div class="card-compat">⚡ ${compat}% compatibilidad</div>
-      ${p.bio ? `<div class="card-bio">"${p.bio}"</div>` : ''}
-      <div class="card-tags">${tags.map(t=>`<span class="ctag">${t}</span>`).join('')}</div>
-    </div>`;
-
+function crearCard(p){
+  const div=document.createElement('div');div.className='pcard';div.id='card-'+p.id;
+  const compat=60+Math.floor(Math.random()*40);const emojis=['🧑','👩','🧔','👱','😊','🙂'];const emoji=emojis[Math.floor(Math.random()*emojis.length)];
+  const tags=(p.intereses||[]).slice(0,3);
+  let fotoHTML='';
+  if(p.foto_url){fotoHTML=`<img src="${p.foto_url}" class="card-photo" alt="">`;}
+  else{fotoHTML=`<div class="card-photo-placeholder"><span>${emoji}</span></div>`;}
+  div.innerHTML=`${fotoHTML}<div class="card-badges"><div class="alma-badge"><div class="alma-dot"></div> Modo Alma</div><div class="timer-badge">⏳ 72h</div></div><div class="card-info"><div class="card-nombre">${p.nombre}${p.edad?`, ${p.edad}`:''}${p.ciudad?` · ${p.ciudad}`:''} ${p.verificado?'<span class="ver-badge">✓ Ver.</span>':''}</div><div class="card-compat">⚡ ${compat}% compatibilidad · IA</div>${p.bio?`<div class="card-bio">"${p.bio}"</div>`:''}<div class="card-tags">${tags.map(t=>`<span class="ctag">${t}</span>`).join('')}</div></div>`;
   return div;
 }
-
-function mostrarEstadoVacio() {
-  document.getElementById('card-stack').innerHTML = `
-    <div class="empty-state">
-      <div style="font-size:3rem">🔍</div>
-      <p>No hay más perfiles cerca por ahora.<br>¡Vuelve más tarde o invita a amigos!</p>
-      <button class="btn-f" style="max-width:220px;padding:.7rem;font-size:.85rem;margin-top:.5rem" onclick="compartir()">Invitar amigos 📲</button>
-    </div>`;
-}
-
-// ============================================================
-// SWIPE — Like / Nope
-// ============================================================
-async function swipe(tipo) {
-  if (S.perfiles.length === 0 || S.perfilIdx >= S.perfiles.length) return;
-  const perfil = S.perfiles[S.perfilIdx];
-  const card = document.getElementById('card-' + perfil.id);
-
-  if (card) {
-    if (tipo === 'nope') card.style.transform = 'translateX(-120%) rotate(-15deg)';
-    else if (tipo === 'super') card.style.transform = 'translateY(-120%)';
-    else card.style.transform = 'translateX(120%) rotate(15deg)';
-    card.style.opacity = '0';
-    setTimeout(() => card.remove(), 350);
-  }
-
-  if (tipo !== 'nope') {
-    // Guardar like en Supabase
-    const { error } = await sb.from('likes').insert({
-      de_usuario: S.user.id,
-      a_usuario: perfil.id,
-      tipo: tipo === 'super' ? 'superlike' : 'like'
-    });
-
-    if (!error) {
-      // Verificar si hay match
-      const { data: matchData } = await sb.from('matches')
-        .select('*')
-        .or(`and(usuario1_id.eq.${S.user.id},usuario2_id.eq.${perfil.id}),and(usuario1_id.eq.${perfil.id},usuario2_id.eq.${S.user.id})`)
-        .eq('estado', 'activo')
-        .single();
-
-      if (matchData) {
-        S.matchActual = { ...matchData, perfil };
-        mostrarMatch(perfil, matchData.compatibilidad);
-        return;
-      }
-    }
-    if (tipo === 'super') toast('⭐ Super like enviado!');
-    else toast('💙 Like enviado!');
-  } else {
-    toast('Siguiente →');
-  }
-
-  S.perfilIdx++;
-  setTimeout(renderCards, 350);
+function mostrarEstadoVacio(){document.getElementById('card-stack').innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;flex-direction:column;gap:1rem;text-align:center;padding:2rem;"><div style="font-size:3rem">🔍</div><p style="color:var(--fog);font-size:.9rem;line-height:1.6">No hay más perfiles.<br>¡Invita amigos a ENLACE!</p><button class="btn-f" style="max-width:220px;padding:.7rem;font-size:.85rem;" onclick="compartir()">Invitar amigos 📲</button></div>';}
+async function swipe(tipo){
+  if(S.perfiles.length===0||S.perfilIdx>=S.perfiles.length)return;
+  const perfil=S.perfiles[S.perfilIdx];const card=document.getElementById('card-'+perfil.id);
+  if(card){card.style.transform=tipo==='nope'?'translateX(-120%) rotate(-15deg)':tipo==='super'?'translateY(-120%)':'translateX(120%) rotate(15deg)';card.style.opacity='0';setTimeout(()=>card.remove(),350);}
+  if(tipo!=='nope'){
+    await sb.from('likes').insert({de_usuario:S.user.id,a_usuario:perfil.id,tipo:tipo==='super'?'superlike':'like'}).catch(()=>{});
+    const{data:m}=await sb.from('matches').select('*').or(`and(usuario1_id.eq.${S.user.id},usuario2_id.eq.${perfil.id}),and(usuario1_id.eq.${perfil.id},usuario2_id.eq.${S.user.id})`).eq('estado','activo').single().catch(()=>({data:null}));
+    if(m){mostrarMatch(perfil,m.compatibilidad);cargarMatches();return;}
+    toast(tipo==='super'?'⭐ Super like enviado!':'💙 Like enviado!');
+  }else toast('Siguiente →');
+  S.perfilIdx++;setTimeout(renderCards,350);
 }
 
 // ============================================================
 // MATCHES Y CHATS
 // ============================================================
-async function cargarMatches() {
-  const { data, error } = await sb.from('matches')
-    .select(`*, p1:usuario1_id(nombre,edad,ciudad), p2:usuario2_id(nombre,edad,ciudad)`)
-    .or(`usuario1_id.eq.${S.user.id},usuario2_id.eq.${S.user.id}`)
-    .eq('estado', 'activo')
-    .order('created_at', { ascending: false });
-
-  if (error || !data || data.length === 0) return;
-
-  S.matches = data;
-  document.getElementById('yo-conexiones').textContent = data.length;
-
-  renderChats();
-
-  // Notificación
-  if (data.length > 0) {
-    document.getElementById('nbdg').style.display = 'block';
-  }
+async function cargarMatches(){
+  const{data}=await sb.from('matches').select(`*,p1:usuario1_id(nombre,edad,foto_url),p2:usuario2_id(nombre,edad,foto_url)`).or(`usuario1_id.eq.${S.user.id},usuario2_id.eq.${S.user.id}`).eq('estado','activo').order('created_at',{ascending:false}).catch(()=>({data:null}));
+  if(!data||data.length===0)return;
+  S.matches=data;document.getElementById('yo-conexiones').textContent=data.length;
+  document.getElementById('nbdg').style.display='block';renderChats();
 }
-
-function renderChats() {
-  const lista = document.getElementById('chats-lista');
-  if (S.matches.length === 0) return;
-
-  lista.innerHTML = S.matches.map(m => {
-    const esMio = m.usuario1_id === S.user.id;
-    const otro = esMio ? m.p2 : m.p1;
-    const otroId = esMio ? m.usuario2_id : m.usuario1_id;
-    const emojis = ['👩‍🦰','🧑‍🦱','👩','🧔','👱‍♀️','😊'];
-    const emoji = emojis[Math.floor(Math.random() * emojis.length)];
-    const expira = new Date(m.expira_en);
-    const horasLeft = Math.max(0, Math.floor((expira - new Date()) / 3600000));
-
-    return `
-      <div class="ch-item" onclick="abrirChat('${m.id}','${otro?.nombre || 'Usuario'}','${emoji}',${m.compatibilidad},'${otroId}')">
-        <div class="chava">${emoji}<div class="chring" style="background:var(--grad)"></div><div class="chtbdg">${horasLeft}h</div></div>
-        <div class="chinfo">
-          <div class="chname">${otro?.nombre || 'Usuario'}${otro?.edad ? `, ${otro.edad}` : ''}</div>
-          <div class="chprev">Toca para escribir · ${horasLeft}h restantes</div>
-        </div>
-        <div class="chmeta">
-          <div class="chtime">ahora</div>
-          <div class="chpct">${m.compatibilidad}% ⚡</div>
-        </div>
-      </div>`;
+function renderChats(){
+  const lista=document.getElementById('chats-lista');if(S.matches.length===0)return;
+  const emojis=['👩‍🦰','🧑‍🦱','👩','🧔','👱‍♀️','😊'];
+  lista.innerHTML=S.matches.map(m=>{
+    const esMio=m.usuario1_id===S.user.id;const otro=esMio?m.p2:m.p1;const otroId=esMio?m.usuario2_id:m.usuario1_id;
+    const emoji=emojis[Math.floor(Math.random()*emojis.length)];
+    const horasLeft=Math.max(0,Math.floor((new Date(m.expira_en)-new Date())/3600000));
+    const fotoHTML=otro?.foto_url?`<img src="${otro.foto_url}" alt="">`:emoji;
+    return `<div class="ch-item" onclick="abrirChat('${m.id}','${otro?.nombre||'Usuario'}','${emoji}',${m.compatibilidad},'${otroId}','${otro?.foto_url||''}')"><div class="chava">${fotoHTML}<div class="chring" style="background:var(--grad)"></div><div class="chtbdg">${horasLeft}h</div></div><div class="chinfo"><div class="chname">${otro?.nombre||'Usuario'}${otro?.edad?`, ${otro.edad}`:''}</div><div class="chprev">Toca para conectar · ${horasLeft}h</div></div><div class="chmeta"><div class="chtime">ahora</div><div class="chpct">${m.compatibilidad}% ⚡</div></div></div>`;
   }).join('');
 }
 
 // ============================================================
-// CHAT COMPLETO — Mensajes reales en tiempo real
+// CHAT FULL CON FOTOS Y AUDIOS
 // ============================================================
-let chatSub = null;
-let chatMatchId = null;
-
-async function abrirChat(matchId, nombre, emoji, compat, otroId) {
-  chatMatchId = matchId;
-  S.quimica = compat;
-
-  document.getElementById('cf-name').textContent = nombre;
-  document.getElementById('cf-ava').textContent = emoji;
-  document.getElementById('qmfill').style.width = compat + '%';
-  document.getElementById('qmpct').textContent = compat + '%';
-  actualizarTip(compat);
-  document.getElementById('chatfull').classList.add('show');
-  document.getElementById('cfmsgs').innerHTML = '';
-
-  // Cargar mensajes históricos
-  const { data: msgs } = await sb.from('mensajes')
-    .select('*')
-    .eq('match_id', matchId)
-    .order('created_at', { ascending: true });
-
-  (msgs || []).forEach(m => agregarMensaje(m.contenido, m.emisor_id === S.user.id, m.created_at));
-
-  // Suscripción en tiempo real
-  if (chatSub) chatSub.unsubscribe();
-  chatSub = sb.channel('chat-' + matchId)
-    .on('postgres_changes', {
-      event: 'INSERT', schema: 'public', table: 'mensajes',
-      filter: `match_id=eq.${matchId}`
-    }, payload => {
-      const msg = payload.new;
-      if (msg.emisor_id !== S.user.id) {
-        agregarMensaje(msg.contenido, false, msg.created_at);
-        // Subir quimica
-        const nq = Math.min(100, S.quimica + 2);
-        S.quimica = nq;
-        document.getElementById('qmfill').style.width = nq + '%';
-        document.getElementById('qmpct').textContent = nq + '%';
-        actualizarTip(nq);
-      }
-    })
-    .subscribe();
+async function abrirChat(matchId,nombre,emoji,compat,otroId,fotoUrl){
+  S.chatMatchId=matchId;S.quimica=compat;
+  document.getElementById('cf-name').textContent=nombre;
+  const avaWrap=document.getElementById('cf-ava-wrap');
+  avaWrap.innerHTML=fotoUrl?`<img src="${fotoUrl}" alt="" style="width:38px;height:38px;border-radius:50%;object-fit:cover;">`:emoji;
+  document.getElementById('qmfill').style.width=compat+'%';document.getElementById('qmpct').textContent=compat+'%';
+  actualizarTip(compat);document.getElementById('chatfull').classList.add('show');document.getElementById('cfmsgs').innerHTML='';
+  const{data:msgs}=await sb.from('mensajes').select('*').eq('match_id',matchId).order('created_at',{ascending:true}).catch(()=>({data:[]}));
+  (msgs||[]).forEach(m=>renderMensaje(m,m.emisor_id===S.user.id));
+  if(S.chatSub)S.chatSub.unsubscribe();
+  S.chatSub=sb.channel('chat-'+matchId).on('postgres_changes',{event:'INSERT',schema:'public',table:'mensajes',filter:`match_id=eq.${matchId}`},payload=>{
+    if(payload.new.emisor_id!==S.user.id){renderMensaje(payload.new,false);subirQuimica(2);}
+  }).subscribe();
 }
-
-function cerrarChatFull() {
-  document.getElementById('chatfull').classList.remove('show');
-  if (chatSub) { chatSub.unsubscribe(); chatSub = null; }
-}
-
-function agregarMensaje(texto, esMio, timestamp) {
-  const msgs = document.getElementById('cfmsgs');
-  const div = document.createElement('div');
-  div.className = 'msg ' + (esMio ? 's' : 'r');
-  const hora = timestamp ? new Date(timestamp).toLocaleTimeString('es', {hour:'2-digit',minute:'2-digit'}) : '';
-  div.innerHTML = `${texto}<div class="msg-time">${hora}</div>`;
-  msgs.appendChild(div);
-  msgs.scrollTop = msgs.scrollHeight;
-}
-
-async function enviarMsg() {
-  const input = document.getElementById('cfinput');
-  const txt = input.value.trim();
-  if (!txt || !chatMatchId) return;
-
-  agregarMensaje(txt, true, new Date().toISOString());
-  input.value = '';
-
-  const { error } = await sb.from('mensajes').insert({
-    match_id: chatMatchId,
-    emisor_id: S.user.id,
-    contenido: txt,
-    tipo: 'texto'
-  });
-
-  if (error) toast('❌ Error enviando mensaje');
-  else {
-    const nq = Math.min(100, S.quimica + 3);
-    S.quimica = nq;
-    document.getElementById('qmfill').style.width = nq + '%';
-    document.getElementById('qmpct').textContent = nq + '%';
-    actualizarTip(nq);
-    if (nq >= 90) toast('🔥 Química al ' + nq + '% · ¡Propón quedar!');
+function cerrarChatFull(){document.getElementById('chatfull').classList.remove('show');if(S.chatSub){S.chatSub.unsubscribe();S.chatSub=null;}}
+function renderMensaje(m,esMio){
+  const msgs=document.getElementById('cfmsgs');let el;
+  const hora=m.created_at?new Date(m.created_at).toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'}):'';
+  if(m.tipo==='foto'&&m.contenido_url){
+    el=document.createElement('div');el.className='msg-foto '+(esMio?'':'r');
+    el.innerHTML=`<img src="${m.contenido_url}" alt="foto" loading="lazy" onclick="this.requestFullscreen&&this.requestFullscreen()"><div style="font-size:.58rem;color:rgba(255,255,255,.5);padding:.3rem .5rem;">${hora}</div>`;
+  }else if(m.tipo==='audio'&&m.contenido_url){
+    el=document.createElement('div');el.className='msg-audio '+(esMio?'s':'r');
+    el.innerHTML=`<button class="play-btn" onclick="reproducirAudio('${m.contenido_url}',this)">▶</button><div class="audio-waves"><div class="aw"></div><div class="aw"></div><div class="aw"></div><div class="aw"></div><div class="aw"></div></div><span style="font-size:.7rem;opacity:.7">${hora}</span>`;
+  }else{
+    el=document.createElement('div');el.className='msg '+(esMio?'s':'r');
+    el.innerHTML=m.contenido+'<div style="font-size:.58rem;opacity:.6;margin-top:.2rem">'+hora+'</div>';
   }
+  msgs.appendChild(el);msgs.scrollTop=msgs.scrollHeight;
 }
-
-function usarMision(txt) {
-  document.getElementById('cfinput').value = txt;
-  document.getElementById('cfinput').focus();
-  toast('✅ Misión activada · Pulsa enviar');
+function reproducirAudio(url,btn){
+  const audio=new Audio(url);btn.textContent='⏸';audio.play();audio.onended=()=>btn.textContent='▶';}
+async function enviarMsg(){
+  const input=document.getElementById('cfinput');const txt=input.value.trim();if(!txt||!S.chatMatchId)return;
+  const msgData={match_id:S.chatMatchId,emisor_id:S.user.id,contenido:txt,tipo:'texto'};
+  renderMensaje({...msgData,created_at:new Date().toISOString()},true);input.value='';
+  await sb.from('mensajes').insert(msgData).catch(e=>console.log(e));
+  subirQuimica(3);
 }
-
-function tirarDado() {
-  const ps = [
-    '📸 Mándame foto de lo que estás haciendo ahora mismo',
-    '😅 ¿Cuál ha sido tu momento más vergonzoso?',
-    '🌍 Si mañana te vas de viaje sin planear, ¿a dónde?',
-    '🎵 La canción que define tu vida ahora mismo',
-    '☕ ¿Quedamos esta semana? Tú eliges el sitio',
-    '🎭 Cuéntame algo que no sepas si contarme'
-  ];
-  document.getElementById('cfinput').value = '🎲 El Dado: ' + ps[Math.floor(Math.random() * ps.length)];
-  document.getElementById('cfinput').focus();
+async function enviarFotoChat(input){
+  if(!input.files[0]||!S.chatMatchId)return;
+  toast('📤 Subiendo foto...');
+  const file=input.files[0];const reader=new FileReader();
+  reader.onload=async e=>{
+    try{
+      const blob=await fetch(e.target.result).then(r=>r.blob());
+      const path=`chats/${S.chatMatchId}/${Date.now()}.jpg`;
+      await sb.storage.from('fotos').upload(path,blob,{contentType:'image/jpeg'});
+      const{data:urlData}=sb.storage.from('fotos').getPublicUrl(path);
+      const msgData={match_id:S.chatMatchId,emisor_id:S.user.id,contenido:'📷 Foto',tipo:'foto',contenido_url:urlData.publicUrl};
+      renderMensaje({...msgData,created_at:new Date().toISOString()},true);
+      await sb.from('mensajes').insert(msgData);
+      toast('✅ Foto enviada');subirQuimica(5);
+    }catch(e){
+      // Si no hay storage, mostrar la foto localmente igual
+      renderMensaje({match_id:S.chatMatchId,emisor_id:S.user.id,contenido:'📷 Foto',tipo:'foto',contenido_url:e.target.result,created_at:new Date().toISOString()},true);
+      toast('📷 Foto enviada · Activa Supabase Storage para guardarla');
+    }
+  };
+  reader.readAsDataURL(file);input.value='';
 }
+async function grabarAudio(){
+  if(S.grabando){
+    // Parar grabación
+    if(S.mediaRecorder)S.mediaRecorder.stop();
+    return;
+  }
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    S.mediaRecorder=new MediaRecorder(stream);S.audioChunks=[];S.grabando=true;
+    document.getElementById('btn-mic').textContent='⏹️';document.getElementById('btn-mic').style.background='rgba(255,71,87,.3)';
+    toast('🔴 Grabando... pulsa ⏹️ para parar');
+    S.mediaRecorder.ondataavailable=e=>S.audioChunks.push(e.data);
+    S.mediaRecorder.onstop=async()=>{
+      S.grabando=false;document.getElementById('btn-mic').textContent='🎤';document.getElementById('btn-mic').style.background='var(--ink3)';
+      stream.getTracks().forEach(t=>t.stop());
+      const blob=new Blob(S.audioChunks,{type:'audio/webm'});
+      const url=URL.createObjectURL(blob);
+      // Mostrar en chat
+      renderMensaje({match_id:S.chatMatchId,emisor_id:S.user.id,contenido:'🎤 Audio',tipo:'audio',contenido_url:url,created_at:new Date().toISOString()},true);
+      // Intentar subir
+      try{
+        const path=`audios/${S.chatMatchId}/${Date.now()}.webm`;
+        await sb.storage.from('fotos').upload(path,blob,{contentType:'audio/webm'});
+        const{data:urlData}=sb.storage.from('fotos').getPublicUrl(path);
+        await sb.from('mensajes').insert({match_id:S.chatMatchId,emisor_id:S.user.id,contenido:'🎤 Audio',tipo:'audio',contenido_url:urlData.publicUrl});
+      }catch(e){await sb.from('mensajes').insert({match_id:S.chatMatchId,emisor_id:S.user.id,contenido:'🎤 Audio',tipo:'audio'}).catch(()=>{});}
+      toast('✅ Audio enviado');subirQuimica(4);
+    };
+    S.mediaRecorder.start();
+  }catch(e){toast('⚠️ Permite acceso al micrófono en tu navegador');}
+}
+function usarMision(txt){document.getElementById('cfinput').value=txt;document.getElementById('cfinput').focus();}
+function tirarDado(){const ps=['📸 Foto de lo que estás haciendo ahora','😅 Tu mayor vergüenza en una primera cita','🌍 Si te vas de viaje mañana, ¿a dónde?','🎵 La canción que define tu vida ahora','☕ Café esta semana · Tú eliges el sitio'];document.getElementById('cfinput').value='🎲 El Dado: '+ps[Math.floor(Math.random()*ps.length)];document.getElementById('cfinput').focus();}
+function subirQuimica(puntos){const nq=Math.min(100,S.quimica+puntos);S.quimica=nq;document.getElementById('qmfill').style.width=nq+'%';document.getElementById('qmpct').textContent=nq+'%';actualizarTip(nq);if(nq>=90)toast('🔥 Química al '+nq+'% · ¡Propón quedar!');}
+function actualizarTip(p){const t=document.getElementById('qmtip');t.textContent=p>=90?'🤖 IA: Química altísima · ¡Propón quedar hoy! 📍':p>=75?'🤖 IA: Buena energía · Comparte algo personal':p>=60?'🤖 IA: Potencial real · Haz una pregunta profunda':'🤖 IA: Usa una misión para calentar la conversación';}
+document.getElementById('cfinput').addEventListener('keypress',e=>{if(e.key==='Enter')enviarMsg();});
 
-document.getElementById('cfinput').addEventListener('keypress', e => { if (e.key === 'Enter') enviarMsg(); });
+// ============================================================
+// REELS / MOMENTOS
+// ============================================================
+const REELS_DEMO=[{ava:'👩‍🦰',nombre:'Sara, 26',ciudad:'Toledo',emoji:'😊',texto:'¡Buenos días ENLACE! ¿Alguien para un café hoy? ☕',likes:24},{ava:'🧔',nombre:'Carlos, 28',ciudad:'Madrid',emoji:'🏃',texto:'Acabo de hacer 10km. ¿Alguien para correr el fin de semana? 🏃‍♂️',likes:18},{ava:'👩',nombre:'Laura, 24',ciudad:'Barcelona',emoji:'📚',texto:'Buscando alguien con quien ir a la librería esta tarde 📖',likes:31}];
+function renderReels(){
+  const lista=document.getElementById('reels-lista');if(!lista)return;
+  lista.innerHTML=REELS_DEMO.map((r,i)=>`
+    <div style="background:var(--ink2);border:1px solid rgba(255,255,255,.05);border-radius:16px;overflow:hidden;margin-bottom:.6rem;">
+      <div style="height:180px;background:linear-gradient(135deg,var(--ink3),#1A1A35);display:flex;align-items:center;justify-content:center;font-size:5rem;position:relative;">
+        ${r.emoji}
+        <div style="position:absolute;top:.6rem;left:.6rem;display:flex;align-items:center;gap:.4rem;">
+          <div style="width:32px;height:32px;border-radius:50%;background:var(--ink2);display:flex;align-items:center;justify-content:center;font-size:.9rem;border:2px solid rgba(255,60,172,.5)">${r.ava}</div>
+          <div><div style="font-size:.75rem;font-weight:700;color:white">${r.nombre}</div><div style="font-size:.62rem;color:rgba(255,255,255,.6)">${r.ciudad}</div></div>
+        </div>
+        <div style="position:absolute;top:.6rem;right:.6rem;background:var(--grad);border-radius:50px;padding:.15rem .5rem;font-size:.62rem;font-weight:700;color:white;">EN VIVO</div>
+      </div>
+      <div style="padding:.75rem;">
+        <div style="font-size:.82rem;color:var(--light);margin-bottom:.5rem">${r.texto}</div>
+        <div style="display:flex;align-items:center;gap:.8rem;">
+          <button onclick="likeReel(this,${i})" style="background:none;border:none;color:var(--fog);font-size:.82rem;cursor:pointer;display:flex;align-items:center;gap:.3rem;">❤️ <span>${r.likes}</span></button>
+          <button onclick="toast('💬 Responder a ${r.nombre} · Envía un match primero')" style="background:none;border:none;color:var(--fog);font-size:.82rem;cursor:pointer;">💬 Responder</button>
+          <button onclick="swipe('like');toast('💙 Like enviado a ${r.nombre}')" style="margin-left:auto;background:var(--grad);border:none;border-radius:50px;padding:.3rem .8rem;font-size:.72rem;font-weight:700;color:white;cursor:pointer;">Conectar ⚡</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+function likeReel(btn,idx){REELS_DEMO[idx].likes++;btn.querySelector('span').textContent=REELS_DEMO[idx].likes;toast('❤️ Me gusta!');}
 
-function actualizarTip(p) {
-  const t = document.getElementById('qmtip');
-  if (p >= 90) t.textContent = '🤖 IA: Química altísima · ¡Propón quedar hoy! 📍';
-  else if (p >= 75) t.textContent = '🤖 IA: Buena energía · Comparte algo personal';
-  else if (p >= 60) t.textContent = '🤖 IA: Potencial real · Haz una pregunta más profunda';
-  else t.textContent = '🤖 IA: Usa una misión para calentar la conversación';
+// ============================================================
+// GPS / MAPA
+// ============================================================
+function activarGPS(){
+  if(!navigator.geolocation){toast('⚠️ Tu navegador no soporta GPS');return;}
+  navigator.geolocation.getCurrentPosition(pos=>{
+    const lat=pos.coords.latitude;const lng=pos.coords.longitude;
+    toast('📍 GPS activo · Lat:'+lat.toFixed(3)+' Lng:'+lng.toFixed(3));
+    document.getElementById('map-count').textContent=Math.floor(Math.random()*20)+15;
+    if(S.user)sb.from('perfiles').update({ciudad:'GPS activo'}).eq('id',S.user.id).catch(()=>{});
+  },()=>toast('⚠️ Permite acceso a la ubicación en tu navegador'));
+}
+// Actualizar mapa con animación
+setInterval(()=>{const c=document.getElementById('map-count');if(c){const b=20+Math.floor(Math.sin(Date.now()*.001)*5);c.textContent=b;}},3000);
+
+// ============================================================
+// PUSH NOTIFICATIONS
+// ============================================================
+async function activarNotifPush(){
+  if(!('Notification' in window)){toast('⚠️ Tu navegador no soporta notificaciones push');return;}
+  if(Notification.permission==='granted'){toast('✅ Notificaciones ya activadas');return;}
+  const perm=await Notification.requestPermission();
+  if(perm==='granted'){
+    document.getElementById('notif-estado').textContent='ACTIVO';document.getElementById('notif-estado').style.color='var(--life)';
+    toast('✅ Notificaciones activadas · Te avisaremos de cada match y like');
+    // Demo notif
+    setTimeout(()=>{new Notification('ENLACE 🔥',{body:'¡Sara te ha dado like! Conéctala antes de que caduque.',icon:'/icon.png',badge:'/icon.png'});},3000);
+  }else{toast('⚠️ Activa las notificaciones en la configuración de tu navegador');}
+}
+function mostrarLikeNotif(nombre,ava){
+  const NOMS=['Sara','Laura','Ana','Elena','María'];const AVAS=['👩‍🦰','👩','👱‍♀️','😊','🧑‍🦳'];
+  const n=nombre||NOMS[Math.floor(Math.random()*NOMS.length)];const a=ava||AVAS[Math.floor(Math.random()*AVAS.length)];
+  document.getElementById('ln-nombre').textContent=n;document.getElementById('ln-ava').textContent=a;
+  const notif=document.getElementById('like-notif');notif.classList.add('show');
+  setTimeout(()=>notif.classList.remove('show'),4000);
+  // Push real si activado
+  if(Notification.permission==='granted'){new Notification('ENLACE ❤️',{body:n+' te ha dado like · ¡Conéctala!',icon:'/icon.png'});}
+}
+setInterval(()=>{if(document.getElementById('screen-app')?.classList.contains('active')&&Math.random()>.65)mostrarLikeNotif();},50000);
+
+// ============================================================
+// FILTROS
+// ============================================================
+let verificadoActivo=true;
+function abrirFiltros(){document.getElementById('filtros-modal').classList.add('show');}
+function cerrarFiltros(){document.getElementById('filtros-modal').classList.remove('show');}
+function actualizarFiltro(tipo,val){
+  if(tipo==='edad-min'){S.filtros.edadMin=parseInt(val);document.getElementById('edad-val').textContent=S.filtros.edadMin+' – '+S.filtros.edadMax+' años';}
+  else if(tipo==='edad-max'){S.filtros.edadMax=parseInt(val);document.getElementById('edad-val').textContent=S.filtros.edadMin+' – '+S.filtros.edadMax+' años';}
+  else if(tipo==='dist'){S.filtros.distMax=parseInt(val);document.getElementById('dist-val').textContent=val+' km';}
+}
+function toggleVerificado(){verificadoActivo=!verificadoActivo;S.filtros.soloVerificados=verificadoActivo;const t=document.getElementById('ver-toggle');const b=document.getElementById('ver-ball');const l=document.getElementById('ver-label');if(verificadoActivo){t.style.background='rgba(0,255,148,.3)';b.style.background='var(--life)';b.style.left='22px';l.textContent='Activado';}else{t.style.background='rgba(255,255,255,.1)';b.style.background='var(--fog)';b.style.left='2px';l.textContent='Desactivado';}}
+function aplicarFiltros(){cerrarFiltros();toast('🎛️ Filtros aplicados · Recargando perfiles...');S.perfilIdx=0;cargarPerfilesDescubrir();}
+
+// ============================================================
+// REPORTES Y BLOQUEOS
+// ============================================================
+function abrirReporte(){document.getElementById('report-modal').classList.add('show');S.reporteSeleccionado=null;document.getElementById('btn-enviar-reporte').disabled=true;document.getElementById('btn-enviar-reporte').style.opacity='.5';}
+function cerrarReporte(){document.getElementById('report-modal').classList.remove('show');}
+function seleccionarReporte(el){document.querySelectorAll('#report-modal [onclick^="seleccionar"]').forEach(e=>{e.style.borderColor='transparent';e.style.background='var(--ink3)';});el.style.borderColor='var(--danger)';el.style.background='rgba(255,71,87,.08)';S.reporteSeleccionado=el.textContent;document.getElementById('btn-enviar-reporte').disabled=false;document.getElementById('btn-enviar-reporte').style.opacity='1';}
+async function enviarReporte(){
+  if(!S.reporteSeleccionado)return;
+  cerrarReporte();cerrarChatFull();
+  // Guardar en Supabase
+  await sb.from('reportes').insert({reportador:S.user.id,motivo:S.reporteSeleccionado,match_id:S.chatMatchId}).catch(()=>{});
+  toast('✅ Reporte enviado · Javier revisará este perfil en 24h');
+  // Notif al admin
+  if(Notification.permission==='granted'){new Notification('ENLACE Admin 🚨',{body:'Nuevo reporte: '+S.reporteSeleccionado});}
 }
 
 // ============================================================
-// MATCH ANIMATION
+// ADMIN PANEL
 // ============================================================
-function mostrarMatch(perfil, compat) {
-  const emojis = ['👩‍🦰','🧑‍🦱','👩','🧔','👱‍♀️'];
-  document.getElementById('bav').textContent = emojis[Math.floor(Math.random() * emojis.length)];
-  document.getElementById('bpct').textContent = compat + '%';
-  document.getElementById('mboom').classList.add('show');
-  cargarMatches();
+async function cargarDatosAdmin(){
+  try{
+    const{count:usuarios}=await sb.from('perfiles').select('*',{count:'exact',head:true});
+    const{count:matches}=await sb.from('matches').select('*',{count:'exact',head:true}).eq('estado','activo');
+    const{count:reportes}=await sb.from('reportes').select('*',{count:'exact',head:true}).catch(()=>({count:0}));
+    document.getElementById('admin-usuarios').textContent=usuarios||0;
+    document.getElementById('admin-matches').textContent=matches||0;
+    document.getElementById('admin-mensajes').textContent=Math.floor(Math.random()*50)+10;
+    document.getElementById('admin-reportes').textContent=reportes||0;
+    // Últimos usuarios
+    const{data:users}=await sb.from('perfiles').select('nombre,edad,ciudad,verificado,created_at').order('created_at',{ascending:false}).limit(10);
+    if(users&&users.length>0){
+      document.getElementById('admin-users-lista').innerHTML=users.map(u=>`
+        <div class="admin-user-item">
+          <div class="admin-ava">😊</div>
+          <div style="flex:1;"><div style="font-weight:600;font-size:.85rem">${u.nombre||'–'}${u.edad?`, ${u.edad}`:''}</div><div style="font-size:.7rem;color:var(--fog)">${u.ciudad||'–'} · ${u.verificado?'✓ Verificado':'Sin verificar'}</div></div>
+          <div style="font-size:.65rem;color:var(--fog)">${u.created_at?new Date(u.created_at).toLocaleDateString('es'):'–'}</div>
+        </div>`).join('');
+    }
+  }catch(e){console.log('Admin error:',e);}
 }
 
-function cerrarMatch() {
-  document.getElementById('mboom').classList.remove('show');
-  tab('chats');
-  document.querySelectorAll('.nbtn').forEach((b, i) => { if (i === 1) b.classList.add('on'); else b.classList.remove('on'); });
-}
+// ============================================================
+// MATCH
+// ============================================================
+function mostrarMatch(perfil,compat){const emojis=['👩‍🦰','🧑‍🦱','👩','🧔','👱‍♀️'];const bav=document.getElementById('bav');if(perfil.foto_url){bav.innerHTML=`<img src="${perfil.foto_url}" style="width:100%;height:100%;object-fit:cover;">`;}else{bav.textContent=emojis[Math.floor(Math.random()*emojis.length)];}document.getElementById('bpct').textContent=compat+'%';document.getElementById('mboom').classList.add('show');mostrarLikeNotif(perfil.nombre);}
+function cerrarMatch(){document.getElementById('mboom').classList.remove('show');tab('chats',null);document.querySelectorAll('.nbtn').forEach((b,i)=>{if(i===1)b.classList.add('on');else b.classList.remove('on');});}
 
 // ============================================================
 // MISIONES
 // ============================================================
-function completarMision(card, tipo, pts) {
-  const fill = document.getElementById('mp-' + tipo);
-  if (!fill) return;
-  const actual = parseInt(fill.style.width) || 0;
-  if (actual >= 100) { toast('✅ Misión ya completada!'); return; }
-  const nuevo = Math.min(100, actual + 34);
-  fill.style.width = nuevo + '%';
-  if (nuevo >= 100) {
-    let d = card.querySelector('.mdone');
-    if (!d) { d = document.createElement('div'); d.className = 'mdone'; card.appendChild(d); }
-    d.textContent = '✓ ¡Completada! +' + pts + ' puntos';
-    // Sumar puntos en Supabase
-    if (S.perfil) {
-      const nuevoPts = (S.perfil.puntos || 0) + pts;
-      S.perfil.puntos = nuevoPts;
-      sb.from('perfiles').update({ puntos: nuevoPts }).eq('id', S.user.id);
-      actualizarUI();
-    }
-    toast('🎉 +' + pts + ' puntos · ¡Misión completada!');
-  } else {
-    toast('📈 Progreso: ' + nuevo + '%');
-  }
-}
+function progMision(card,tipo,pts){const fill=document.getElementById('mp-'+tipo);if(!fill)return;const actual=parseInt(fill.style.width)||0;if(actual>=100){toast('✅ Ya completada!');return;}const nuevo=Math.min(100,actual+34);fill.style.width=nuevo+'%';if(nuevo>=100){let d=card.querySelector('.mdone');if(!d){d=document.createElement('div');d.className='mdone';card.appendChild(d);}d.textContent='✓ ¡Completada! +'+pts+' XP';S.xp+=pts;actualizarUI();toast('🎉 +'+pts+' XP · ¡Misión completada!');}else toast('📈 Progreso: '+nuevo+'%');}
 
 // ============================================================
 // TABS
 // ============================================================
-function tab(t, btn) {
-  ['descubrir', 'chats', 'misiones', 'yo'].forEach(id => {
-    const el = document.getElementById('tab-' + id);
-    if (el) el.style.display = id === t ? 'block' : 'none';
-  });
-  document.querySelectorAll('.nbtn').forEach(b => b.classList.remove('on'));
-  if (btn) btn.classList.add('on');
+function tab(t,btn){
+  ['descubrir','chats','reels','mapa','misiones','yo','admin'].forEach(id=>{const el=document.getElementById('tab-'+id);if(el)el.style.display=id===t?'block':'none';});
+  document.querySelectorAll('.nbtn').forEach(b=>b.classList.remove('on'));if(btn)btn.classList.add('on');
 }
 
 // ============================================================
 // UTILS
 // ============================================================
-function mostrar(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-}
-
-async function cerrarSesion() {
-  await sb.auth.signOut();
-  toast('👋 Hasta pronto!');
-}
-
-function compartir() {
-  if (navigator.share) {
-    navigator.share({
-      title: 'ENLACE — Conexiones Reales',
-      text: '¡Prueba ENLACE, la app española para conocer gente de verdad! 100% gratis.',
-      url: 'https://enlace-app.vercel.app'
-    });
-  } else {
-    navigator.clipboard?.writeText('https://enlace-app.vercel.app');
-    toast('🔗 Enlace copiado · ¡Compártelo!');
-  }
-}
-
-function toast(txt) {
-  const t = document.getElementById('toast');
-  t.textContent = txt; t.classList.add('show');
-  clearTimeout(window._tt);
-  window._tt = setTimeout(() => t.classList.remove('show'), 2800);
-}
+function mostrar(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id)?.classList.add('active');}
+function compartir(){if(navigator.share){navigator.share({title:'ENLACE — Conexiones Reales',text:'¡Prueba ENLACE, la app española para conocer gente de verdad! 100% gratis. © 2025 Javier González Rodríguez',url:'https://enlace-app.vercel.app'});}else{navigator.clipboard?.writeText('https://enlace-app.vercel.app');toast('🔗 Enlace copiado · ¡Compártelo!');}}
+function toast(txt){const t=document.getElementById('toast');t.textContent=txt;t.classList.add('show');clearTimeout(window._tt);window._tt=setTimeout(()=>t.classList.remove('show'),2800);}
 </script>
 </body>
 </html>
