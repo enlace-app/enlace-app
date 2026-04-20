@@ -1049,17 +1049,45 @@ function likeReel(btn,idx){REELS_DEMO[idx].likes++;btn.querySelector('span').tex
 // ============================================================
 // GPS / MAPA
 // ============================================================
-function activarGPS(){
+async function activarGPS(){
   if(!navigator.geolocation){toast('⚠️ Tu navegador no soporta GPS');return;}
-  navigator.geolocation.getCurrentPosition(pos=>{
+  navigator.geolocation.getCurrentPosition(async pos=>{
     const lat=pos.coords.latitude;const lng=pos.coords.longitude;
-    toast('📍 GPS activo · Lat:'+lat.toFixed(3)+' Lng:'+lng.toFixed(3));
-    document.getElementById('map-count').textContent=Math.floor(Math.random()*20)+15;
-    if(S.user)sb.from('perfiles').update({ciudad:'GPS activo'}).eq('id',S.user.id).catch(()=>{});
+    toast('📍 GPS activo · Buscando personas cerca...');
+    if(S.user){
+      await sb.from('perfiles').update({lat,lng,gps_activo:true}).eq('id',S.user.id).catch(()=>{});
+    }
+    await cargarUsuariosGPS(lat,lng);
   },()=>toast('⚠️ Permite acceso a la ubicación en tu navegador'));
 }
-// Actualizar mapa con animación
-setInterval(()=>{const c=document.getElementById('map-count');if(c){const b=20+Math.floor(Math.sin(Date.now()*.001)*5);c.textContent=b;}},3000);
+
+async function cargarUsuariosGPS(miLat,miLng){
+  // Contar usuarios reales con GPS
+  const{count}=await sb.from('perfiles').select('*',{count:'exact',head:true}).eq('gps_activo',true).neq('id',S.user?.id||'').catch(()=>({count:0}));
+  const usuariosReales=count||0;
+  const mapContainer=document.getElementById('map-container');
+  if(usuariosReales>=10){
+    // Mostrar usuarios reales
+    document.getElementById('map-count').textContent=usuariosReales;
+    toast('📍 '+usuariosReales+' personas reales cerca');
+  } else {
+    // Mantener demo hasta llegar a 10
+    const faltanPara10=10-usuariosReales;
+    document.getElementById('map-count').textContent=(usuariosReales+Math.floor(Math.random()*5)+3);
+    const aviso=document.createElement('div');
+    aviso.style.cssText='background:rgba(255,184,0,.08);border:1px solid rgba(255,184,0,.2);border-radius:10px;padding:.6rem .8rem;font-size:.72rem;color:var(--spark);margin-top:.5rem;text-align:center;';
+    aviso.textContent='🧪 Modo demo · '+faltanPara10+' usuarios más para activar GPS real · Invita amigos!';
+    const info=mapContainer.querySelector('.map-info');
+    if(info&&!info.querySelector('.aviso-demo')){aviso.className+=' aviso-demo';info.appendChild(aviso);}
+    toast('📍 GPS activado · Modo demo hasta 10 usuarios reales');
+  }
+}
+
+// Fluctuación natural del contador
+setInterval(()=>{
+  const c=document.getElementById('map-count');
+  if(c){const actual=parseInt(c.textContent)||20;const nuevo=Math.max(5,actual+Math.floor(Math.random()*3)-1);c.textContent=nuevo;}
+},8000);
 
 // ============================================================
 // PUSH NOTIFICATIONS
