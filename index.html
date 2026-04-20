@@ -334,7 +334,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
 .ep-emoji:hover{background:rgba(255,255,255,.1);}
 
 /* FEEDBACK */
-.feedback-fab{position:fixed;bottom:5.5rem;right:1rem;z-index:190;width:48px;height:48px;border-radius:50%;background:var(--grad);border:none;display:flex;align-items:center;justify-content:center;font-size:1.2rem;cursor:pointer;box-shadow:var(--glow);}
+.feedback-fab{display:none !important;}
 .feedback-modal{display:none;position:fixed;inset:0;z-index:450;background:rgba(0,0,0,.85);align-items:flex-end;}
 .feedback-modal.show{display:flex;}
 
@@ -563,6 +563,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
       <div class="optrow" onclick="tab('mapa',null);document.querySelectorAll('.nbtn').forEach((b,i)=>{if(i===3)b.classList.add('on');else b.classList.remove('on');})"><div class="optleft"><div class="optico">📍</div><div class="opttxt">Radar GPS</div></div><div class="optarr">›</div></div>
       <div class="optrow" onclick="tab('reels',null);document.querySelectorAll('.nbtn').forEach((b,i)=>{if(i===2)b.classList.add('on');else b.classList.remove('on');})"><div class="optleft"><div class="optico">🎬</div><div class="opttxt">Mis Momentos</div></div><div class="optarr">›</div></div>
       <div class="optrow" onclick="abrirFiltros()"><div class="optleft"><div class="optico">🎛️</div><div class="opttxt">Filtros de búsqueda</div></div><div class="optarr">›</div></div>
+      <div class="optrow" onclick="abrirFeedback()"><div class="optleft"><div class="optico">💬</div><div class="opttxt">Enviar feedback beta</div></div><div class="optarr">›</div></div>
       <div class="optrow" onclick="compartir()"><div class="optleft"><div class="optico">📲</div><div class="opttxt">Invitar amigos</div></div><div class="optarr">›</div></div>
       <div style="background:var(--ink2);border:1px solid rgba(255,255,255,.05);border-radius:14px;padding:.9rem;margin:.5rem 0;">
         <div style="font-size:.7rem;font-weight:700;color:var(--fog);margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.04em;">Info Legal</div>
@@ -806,7 +807,7 @@ async function guardarPerfil(){
 }
 function iniciarApp(){
   mostrar('screen-app');actualizarUI();
-  document.getElementById('feedback-fab').style.display='flex';
+  
   if(S.user?.email===ADMIN_EMAIL){document.getElementById('btn-admin').style.display='flex';cargarDatosAdmin();}
   setTimeout(()=>{
     cargarPerfilesDescubrir().catch(e=>console.log(e));
@@ -1229,8 +1230,7 @@ function toast(txt){const t=document.getElementById('toast');t.textContent=txt;t
   </div>
 </div>
 
-<!-- FEEDBACK FAB -->
-<button class="feedback-fab" onclick="abrirFeedback()" id="feedback-fab" style="display:none" title="Enviar feedback">💬</button>
+
 
 <!-- FEEDBACK MODAL -->
 <div class="feedback-modal" id="feedback-modal">
