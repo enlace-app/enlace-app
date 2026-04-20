@@ -286,6 +286,62 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
 .report-modal{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.85);align-items:flex-end;}
 .report-modal.show{display:flex;}
 .push-banner{background:linear-gradient(135deg,rgba(255,184,0,.08),rgba(255,60,172,.08));border:1px solid rgba(255,184,0,.2);border-radius:14px;padding:.9rem;margin:.5rem 0;cursor:pointer;display:flex;align-items:center;gap:.7rem;}
+
+/* BETA WELCOME */
+#screen-beta{background:var(--ink);align-items:center;justify-content:center;padding:2rem 1.5rem;}
+.beta-inner{width:100%;max-width:360px;text-align:center;}
+.beta-badge{display:inline-flex;align-items:center;gap:.4rem;background:rgba(255,184,0,.1);border:1px solid rgba(255,184,0,.25);border-radius:50px;padding:.35rem .9rem;font-size:.75rem;font-weight:700;color:var(--spark);margin-bottom:1.2rem;}
+.beta-title{font-family:'Clash Display',sans-serif;font-size:2rem;font-weight:700;line-height:1.1;margin-bottom:.6rem;}
+.beta-sub{font-size:.85rem;color:var(--fog);line-height:1.7;margin-bottom:1.5rem;}
+.beta-feature{display:flex;align-items:center;gap:.7rem;padding:.65rem;background:var(--ink2);border:1px solid rgba(255,255,255,.05);border-radius:12px;margin-bottom:.45rem;text-align:left;}
+.beta-feature-ico{font-size:1.3rem;flex-shrink:0;}
+.beta-feature-txt{font-size:.8rem;color:var(--fog);line-height:1.4;}
+.beta-feature-txt strong{color:var(--light);display:block;margin-bottom:.1rem;}
+
+/* TUTORIAL */
+#screen-tutorial{background:var(--ink);}
+.tut-wrap{flex:1;overflow-y:auto;display:flex;flex-direction:column;align-items:center;padding:2rem 1.5rem;max-width:400px;margin:0 auto;width:100%;}
+.tut-steps{display:flex;gap:.3rem;margin-bottom:1.5rem;}
+.tut-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.15);transition:.3s;}
+.tut-dot.on{background:var(--pulse);width:24px;border-radius:4px;}
+.tut-ico{font-size:4rem;margin-bottom:1rem;}
+.tut-title{font-family:'Clash Display',sans-serif;font-size:1.6rem;font-weight:700;text-align:center;margin-bottom:.5rem;}
+.tut-desc{font-size:.88rem;color:var(--fog);text-align:center;line-height:1.7;margin-bottom:2rem;}
+
+/* GALERÍA FOTOS */
+.galeria-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;margin:.5rem 0;}
+.gal-item{aspect-ratio:1;background:var(--ink3);border-radius:8px;overflow:hidden;position:relative;cursor:pointer;}
+.gal-item img{width:100%;height:100%;object-fit:cover;}
+.gal-add{border:2px dashed rgba(255,60,172,.3);display:flex;align-items:center;justify-content:center;font-size:1.5rem;color:rgba(255,60,172,.5);}
+.gal-main{grid-column:span 2;grid-row:span 2;border-radius:12px;}
+
+/* BUSCAR */
+.search-wrap{padding:.5rem 1rem;background:rgba(8,8,16,.94);border-bottom:1px solid rgba(255,255,255,.04);}
+.search-inp{width:100%;background:var(--ink3);border:1.5px solid rgba(255,255,255,.07);border-radius:50px;padding:.6rem 1rem .6rem 2.5rem;font-size:.88rem;color:var(--light);outline:none;font-family:'Cabinet Grotesk',sans-serif;}
+.search-ico{position:absolute;left:1.7rem;top:50%;transform:translateY(-50%);font-size:.9rem;pointer-events:none;}
+.search-result{display:flex;align-items:center;gap:.75rem;padding:.75rem 1rem;border-bottom:1px solid rgba(255,255,255,.04);cursor:pointer;}
+.sr-ava{width:46px;height:46px;border-radius:50%;background:var(--ink3);display:flex;align-items:center;justify-content:center;font-size:1.3rem;overflow:hidden;flex-shrink:0;}
+.sr-ava img{width:100%;height:100%;object-fit:cover;}
+
+/* REACCIONES */
+.msg-reactions{display:flex;gap:.3rem;margin-top:.3rem;flex-wrap:wrap;}
+.reaction-btn{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:50px;padding:.15rem .45rem;font-size:.75rem;cursor:pointer;transition:.2s;}
+.reaction-btn:hover{background:rgba(255,60,172,.15);}
+.reaction-btn.mine{background:rgba(255,60,172,.15);border-color:rgba(255,60,172,.3);}
+.emoji-picker{display:none;position:absolute;background:var(--ink2);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:.5rem;gap:.3rem;flex-wrap:wrap;max-width:200px;z-index:100;box-shadow:0 8px 24px rgba(0,0,0,.4);}
+.emoji-picker.show{display:flex;}
+.ep-emoji{font-size:1.3rem;cursor:pointer;padding:.2rem;border-radius:6px;transition:.15s;}
+.ep-emoji:hover{background:rgba(255,255,255,.1);}
+
+/* FEEDBACK */
+.feedback-fab{position:fixed;bottom:5.5rem;right:1rem;z-index:190;width:48px;height:48px;border-radius:50%;background:var(--grad);border:none;display:flex;align-items:center;justify-content:center;font-size:1.2rem;cursor:pointer;box-shadow:var(--glow);}
+.feedback-modal{display:none;position:fixed;inset:0;z-index:450;background:rgba(0,0,0,.85);align-items:flex-end;}
+.feedback-modal.show{display:flex;}
+
+/* CONTADOR USUARIOS */
+.users-online{display:inline-flex;align-items:center;gap:.35rem;background:rgba(0,255,148,.07);border:1px solid rgba(0,255,148,.15);border-radius:50px;padding:.2rem .65rem;font-size:.68rem;color:var(--life);font-weight:600;}
+.online-dot{width:6px;height:6px;border-radius:50%;background:var(--life);animation:dp 1.5s infinite;}
+
 </style>
 </head>
 <body>
@@ -381,7 +437,10 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
   <!-- DESCUBRIR -->
   <div class="page" id="tab-descubrir">
     <div style="padding:.8rem 1rem;padding-top:4.5rem;">
-      <div class="free-banner">✅ <strong>Conexiones ilimitadas</strong> · 100% gratis · v8.0 BETA</div>
+      <div class="free-banner" style="justify-content:space-between;">
+        <span>✅ <strong>Conexiones ilimitadas</strong> · 100% gratis</span>
+        <div class="users-online"><div class="online-dot"></div><span class="online-count">0</span> online</div>
+      </div>
       <div class="card-stack" id="card-stack">
         <div style="display:flex;align-items:center;justify-content:center;height:100%;flex-direction:column;gap:1rem;color:var(--fog);">
           <div class="spin" style="width:32px;height:32px;border-width:2px;"></div>
@@ -400,7 +459,15 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
   <!-- CHATS -->
   <div class="page" id="tab-chats" style="display:none">
     <div class="ch-wrap">
-      <div style="font-family:'Clash Display',sans-serif;font-size:1.25rem;font-weight:700;margin:.5rem 0 .7rem">Mis conexiones</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin:.5rem 0 .7rem">
+        <div style="font-family:'Clash Display',sans-serif;font-size:1.25rem;font-weight:700;">Mis conexiones</div>
+        <div class="users-online"><div class="online-dot"></div><span class="online-count">0</span> online</div>
+      </div>
+      <div style="position:relative;margin-bottom:.6rem;">
+        <span class="search-ico">🔍</span>
+        <input class="search-inp" type="text" placeholder="Buscar por nombre o ciudad..." oninput="clearTimeout(window._st);window._st=setTimeout(()=>buscarUsuarios(this.value),300)">
+      </div>
+      <div id="search-results"></div>
       <div id="chats-lista">
         <div style="text-align:center;padding:2rem;color:var(--fog);font-size:.88rem;"><div style="font-size:2rem;margin-bottom:.5rem">💬</div>Aún no tienes conexiones.<br>¡Da likes para crear matches!</div>
       </div>
@@ -479,6 +546,19 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
         <span style="font-size:1.5rem">🔔</span>
         <div style="flex:1"><div style="font-weight:700;font-size:.85rem;margin-bottom:.13rem">Activar notificaciones</div><div style="font-size:.72rem;color:var(--fog)">Sabe cuándo alguien te da like · Gratis</div></div>
         <div id="notif-estado" style="font-size:.72rem;color:var(--fog);font-weight:600;">ACTIVAR</div>
+      </div>
+      <!-- GALERÍA FOTOS -->
+      <div style="background:var(--ink2);border:1px solid rgba(255,255,255,.05);border-radius:14px;padding:.9rem;margin-bottom:.5rem;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem;">
+          <div style="font-size:.78rem;font-weight:700;color:var(--fog);text-transform:uppercase;letter-spacing:.04em;">📸 Mis fotos</div>
+          <button onclick="document.getElementById('galeria-input').click()" style="background:rgba(255,60,172,.1);border:1px solid rgba(255,60,172,.2);border-radius:50px;padding:.2rem .6rem;font-size:.7rem;color:var(--pulse);cursor:pointer;">+ Añadir</button>
+        </div>
+        <input type="file" id="galeria-input" accept="image/*" multiple style="display:none" onchange="subirFotoGaleria(this)">
+        <div class="galeria-grid" id="galeria-container">
+          <div class="gal-item gal-add gal-main" onclick="document.getElementById('galeria-input').click()">📷<div style="font-size:.7rem;color:var(--fog);margin-top:.3rem">Añade fotos</div></div>
+          <div class="gal-item gal-add" onclick="document.getElementById('galeria-input').click()">➕</div>
+          <div class="gal-item gal-add" onclick="document.getElementById('galeria-input').click()">➕</div>
+        </div>
       </div>
       <div class="optrow" onclick="tab('mapa',null);document.querySelectorAll('.nbtn').forEach((b,i)=>{if(i===3)b.classList.add('on');else b.classList.remove('on');})"><div class="optleft"><div class="optico">📍</div><div class="opttxt">Radar GPS</div></div><div class="optarr">›</div></div>
       <div class="optrow" onclick="tab('reels',null);document.querySelectorAll('.nbtn').forEach((b,i)=>{if(i===2)b.classList.add('on');else b.classList.remove('on');})"><div class="optleft"><div class="optico">🎬</div><div class="opttxt">Mis Momentos</div></div><div class="optarr">›</div></div>
@@ -639,7 +719,7 @@ const S={user:null,perfil:null,perfiles:[],perfilIdx:0,matches:[],quimica:50,xp:
 // INIT
 // ============================================================
 window.addEventListener('load',()=>{
-  mostrar('screen-auth');
+  mostrar('screen-beta');
   sb.auth.getSession().then(({data:{session}})=>{
     if(session){S.user=session.user;cargarPerfil();}
   }).catch(e=>console.log(e));
@@ -726,9 +806,15 @@ async function guardarPerfil(){
 }
 function iniciarApp(){
   mostrar('screen-app');actualizarUI();
-  // Admin check
+  document.getElementById('feedback-fab').style.display='flex';
   if(S.user?.email===ADMIN_EMAIL){document.getElementById('btn-admin').style.display='flex';cargarDatosAdmin();}
-  setTimeout(()=>{cargarPerfilesDescubrir().catch(e=>console.log(e));cargarMatches().catch(e=>console.log(e));renderReels();},100);
+  setTimeout(()=>{
+    cargarPerfilesDescubrir().catch(e=>console.log(e));
+    cargarMatches().catch(e=>console.log(e));
+    renderReels();
+    cargarContadorUsuarios();
+    cargarGaleria(S.user.id);
+  },100);
   setTimeout(()=>mostrarLikeNotif(),7000);
 }
 function actualizarUI(){
@@ -859,6 +945,9 @@ function renderMensaje(m,esMio){
     el=document.createElement('div');el.className='msg '+(esMio?'s':'r');
     el.innerHTML=m.contenido+'<div style="font-size:.58rem;opacity:.6;margin-top:.2rem">'+hora+'</div>';
   }
+  el.addEventListener('contextmenu', e => { e.preventDefault(); mostrarEmojiPicker(el); });
+  el.addEventListener('touchstart', () => { window._lp = setTimeout(() => mostrarEmojiPicker(el), 600); });
+  el.addEventListener('touchend', () => clearTimeout(window._lp));
   msgs.appendChild(el);msgs.scrollTop=msgs.scrollHeight;
 }
 function reproducirAudio(url,btn){
@@ -1078,5 +1167,81 @@ function mostrar(id){document.querySelectorAll('.screen').forEach(s=>s.classList
 function compartir(){if(navigator.share){navigator.share({title:'ENLACE — Conexiones Reales',text:'¡Prueba ENLACE, la app española para conocer gente de verdad! 100% gratis. © 2025 Javier González Rodríguez',url:'https://enlace-app.vercel.app'});}else{navigator.clipboard?.writeText('https://enlace-app.vercel.app');toast('🔗 Enlace copiado · ¡Compártelo!');}}
 function toast(txt){const t=document.getElementById('toast');t.textContent=txt;t.classList.add('show');clearTimeout(window._tt);window._tt=setTimeout(()=>t.classList.remove('show'),2800);}
 </script>
+
+<!-- BETA WELCOME -->
+<div class="screen" id="screen-beta">
+  <div class="beta-inner">
+    <div style="font-size:3rem;margin-bottom:.8rem">🔗</div>
+    <div class="beta-badge">🧪 BETA PRIVADA · v8.0</div>
+    <div class="beta-title">Bienvenido a<br><span class="gt">ENLACE Beta</span></div>
+    <div class="beta-sub">Eres uno de los primeros en probar ENLACE.<br>Tu opinión construirá la mejor app de conexiones reales de España.</div>
+    <div class="beta-feature"><div class="beta-feature-ico">📸</div><div class="beta-feature-txt"><strong>Fotos reales verificadas</strong>Sube tu foto y verifica tu identidad en 3 pasos.</div></div>
+    <div class="beta-feature"><div class="beta-feature-ico">🛡️</div><div class="beta-feature-txt"><strong>La app más segura</strong>Verificación en 3 capas. Encuentro Seguro con GPS.</div></div>
+    <div class="beta-feature"><div class="beta-feature-ico">🧠</div><div class="beta-feature-txt"><strong>IA que aprende de ti</strong>Matching real basado en comportamiento, no en fotos.</div></div>
+    <div class="beta-feature"><div class="beta-feature-ico">🎯</div><div class="beta-feature-txt"><strong>100% gratuito siempre</strong>Sin tarjeta. Sin trampas. © 2025 Javier González Rodríguez</div></div>
+    <button class="btn-f" onclick="mostrar('screen-tutorial')" style="margin-top:1.2rem;">Ver cómo funciona →</button>
+    <button class="btn-g" onclick="mostrar('screen-auth')" style="margin-top:.5rem;">Saltar intro · Ir al registro</button>
+    <div style="font-size:.65rem;color:var(--fog);margin-top:1rem;line-height:1.6;">Al continuar aceptas los Términos de Uso y la Política de Privacidad de ENLACE.<br>© 2025 Javier González Rodríguez · RDL 1/1996 · RGPD 2016/679</div>
+  </div>
+</div>
+
+<!-- TUTORIAL -->
+<div class="screen" id="screen-tutorial">
+  <div class="tut-wrap">
+    <div class="tut-steps" id="tut-dots">
+      <div class="tut-dot on"></div><div class="tut-dot"></div><div class="tut-dot"></div><div class="tut-dot"></div>
+    </div>
+    <div id="tut-content">
+      <div class="tut-ico">✨</div>
+      <div class="tut-title">Conexiones <span class="gt">reales</span></div>
+      <div class="tut-desc">ENLACE no es Tinder. Aquí las fotos se desbloquean progresivamente para que conectes primero por personalidad.</div>
+    </div>
+    <button class="btn-f" onclick="siguienteTut()" id="btn-tut" style="width:100%;max-width:320px;">Siguiente →</button>
+    <button class="btn-g" onclick="mostrar('screen-auth')" style="width:100%;max-width:320px;margin-top:.5rem;">Saltar</button>
+  </div>
+</div>
+
+<!-- FEEDBACK FAB -->
+<button class="feedback-fab" onclick="abrirFeedback()" id="feedback-fab" style="display:none" title="Enviar feedback">💬</button>
+
+<!-- FEEDBACK MODAL -->
+<div class="feedback-modal" id="feedback-modal">
+  <div style="background:var(--ink2);border-radius:24px 24px 0 0;width:100%;padding:1.5rem;animation:slideUp .3s ease;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+      <div style="font-family:'Clash Display',sans-serif;font-size:1.1rem;font-weight:700;">💬 Tu opinión importa</div>
+      <button onclick="cerrarFeedback()" style="background:var(--ink3);border:none;border-radius:50%;width:32px;height:32px;color:var(--light);cursor:pointer;">✕</button>
+    </div>
+    <div style="display:flex;gap:.5rem;margin-bottom:.8rem;">
+      <div onclick="seleccionarTipoFeedback(this,'🐛 Bug')" style="flex:1;padding:.6rem;background:var(--ink3);border-radius:10px;text-align:center;font-size:.78rem;cursor:pointer;border:1.5px solid transparent;">🐛 Bug</div>
+      <div onclick="seleccionarTipoFeedback(this,'💡 Idea')" style="flex:1;padding:.6rem;background:var(--ink3);border-radius:10px;text-align:center;font-size:.78rem;cursor:pointer;border:1.5px solid transparent;">💡 Idea</div>
+      <div onclick="seleccionarTipoFeedback(this,'⭐ Valoración')" style="flex:1;padding:.6rem;background:var(--ink3);border-radius:10px;text-align:center;font-size:.78rem;cursor:pointer;border:1.5px solid transparent;">⭐ Valorar</div>
+    </div>
+    <textarea id="feedback-texto" placeholder="Cuéntanos qué has encontrado o qué mejorarías..." style="width:100%;background:var(--ink3);border:1.5px solid rgba(255,255,255,.07);border-radius:12px;padding:.75rem;color:var(--light);font-family:'Cabinet Grotesk',sans-serif;font-size:.85rem;outline:none;resize:none;height:100px;margin-bottom:.8rem;"></textarea>
+    <div style="display:flex;gap:.5rem;margin-bottom:.5rem;">
+      <div style="font-size:.75rem;color:var(--fog);margin-bottom:.3rem;">¿Cómo valorarías ENLACE?</div>
+      <div style="display:flex;gap:.3rem;" id="feedback-stars">
+        <span onclick="valorarFeedback(1)" style="font-size:1.3rem;cursor:pointer;">⭐</span>
+        <span onclick="valorarFeedback(2)" style="font-size:1.3rem;cursor:pointer;">⭐</span>
+        <span onclick="valorarFeedback(3)" style="font-size:1.3rem;cursor:pointer;">⭐</span>
+        <span onclick="valorarFeedback(4)" style="font-size:1.3rem;cursor:pointer;">⭐</span>
+        <span onclick="valorarFeedback(5)" style="font-size:1.3rem;cursor:pointer;">⭐</span>
+      </div>
+    </div>
+    <button onclick="enviarFeedback()" style="width:100%;padding:.88rem;background:var(--grad);border:none;border-radius:12px;color:white;font-family:'Clash Display',sans-serif;font-weight:600;font-size:.9rem;cursor:pointer;">Enviar feedback 🚀</button>
+  </div>
+</div>
+
+<!-- EMOJI PICKER -->
+<div class="emoji-picker" id="emoji-picker">
+  <span class="ep-emoji" onclick="reaccionar('❤️')">❤️</span>
+  <span class="ep-emoji" onclick="reaccionar('😂')">😂</span>
+  <span class="ep-emoji" onclick="reaccionar('😮')">😮</span>
+  <span class="ep-emoji" onclick="reaccionar('🔥')">🔥</span>
+  <span class="ep-emoji" onclick="reaccionar('👏')">👏</span>
+  <span class="ep-emoji" onclick="reaccionar('💜')">💜</span>
+  <span class="ep-emoji" onclick="reaccionar('😍')">😍</span>
+  <span class="ep-emoji" onclick="reaccionar('🎉')">🎉</span>
+</div>
+
 </body>
 </html>
