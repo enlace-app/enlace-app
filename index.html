@@ -316,6 +316,77 @@ body{font-family:var(--ff-b);color:var(--text);}
 .si{animation:slideIn .3s ease forwards;}
 @keyframes pop{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
 .pop{animation:pop .25s cubic-bezier(.34,1.56,.64,1) forwards;}
+
+/* ── SAFE AREA iPhones con notch ── */
+.navbar { padding-bottom: max(var(--safe), 8px); }
+.cf-inp-area { padding-bottom: max(calc(var(--safe) + .55rem), .8rem); }
+
+/* ── FEEDBACK TÁCTIL — todos los botones ── */
+button, .nbtn, .abtn, .qchip, .ichip, .opt-row, .chat-row, .obj-opt, .int, .fchip, .rep-opt, .cfbtn, .ibtn {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.abtn:active { transform: scale(.86) !important; transition: transform .1s !important; }
+.btn:active { transform: scale(.97); opacity: .92; }
+.btn-ghost:active { background: rgba(255,255,255,.05); }
+.nbtn:active .nicon { transform: scale(.88); }
+.chat-row:active { background: rgba(255,255,255,.04); transform: scale(.99); }
+.opt-row:active { background: var(--s2); transform: scale(.99); }
+.ibtn:active { transform: scale(.88); }
+.cfbtn:active { background: var(--s2); }
+
+/* ── SCROLL FLUIDO (iOS) ── */
+.page, .msgs, .ia-msgs, .online-row, .quick, .ia-chips-row {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+/* ── SKELETON LOADER para fotos ── */
+.skeleton {
+  background: linear-gradient(90deg, var(--s2) 25%, var(--s3) 50%, var(--s2) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+  border-radius: inherit;
+}
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.card-photo-wrap { background: var(--s2); }
+.card-img { transition: opacity .3s ease; }
+.card-img.loading { opacity: 0; }
+.card-img.loaded { opacity: 1; }
+.cr-ava.loading-ava { background: var(--s2) !important; animation: shimmer 1.4s infinite; background-size: 200% 100% !important; background: linear-gradient(90deg, var(--s2) 25%, var(--s3) 50%, var(--s2) 75%) !important; }
+
+/* ── ESTADO DE MENSAJE ENVIADO ── */
+.msg-status { font-size: .52rem; opacity: .7; margin-left: .25rem; }
+.msg-status.sent { color: rgba(255,255,255,.5); }
+.msg-status.delivered { color: var(--green); }
+
+/* ── INDICADOR DE ESCRITURA (typing) ── */
+.typing-wrap { display: flex; align-items: flex-start; gap: .4rem; margin-bottom: .3rem; }
+.typing-bubble { display: flex; gap: 4px; padding: .55rem .75rem; background: var(--s2); border-radius: 16px; border-bottom-left-radius: 4px; border: 1px solid var(--border); }
+.td { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); animation: tdAnim .9s ease-in-out infinite; }
+.td:nth-child(2){animation-delay:.15s}.td:nth-child(3){animation-delay:.3s}
+@keyframes tdAnim{0%,100%{opacity:.3;transform:scale(.7)}50%{opacity:1;transform:scale(1)}}
+
+/* ── CHAT INPUT — prevenir salto con teclado ── */
+.chat-full { position: fixed; inset: 0; display: flex; flex-direction: column; }
+.msgs { flex: 1; overflow-y: auto; min-height: 0; }
+.cf-inp-area { flex-shrink: 0; }
+
+/* ── MATCH OVERLAY mejorado ── */
+.match-overlay { position: fixed; inset: 0; z-index: 700; }
+.match-overlay.on { animation: matchIn .45s cubic-bezier(.34,1.56,.64,1); }
+@keyframes matchIn { from { opacity: 0; transform: scale(.75); } to { opacity: 1; transform: scale(1); } }
+.match-pulse { animation: matchPulse 1.5s ease-in-out infinite; }
+@keyframes matchPulse { 0%,100% { box-shadow: 0 0 0 0 rgba(232,53,109,.4); } 50% { box-shadow: 0 0 0 20px rgba(232,53,109,0); } }
+
+/* ── RIPPLE EFFECT en botones de acción ── */
+.abtn-like { position: relative; overflow: hidden; }
+.abtn-like::after { content: ''; position: absolute; inset: 0; background: rgba(255,255,255,.2); border-radius: 50%; transform: scale(0); transition: transform .3s, opacity .3s; opacity: 0; }
+.abtn-like:active::after { transform: scale(1); opacity: 1; }
+
 </style>
 </head>
 <body>
@@ -980,9 +1051,15 @@ function crearCard(p) {
   const emoji = emojis[Math.floor(Math.random() * emojis.length)];
   const tags = (p.intereses || []).slice(0, 4);
   const color = compat >= 85 ? '#10B981' : compat >= 72 ? '#F59E0B' : '#6366F1';
-  const fotoHTML = p.foto_url
-    ? `<img src="${p.foto_url}" class="card-img" alt="" loading="lazy">`
-    : `<div class="card-emoji-placeholder">${emoji}</div>`;
+  // Skeleton loader mientras carga la foto
+  const fotoHTML = p.foto_url && p.foto_url.startsWith('http')
+    ? '<div style="position:relative;width:100%;height:100%;">' +
+        '<div class="skeleton" style="position:absolute;inset:0;z-index:1;"></div>' +
+        '<img src="' + p.foto_url + '" class="card-img loading" alt="" loading="lazy" ' +
+        'onload="this.classList.remove('loading');this.classList.add('loaded');this.previousElementSibling&&(this.previousElementSibling.style.display='none')" ' +
+        'onerror="this.parentElement.innerHTML='<div class=card-emoji-placeholder>' + emoji + '</div>'">' +
+      '</div>'
+    : '<div class="card-emoji-placeholder">' + emoji + '</div>';
   div.innerHTML = `
     ${fotoHTML}
     <div class="card-overlay"></div>
@@ -1156,7 +1233,8 @@ function renderChats() {
     const h = Math.max(0, Math.floor((new Date(m.expira_en) - new Date()) / 3600000));
     const fotoSrc = (otro.foto_url && otro.foto_url.startsWith('http')) ? otro.foto_url : '';
     const fHTML = fotoSrc
-      ? '<img src="' + fotoSrc + '" alt="" style="width:100%;height:100%;object-fit:cover;">'
+      ? '<img src="' + fotoSrc + '" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover;" ' +
+        'onerror="this.outerHTML='' + emoji + ''">'
       : emoji;
     const nombre = (otro.nombre || 'Usuario').replace(/'/g, "\'");
     return '<div class="chat-row si" onclick="abrirChat(\'' + m.id + '\',\'' + nombre + '\',\'' + emoji + '\',' + (m.compatibilidad||75) + ',\'' + fotoSrc + '\')">' +
@@ -1178,13 +1256,38 @@ function filtrarChats(q) {
 function mostrarMatch(p, compatOverride) {
   S.matchActual = p;
   const compat = compatOverride || (68 + Math.floor(Math.random() * 30));
-  if (p.foto_url) document.getElementById('m-otro').innerHTML = `<img src="${p.foto_url}" style="width:100%;height:100%;object-fit:cover;">`;
-  else document.getElementById('m-otro').innerHTML = '<span>👤</span>';
+
+  // Fotos
+  const mOtro = document.getElementById('m-otro');
+  const mYo = document.getElementById('m-yo');
+  if (p.foto_url && p.foto_url.startsWith('http')) {
+    mOtro.innerHTML = '<img src="' + p.foto_url + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
+  } else {
+    mOtro.innerHTML = '<span style="font-size:2.5rem">👤</span>';
+  }
+  if (S.perfil?.foto_url && S.perfil.foto_url.startsWith('http')) {
+    mYo.innerHTML = '<img src="' + S.perfil.foto_url + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
+  } else {
+    mYo.innerHTML = '<span style="font-size:2.5rem">😊</span>';
+  }
+
   document.getElementById('mc-num').textContent = compat + '%';
-  document.getElementById('match-overlay').classList.add('on');
+
+  // Añadir clase match-pulse a los avatares
+  mOtro.classList.add('match-pulse');
+  mYo.classList.add('match-pulse');
+
+  // Mostrar overlay a pantalla completa
+  const overlay = document.getElementById('match-overlay');
+  overlay.classList.add('on');
+
+  // Confetti + vibración
   generarConfetti();
   ganarXP(50);
-  navigator.vibrate?.([100, 50, 200]);
+  navigator.vibrate?.([200, 100, 200, 100, 400]);
+
+  // Limpiar pulse al cerrar
+  setTimeout(() => { mOtro.classList.remove('match-pulse'); mYo.classList.remove('match-pulse'); }, 3000);
 }
 
 function generarConfetti() {
@@ -1224,25 +1327,47 @@ async function abrirChat(matchId, nombre, emoji, compat, fotoUrl) {
     .eq('match_id', matchId)
     .order('created_at', { ascending: true });
   if (error) console.error('Cargar mensajes error:', error);
-  (msgs || []).forEach(m => pintarMensaje(m, m.emisor_id === S.user.id));
+  (msgs || []).forEach(m => pintarMensaje(m, m.emisor_id === S.user.id, false));
+  // Scroll forzado al final al abrir
+  setTimeout(() => scrollAlFinal(document.getElementById('msgs'), true), 100);
   // ── REALTIME SUBSCRIPTION ──
   if (S.chatSub) { S.chatSub.unsubscribe(); S.chatSub = null; }
-  S.chatSub = sb.channel('chat_' + matchId.replace(/-/g,''))
-    .on('postgres_changes', {
-      event: 'INSERT',
-      schema: 'public',
-      table: 'mensajes',
-      filter: `match_id=eq.${matchId}`
-    }, payload => {
-      const m = payload.new;
-      // Solo pintar si no es mío (el mío ya se pintó optimistamente)
-      if (m.emisor_id !== S.user.id) {
-        document.getElementById('typing-ind')?.remove(); // Quitar typing
-        pintarMensaje(m, false);
-        subirQuimica(2);
+  // Nombre de canal único y limpio (UUID sin guiones, max 64 chars)
+  const chanName = 'chat_' + matchId.replace(/-/g, '').slice(0, 32);
+  S.chatSub = sb.channel(chanName, {
+    config: { broadcast: { self: false }, presence: { key: S.user.id } }
+  })
+  .on('postgres_changes', {
+    event: 'INSERT',
+    schema: 'public',
+    table: 'mensajes',
+    filter: 'match_id=eq.' + matchId
+  }, payload => {
+    const m = payload.new;
+    if (m.emisor_id !== S.user.id) {
+      // Vibración suave al recibir mensaje
+      navigator.vibrate?.(30);
+      pintarMensaje(m, false, false);
+      subirQuimica(2);
+      // Notificación si la app está en segundo plano
+      if (document.hidden && Notification.permission === 'granted') {
+        new Notification('ENLACE 💬', { body: 'Nuevo mensaje', icon: '/icon.png', silent: false });
       }
-    })
-    .subscribe(status => { console.log('Realtime status:', status); });
+    }
+  })
+  .subscribe(status => {
+    console.log('Realtime chat status:', status);
+    if (status === 'CLOSED' || status === 'CHANNEL_ERROR') {
+      // Reconectar automáticamente tras 2 segundos
+      console.warn('Realtime desconectado, reconectando...');
+      setTimeout(() => {
+        if (S.chatId === matchId) {
+          if (S.chatSub) { try { S.chatSub.unsubscribe(); } catch(e){} }
+          abrirChat(matchId, document.getElementById('cf-nombre').textContent, '', S.quimica, '');
+        }
+      }, 2000);
+    }
+  });
 }
 
 function cerrarChat() {
@@ -1250,38 +1375,96 @@ function cerrarChat() {
   if (S.chatSub) { S.chatSub.unsubscribe(); S.chatSub = null; }
 }
 
-function pintarMensaje(m, esMio) {
+function pintarMensaje(m, esMio, pendiente) {
   const cont = document.getElementById('msgs');
   const wrap = document.createElement('div');
   wrap.className = 'mw ' + (esMio ? 'me' : 'them') + ' si';
+  if (m.id) wrap.dataset.id = m.id;
   const hora = m.created_at ? new Date(m.created_at).toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' }) : '';
+  // Estado del mensaje: ✓ enviado, ✓✓ entregado (solo para mensajes propios)
+  const statusHtml = esMio
+    ? '<span class="msg-status ' + (pendiente ? 'sent' : 'delivered') + '">' + (pendiente ? '✓' : '✓✓') + '</span>'
+    : '';
   if (m.tipo === 'foto' && m.contenido_url) {
-    wrap.innerHTML = `<div class="msg-img-wrap"><img src="${m.contenido_url}" alt="foto" loading="lazy" onclick="window.open('${m.contenido_url}','_blank')"></div><div class="mt">${hora}</div>`;
+    // Skeleton loader para fotos
+    wrap.innerHTML = '<div class="msg-img-wrap">' +
+      '<div class="skeleton" style="width:210px;height:160px;border-radius:12px;position:absolute;top:0;left:0;" id="sk-' + Date.now() + '"></div>' +
+      '<img src="' + m.contenido_url + '" alt="foto" loading="lazy" style="border-radius:12px;" ' +
+      'onload="this.previousElementSibling&&(this.previousElementSibling.style.display='none')" ' +
+      'onclick="window.open('' + m.contenido_url + '','_blank')"></div>' +
+      '<div class="mt">' + hora + statusHtml + '</div>';
   } else if (m.tipo === 'audio' && m.contenido_url) {
-    wrap.innerHTML = `<div class="msg-audio-wrap"><button class="audio-play-btn" onclick="(new Audio('${m.contenido_url}')).play()">▶</button><div class="waveform"><div class="wv"></div><div class="wv"></div><div class="wv"></div><div class="wv"></div><div class="wv"></div><div class="wv"></div></div></div><div class="mt">${hora}</div>`;
+    wrap.innerHTML = '<div class="msg-audio-wrap">' +
+      '<button class="audio-play-btn" onclick="reproducirAudio('' + m.contenido_url + '',this)">▶</button>' +
+      '<div class="waveform"><div class="wv"></div><div class="wv"></div><div class="wv"></div><div class="wv"></div><div class="wv"></div><div class="wv"></div></div>' +
+      '</div><div class="mt">' + hora + statusHtml + '</div>';
   } else {
-    wrap.innerHTML = `<div class="mb">${escapeHTML(m.contenido||'')}</div><div class="mt">${hora}</div>`;
+    wrap.innerHTML = '<div class="mb">' + escapeHTML(m.contenido||'') + '</div>' +
+      '<div class="mt">' + hora + statusHtml + '</div>';
   }
   cont.appendChild(wrap);
-  cont.scrollTop = cont.scrollHeight;
+  scrollAlFinal(cont);
+}
+
+function reproducirAudio(url, btn) {
+  const audio = new Audio(url);
+  btn.textContent = '⏸';
+  audio.play();
+  audio.onended = () => btn.textContent = '▶';
+  audio.onerror = () => { btn.textContent = '▶'; toast('⚠️ Error al reproducir audio'); };
+}
+
+// Auto-scroll suave al final del chat
+function scrollAlFinal(cont, forzar) {
+  const el = cont || document.getElementById('msgs');
+  if (!el) return;
+  // Solo scroll automático si el usuario está cerca del final (o se fuerza)
+  const distanciaFinal = el.scrollHeight - el.scrollTop - el.clientHeight;
+  if (forzar || distanciaFinal < 120) {
+    requestAnimationFrame(() => { el.scrollTop = el.scrollHeight; });
+  }
+}
+
+// Actualizar el estado de un mensaje de pendiente a entregado
+function marcarMensajeEntregado(tempId) {
+  const msgs = document.getElementById('msgs');
+  if (!msgs) return;
+  const lastMine = [...msgs.querySelectorAll('.mw.me')].pop();
+  if (lastMine) {
+    const st = lastMine.querySelector('.msg-status');
+    if (st) { st.textContent = '✓✓'; st.className = 'msg-status delivered'; }
+  }
 }
 
 async function enviarMensaje() {
   const inp = document.getElementById('chat-inp');
   const txt = inp.value.trim();
   if (!txt || !S.chatId) return;
-  // Pintar optimistamente
-  pintarMensaje({ contenido: txt, tipo: 'texto', created_at: new Date().toISOString(), emisor_id: S.user.id }, true);
+
   inp.value = '';
   inp.style.height = '40px';
+
+  // Pintar optimistamente con estado "pendiente" (✓)
+  pintarMensaje({ contenido: txt, tipo: 'texto', created_at: new Date().toISOString(), emisor_id: S.user.id }, true, true);
+
   // Insertar en Supabase
-  const { error } = await sb.from('mensajes').insert({
+  const { data, error } = await sb.from('mensajes').insert({
     match_id: S.chatId,
     emisor_id: S.user.id,
     contenido: txt,
     tipo: 'texto'
-  });
-  if (error) { console.error('Enviar mensaje error:', error); toast('⚠️ Error al enviar'); return; }
+  }).select().single();
+
+  if (error) {
+    console.error('Enviar mensaje error:', error);
+    toast('⚠️ Error al enviar · Reintentando...');
+    // Reintentar una vez
+    await sb.from('mensajes').insert({ match_id: S.chatId, emisor_id: S.user.id, contenido: txt, tipo: 'texto' }).catch(() => {});
+    return;
+  }
+
+  // Actualizar a entregado (✓✓)
+  marcarMensajeEntregado(data?.id);
   subirQuimica(3); ganarXP(2);
 }
 
@@ -1369,11 +1552,41 @@ function actualizarTip(p) {
   document.getElementById('chem-tip').textContent = tips[tip] || tips[0];
 }
 // Auto-resize textarea
+// Auto-resize del textarea
 document.getElementById('chat-inp').addEventListener('input', function () {
   this.style.height = '40px';
-  this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+  this.style.height = Math.min(this.scrollHeight, 120) + 'px';
 });
-document.getElementById('chat-inp').addEventListener('keypress', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); enviarMensaje(); } });
+document.getElementById('chat-inp').addEventListener('keypress', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); enviarMensaje(); }
+});
+
+// FIX TECLADO MÓVIL: usar visualViewport para evitar saltos al abrir teclado
+if (window.visualViewport) {
+  let teclAdoAbierto = false;
+  window.visualViewport.addEventListener('resize', () => {
+    const chatFull = document.getElementById('chat-full');
+    if (!chatFull.classList.contains('on')) return;
+    const alturaVP = window.visualViewport.height;
+    const alturaWindow = window.innerHeight;
+    teclAdoAbierto = alturaVP < alturaWindow * 0.75;
+    if (teclAdoAbierto) {
+      // Teclado abierto: ajustar altura del chat
+      chatFull.style.height = alturaVP + 'px';
+      chatFull.style.top = window.visualViewport.offsetTop + 'px';
+      // Scroll al final cuando se abre el teclado
+      setTimeout(() => scrollAlFinal(document.getElementById('msgs'), true), 150);
+    } else {
+      chatFull.style.height = '';
+      chatFull.style.top = '';
+    }
+  });
+}
+
+// Focus en input → scroll al final del chat
+document.getElementById('chat-inp').addEventListener('focus', () => {
+  setTimeout(() => scrollAlFinal(document.getElementById('msgs'), true), 350);
+});
 
 function pedirSugerenciaIA() {
   const nombre = document.getElementById('cf-nombre').textContent;
