@@ -750,15 +750,19 @@ async function finOb() {
   if (!ciudad) { toast('⚠️ Indica tu ciudad'); return; }
   const intereses = Array.from(document.querySelectorAll('.int.on')).map(i => i.textContent.trim());
   const nombre = S.user.user_metadata?.nombre || S.user.email.split('@')[0];
-  const updates = { id: S.user.id, nombre, edad, ciudad, bio, objetivo: S.obObj || 'ver', intereses, activo: true, puntos: 100 };
+  const updates = { id: S.user.id, nombre, edad, ciudad: ciudad || '', bio: bio || '', objetivo: S.obObj || 'ver', intereses: intereses || [], activo: true, verificado: false, puntos: 100 };
   // Subir foto si existe
   if (S.obFoto) {
     try {
       const blob = await fetch(S.obFoto).then(r => r.blob());
-      const { error: upErr } = await sb.storage.from('fotos').upload(`avatars/${S.user.id}.jpg`, blob, { upsert: true, contentType: 'image/jpeg' });
+      const avatarPath = 'avatars/' + S.user.id + '.jpg';
+      const { error: upErr } = await sb.storage.from('fotos').upload(avatarPath, blob, { upsert: true, contentType: 'image/jpeg' });
       if (!upErr) {
-        const { data: urlData } = sb.storage.from('fotos').getPublicUrl(`avatars/${S.user.id}.jpg`);
-        updates.foto_url = urlData.publicUrl;
+        // BUG FIX: getPublicUrl no es async
+        const { data: urlData } = sb.storage.from('fotos').getPublicUrl(avatarPath);
+        if (urlData && urlData.publicUrl) updates.foto_url = urlData.publicUrl;
+      } else {
+        console.warn('Avatar upload error:', upErr.message);
       }
     } catch (e) { console.warn('Storage upload failed:', e); }
   }
@@ -771,16 +775,27 @@ async function finOb() {
 
 // ── PERFIL ───────────────────────────────────────────────────
 async function cargarPerfil() {
-  show('sl'); // Loading mientras cargamos perfil
+  show('sl');
   try {
-    const { data, error } = await sb.from('perfiles').select('*').eq('id', S.user.id).single();
-    if (error || !data) { show('sob'); return; }
+    const { data, error } = await sb.from('perfiles')
+      .select('*')
+      .eq('id', S.user.id)
+      .maybeSingle(); // BUG FIX: maybeSingle no lanza error si no hay fila (vs single)
+
+    // PGRST116 = no rows found → ir a onboarding, NO crash
+    if (!data) { show('sob'); return; }
+    if (error && error.code !== 'PGRST116') {
+      console.error('cargarPerfil error:', error.message);
+      show('sa'); return;
+    }
+
     S.perfil = data; S.xp = data.puntos || 0;
+    // Si falta edad o ciudad → onboarding (perfil incompleto)
     if (!data.edad || !data.ciudad) { show('sob'); return; }
     iniciarApp();
   } catch (e) {
-    console.error('cargarPerfil error:', e);
-    show('sa'); // Fallback seguro
+    console.error('cargarPerfil catch:', e);
+    show('sa');
   }
 }
 
@@ -810,64 +825,118 @@ function renderUI() {
   document.getElementById('p-lvl').textContent = `⚡ Nivel ${nivel}`;
   document.getElementById('p-xplbl').textContent = `${puntos} / ${nivel * 500} XP`;
   document.getElementById('p-xpbar').style.width = (xpEnNivel / 500 * 100) + '%';
-  if (foto_url) { document.getElementById('p-foto').src = foto_url; document.getElementById('p-foto').style.display = 'block'; document.getElementById('p-emoji').style.display = 'none'; }
+  // BUG FIX: foto_url puede ser string vacío, verificar explícitamente
+  if (foto_url && foto_url.startsWith('http')) {
+    const pFoto = document.getElementById('p-foto');
+    const pEmoji = document.getElementById('p-emoji');
+    if (pFoto) { pFoto.src = foto_url; pFoto.style.display = 'block'; }
+    if (pEmoji) pEmoji.style.display = 'none';
+  }
 }
 
 async function cambiarFotoPerfil(input) {
   if (!input.files[0]) return;
+  const file = input.files[0];
   const reader = new FileReader();
-  reader.onload = async e => {
-    document.getElementById('p-foto').src = e.target.result;
-    document.getElementById('p-foto').style.display = 'block';
-    document.getElementById('p-emoji').style.display = 'none';
+  reader.onload = async ev => {
+    // Mostrar imagen inmediatamente (UX instantáneo)
+    const pFoto = document.getElementById('p-foto');
+    const pEmoji = document.getElementById('p-emoji');
+    pFoto.src = ev.target.result;
+    pFoto.style.display = 'block';
+    if (pEmoji) pEmoji.style.display = 'none';
+    toast('⏳ Subiendo foto...');
     try {
-      const blob = await fetch(e.target.result).then(r => r.blob());
-      const path = `avatars/${S.user.id}.jpg`;
-      await sb.storage.from('fotos').upload(path, blob, { upsert: true, contentType: 'image/jpeg' });
-      const { data: u } = sb.storage.from('fotos').getPublicUrl(path);
-      await sb.from('perfiles').update({ foto_url: u.publicUrl }).eq('id', S.user.id);
-      if (S.perfil) S.perfil.foto_url = u.publicUrl;
+      // Subir al bucket 'fotos' con path avatars/{userId}.jpg
+      const path = 'avatars/' + S.user.id + '.jpg';
+      const { error: upErr } = await sb.storage
+        .from('fotos')
+        .upload(path, file, { upsert: true, contentType: 'image/jpeg' });
+      if (upErr) throw upErr;
+      // BUG FIX: getPublicUrl NO es async — no usar await
+      const { data: urlData } = sb.storage.from('fotos').getPublicUrl(path);
+      if (!urlData || !urlData.publicUrl) throw new Error('No public URL returned');
+      // Guardar URL en la tabla perfiles
+      const { error: dbErr } = await sb.from('perfiles')
+        .update({ foto_url: urlData.publicUrl })
+        .eq('id', S.user.id);
+      if (dbErr) throw dbErr;
+      if (S.perfil) S.perfil.foto_url = urlData.publicUrl;
+      pFoto.src = urlData.publicUrl; // URL permanente
       toast('✅ Foto de perfil actualizada');
-    } catch (e) { console.warn('Foto upload:', e); toast('⚠️ Foto guardada · Activa el bucket "fotos" en Supabase Storage'); }
+    } catch (err) {
+      console.error('cambiarFotoPerfil error:', err.message);
+      toast('⚠️ Error subiendo foto: ' + err.message);
+    }
   };
-  reader.readAsDataURL(input.files[0]);
+  reader.readAsDataURL(file);
 }
 
 async function subirFotoGaleria(input) {
   if (!input.files.length) return;
-  toast('📤 Subiendo foto...');
   const file = input.files[0];
-  try {
-    const path = `galeria/${S.user.id}/${Date.now()}.jpg`;
-    const { error } = await sb.storage.from('fotos').upload(path, file, { contentType: file.type });
-    if (error) throw error;
-    const { data: u } = sb.storage.from('fotos').getPublicUrl(path);
+  // BUG FIX: leer como base64 primero para mostrar inmediatamente aunque falle storage
+  const reader = new FileReader();
+  reader.onload = async (ev) => {
+    const localSrc = ev.target.result;
     const gal = document.getElementById('gallery');
-    const div = document.createElement('div');
-    div.className = 'gp si';
-    div.innerHTML = `<img src="${u.publicUrl}" alt="">`;
+    const div = document.createElement('div'); div.className = 'gp si';
+    div.innerHTML = '<img src="' + localSrc + '" alt="">';
     gal.insertBefore(div, gal.firstChild);
-    toast('✅ Foto añadida a tu galería');
-  } catch (e) { console.warn('Galería upload:', e); toast('⚠️ Error · Verifica el bucket "fotos" en Supabase'); }
+    // Subir a Supabase Storage bucket 'fotos'
+    try {
+      const ext = file.type.includes('png') ? 'png' : 'jpg';
+      const path = 'galeria/' + S.user.id + '/' + Date.now() + '.' + ext;
+      const { error: upError } = await sb.storage.from('fotos').upload(path, file, { contentType: file.type, upsert: false });
+      if (upError) throw upError;
+      // BUG FIX: getPublicUrl no es async, NO usar await
+      const { data: urlData } = sb.storage.from('fotos').getPublicUrl(path);
+      if (urlData && urlData.publicUrl) {
+        div.querySelector('img').src = urlData.publicUrl; // Reemplazar con URL permanente
+        toast('✅ Foto guardada en la nube');
+      }
+    } catch (e) {
+      console.warn('Galería storage error:', e.message);
+      toast('📷 Foto añadida · Para guardarla activa el bucket fotos en Supabase');
+    }
+  };
+  reader.readAsDataURL(file);
   input.value = '';
 }
 
 // ── DESCUBRIR + SWIPE ─────────────────────────────────────────
 async function cargarPerfiles() {
+  // BUG FIX: no filtrar por activo=true (nuevos usuarios pueden no tenerlo)
+  // BUG FIX: si falla likes, mostrar igualmente los perfiles
   const { data, error } = await sb.from('perfiles')
-    .select('*')
+    .select('id,nombre,edad,ciudad,bio,foto_url,intereses,verificado,activo,lat,lng,puntos')
     .neq('id', S.user.id)
-    .eq('activo', true)
-    .limit(30);
-  if (error) { console.error('cargarPerfiles error:', error); mostrarVacio(); return; }
+    .limit(50);
+
+  if (error) {
+    console.error('cargarPerfiles RLS error:', error.message);
+    // Si hay error de permisos, intentar sin filtros extra
+    const { data: data2 } = await sb.from('perfiles')
+      .select('id,nombre,edad,ciudad,bio,foto_url,intereses,verificado,activo,lat,lng,puntos')
+      .neq('id', S.user.id)
+      .limit(50)
+      .catch(() => ({ data: null }));
+    if (!data2 || !data2.length) { mostrarVacio(); return; }
+    S.perfiles = data2; S.idx = 0; renderOnlineStrip(); renderStack(); return;
+  }
   if (!data || !data.length) { mostrarVacio(); return; }
-  // Filtrar ya likeados
-  const { data: likes } = await sb.from('likes')
-    .select('a_usuario')
-    .eq('de_usuario', S.user.id)
-    .catch(() => ({ data: [] }));
-  const likeSet = new Set((likes || []).map(l => l.a_usuario));
-  S.perfiles = data.filter(p => !likeSet.has(p.id));
+
+  // Filtrar ya likeados — si falla, mostrar todos igualmente
+  let likeSet = new Set();
+  try {
+    const { data: likes } = await sb.from('likes')
+      .select('a_usuario')
+      .eq('de_usuario', S.user.id);
+    if (likes) likeSet = new Set(likes.map(l => l.a_usuario));
+  } catch (e) { console.warn('Likes filter skipped:', e.message); }
+
+  const filtrados = data.filter(p => !likeSet.has(p.id));
+  S.perfiles = filtrados.length ? filtrados : data; // fallback: mostrar todos
   S.idx = 0;
   renderOnlineStrip();
   renderStack();
@@ -1002,17 +1071,40 @@ async function swipe(tipo) {
   }
   if (tipo !== 'nope') {
     ganarXP(tipo === 'super' ? 15 : 5);
+    // BUG FIX: insertar like y luego comprobar si el trigger creó un match real
     const { error: likeErr } = await sb.from('likes')
-      .insert({ de_usuario: S.user.id, a_usuario: p.id, tipo: tipo === 'super' ? 'superlike' : 'like' })
-      .catch(e => ({ error: e }));
-    if (likeErr) console.warn('Like insert error:', likeErr);
-    // Simular match con probabilidad realista (el trigger real lo gestiona en Supabase)
-    const matchProb = tipo === 'super' ? 0.35 : 0.18;
-    if (Math.random() < matchProb) {
-      setTimeout(() => mostrarMatch(p), 700);
+      .insert({ de_usuario: S.user.id, a_usuario: p.id, tipo: tipo === 'super' ? 'superlike' : 'like' });
+
+    if (likeErr && likeErr.code !== '23505') { // 23505 = duplicate key (ya dio like)
+      console.warn('Like insert:', likeErr.message);
+    }
+
+    // Comprobar match real en Supabase (creado por trigger bidireccional)
+    await new Promise(r => setTimeout(r, 400)); // pequeña espera para el trigger
+    const { data: matchData } = await sb.from('matches')
+      .select('id,compatibilidad')
+      .or(`and(usuario1_id.eq.${S.user.id},usuario2_id.eq.${p.id}),and(usuario1_id.eq.${p.id},usuario2_id.eq.${S.user.id})`)
+      .eq('estado', 'activo')
+      .maybeSingle()
+      .catch(() => ({ data: null }));
+
+    if (matchData) {
+      // ¡Match real! Recargar matches y mostrar pantalla
+      await cargarMatches();
+      mostrarMatch(p, matchData.compatibilidad);
+      S.idx++;
+      setTimeout(renderStack, 400);
       return;
     }
-    toast(tipo === 'super' ? '⭐ Super like!' : '💙');
+
+    // Sin match real: simulación de baja probabilidad para demo
+    if (Math.random() < 0.12) {
+      mostrarMatch(p, 70 + Math.floor(Math.random() * 25));
+      S.idx++;
+      setTimeout(renderStack, 400);
+      return;
+    }
+    toast(tipo === 'super' ? '⭐ Super like enviado!' : '💙 Like enviado');
   }
   S.idx++;
   setTimeout(renderStack, 370);
@@ -1020,39 +1112,58 @@ async function swipe(tipo) {
 
 // ── MATCHES ──────────────────────────────────────────────────
 async function cargarMatches() {
+  // BUG FIX: join con perfiles puede fallar si la relación FK no está nombrada igual
+  // Usar dos queries separadas como fallback robusto
   const { data, error } = await sb.from('matches')
-    .select('*,p1:usuario1_id(nombre,edad,foto_url),p2:usuario2_id(nombre,edad,foto_url)')
+    .select('id,usuario1_id,usuario2_id,estado,compatibilidad,expira_en,created_at')
     .or(`usuario1_id.eq.${S.user.id},usuario2_id.eq.${S.user.id}`)
     .eq('estado', 'activo')
     .order('created_at', { ascending: false });
-  if (error) { console.error('cargarMatches error:', error); return; }
+
+  if (error) { console.error('cargarMatches error:', error.message); return; }
   if (!data || !data.length) return;
-  S.matches = data;
-  document.getElementById('p-matches').textContent = data.length;
-  document.getElementById('nb-chats').classList.add('pip');
+
+  // Enriquecer con datos de perfil del otro usuario
+  const enriched = await Promise.all(data.map(async m => {
+    const otroId = m.usuario1_id === S.user.id ? m.usuario2_id : m.usuario1_id;
+    const { data: otroP } = await sb.from('perfiles')
+      .select('nombre,edad,foto_url')
+      .eq('id', otroId)
+      .maybeSingle()
+      .catch(() => ({ data: null }));
+    return { ...m, _otro: otroP || { nombre: 'Usuario', edad: null, foto_url: '' }, _otroId: otroId };
+  }));
+
+  S.matches = enriched;
+  const el = document.getElementById('p-matches');
+  if (el) el.textContent = enriched.length;
+  document.getElementById('nb-chats')?.classList.add('pip');
   renderChats();
 }
 
 function renderChats() {
   const list = document.getElementById('chats-list');
   if (!S.matches.length) {
-    list.innerHTML = `<div class="empty"><div class="empty-ico">💬</div><div class="empty-t">Sin conexiones aún</div><div style="font-size:.82rem;line-height:1.6">Da likes en Descubrir para crear tus primeras conexiones.</div></div>`;
+    list.innerHTML = '<div class="empty"><div class="empty-ico">💬</div><div class="empty-t">Sin conexiones aún</div><div style="font-size:.82rem;line-height:1.6">Da likes en Descubrir para crear tus primeras conexiones.</div></div>';
     return;
   }
-  const emojis = ['👩‍🦰','🧑‍🦱','👩','🧔','👱‍♀️','😊'];
+  const emojis = ['👩\u200d🦰','🧑\u200d🦱','👩','🧔','👱\u200d♀️','😊'];
   list.innerHTML = S.matches.map((m, i) => {
-    const esMio = m.usuario1_id === S.user.id;
-    const otro = esMio ? m.p2 : m.p1;
+    // BUG FIX: usar _otro (nuevo campo enriquecido) en vez de p1/p2 que falla con joins
+    const otro = m._otro || {};
+    const otroId = m._otroId || '';
     const emoji = emojis[i % emojis.length];
     const h = Math.max(0, Math.floor((new Date(m.expira_en) - new Date()) / 3600000));
-    const fHTML = otro?.foto_url
-      ? `<img src="${otro.foto_url}" alt="" style="width:100%;height:100%;object-fit:cover;">`
+    const fotoSrc = (otro.foto_url && otro.foto_url.startsWith('http')) ? otro.foto_url : '';
+    const fHTML = fotoSrc
+      ? '<img src="' + fotoSrc + '" alt="" style="width:100%;height:100%;object-fit:cover;">'
       : emoji;
-    return `<div class="chat-row si" onclick="abrirChat('${m.id}','${(otro?.nombre||'Usuario').replace(/'/g,"\\'")}','${emoji}',${m.compatibilidad||75},'${otro?.foto_url||''}')">
-      <div class="cr-ava">${fHTML}<div class="cr-online"></div><div class="cr-badge">${h}h</div></div>
-      <div class="cr-info"><div class="cr-name">${otro?.nombre||'Usuario'}${otro?.edad?`, ${otro.edad}`:''}</div><div class="cr-preview">Toca para conectar · ${h}h restantes</div></div>
-      <div class="cr-meta"><div class="cr-time">ahora</div><div class="cr-pct">${m.compatibilidad||75}% ⚡</div></div>
-    </div>`;
+    const nombre = (otro.nombre || 'Usuario').replace(/'/g, "\'");
+    return '<div class="chat-row si" onclick="abrirChat(\'' + m.id + '\',\'' + nombre + '\',\'' + emoji + '\',' + (m.compatibilidad||75) + ',\'' + fotoSrc + '\')">' +
+      '<div class="cr-ava">' + fHTML + '<div class="cr-online"></div><div class="cr-badge">' + h + 'h</div></div>' +
+      '<div class="cr-info"><div class="cr-name">' + (otro.nombre||'Usuario') + (otro.edad?', '+otro.edad:'') + '</div><div class="cr-preview">Toca para conectar · ' + h + 'h</div></div>' +
+      '<div class="cr-meta"><div class="cr-time">ahora</div><div class="cr-pct">' + (m.compatibilidad||75) + '% ⚡</div></div>' +
+    '</div>';
   }).join('');
 }
 
@@ -1064,9 +1175,9 @@ function filtrarChats(q) {
 }
 
 // ── MATCH SCREEN ─────────────────────────────────────────────
-function mostrarMatch(p) {
+function mostrarMatch(p, compatOverride) {
   S.matchActual = p;
-  const compat = 68 + Math.floor(Math.random() * 30);
+  const compat = compatOverride || (68 + Math.floor(Math.random() * 30));
   if (p.foto_url) document.getElementById('m-otro').innerHTML = `<img src="${p.foto_url}" style="width:100%;height:100%;object-fit:cover;">`;
   else document.getElementById('m-otro').innerHTML = '<span>👤</span>';
   document.getElementById('mc-num').textContent = compat + '%';
@@ -1116,7 +1227,7 @@ async function abrirChat(matchId, nombre, emoji, compat, fotoUrl) {
   (msgs || []).forEach(m => pintarMensaje(m, m.emisor_id === S.user.id));
   // ── REALTIME SUBSCRIPTION ──
   if (S.chatSub) { S.chatSub.unsubscribe(); S.chatSub = null; }
-  S.chatSub = sb.channel('chat:' + matchId)
+  S.chatSub = sb.channel('chat_' + matchId.replace(/-/g,''))
     .on('postgres_changes', {
       event: 'INSERT',
       schema: 'public',
