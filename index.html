@@ -8,30 +8,28 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-/* Estilo ENLACE v14 */
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'Segoe UI', Arial, sans-serif;
   background: #0A0A0F;
   color: white;
   text-align: center;
   padding: 20px;
 }
-h1 { color: #E8356D; font-size: 2.5rem; letter-spacing: -1px; }
+h1 { color: #E8356D; font-size: 2.5rem; }
 .card {
-  background: #12121A;
-  padding: 25px;
-  border-radius: 20px;
-  border: 1px solid rgba(255,255,255,0.05);
+  background: #111118;
+  padding: 20px;
+  border-radius: 15px;
+  border: 1px solid #222;
   max-width: 400px;
   margin: 0 auto;
 }
 input, button {
   padding: 12px;
   margin: 8px 0;
-  border-radius: 12px;
+  border-radius: 10px;
   border: none;
   width: 90%;
-  font-size: 16px;
 }
 input { background: #1A1A26; color: white; border: 1px solid #333; }
 button {
@@ -39,21 +37,18 @@ button {
   color: white;
   font-weight: bold;
   cursor: pointer;
-  transition: 0.3s;
 }
-button:hover { opacity: 0.8; transform: translateY(-2px); }
 #chat {
-  background: #050507;
-  padding: 15px;
-  margin-top: 20px;
-  border-radius: 15px;
-  max-height: 250px;
+  background: #050505;
+  padding: 10px;
+  margin-top: 15px;
+  border-radius: 10px;
+  max-height: 200px;
   overflow-y: auto;
-  border: 1px solid #222;
   text-align: left;
 }
 #app { display:none; }
-.err { color: #E8356D; font-size: 12px; }
+.error-msg { color: #ff4d4d; font-size: 14px; margin-top: 10px; }
 </style>
 </head>
 
@@ -62,59 +57,55 @@ button:hover { opacity: 0.8; transform: translateY(-2px); }
 <h1>🔗 ENLACE</h1>
 
 <div id="auth" class="card">
-  <p>Entra en la red de conexiones reales</p>
   <input id="email" type="email" placeholder="Email"><br>
   <input id="pass" type="password" placeholder="Contraseña"><br>
-  <button onclick="login()">ENTRAR</button>
-  <button onclick="register()" style="background:transparent; color:#666;">Crear cuenta</button>
-  <p id="msg-auth" class="err"></p>
+  <button onclick="login()">Entrar</button>
+  <button onclick="register()" style="background: #222;">Registrarse</button>
+  <div id="auth-err" class="error-msg"></div>
 </div>
 
 <div id="app" class="card">
-  <h2>¡Hola! 👋</h2>
-  <p style="color:#666">Panel de control de usuario</p>
+  <h2>Bienvenido 👋</h2>
 
-  <button onclick="activarGPS()">📍 Actualizar Ubicación</button><br>
+  <button onclick="activarGPS()">Activar GPS 📍</button><br>
 
   <div style="margin: 15px 0;">
-    <label style="font-size:12px; color:#888;">Subir foto de perfil:</label><br>
+    <label style="display:block; margin-bottom:5px; font-size:14px;">Subir foto de perfil:</label>
     <input type="file" onchange="subirFoto(this.files[0])" style="background:none; border:none; width:auto;">
   </div>
 
-  <button onclick="enviarMensaje()">💬 Enviar Mensaje de Prueba</button>
+  <button onclick="enviarMensaje()">Enviar mensaje 💬</button>
 
   <div id="chat">
-    <small style="color:#444">Mensajes en tiempo real...</small>
+    <small style="color: #444;">Bandeja de entrada...</small>
   </div>
 
-  <button onclick="logout()" style="background:#222; margin-top:30px;">Cerrar sesión</button>
+  <button onclick="logout()" style="background: #333; margin-top: 20px;">Cerrar sesión</button>
 </div>
 
 <script>
-// ═══ TUS CLAVES CONFIGURADAS ═══
-const supabaseUrl = "https://nvvebzpbupqrddxcvnzk.supabase.co";
-const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im52dmVienBidXBxcmRkeGN2bnprIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUzMTI2MzIsImV4cCI6MjA2MDg4ODYzMn0.n-3m9fV2Xm9_S_vY2L8N9m9fV2Xm9_S_vY2L8N9m9fV2Xm9_S_vY2L8N";
+// ═══ CONFIGURACIÓN CON TUS CLAVES REALES ═══
+const supabaseUrl = "https://nvvebzpbupqrddxcvnzk.supabase.co"; //
+const supabaseKey = "sb_publishable_j80UVwAIS-Va86ai1S5qbw_atZ6QTm1"; //
 
 const db = supabase.createClient(supabaseUrl, supabaseKey);
 
-// ELEMENTOS
 const emailInput = document.getElementById("email");
 const passInput = document.getElementById("pass");
 const authDiv = document.getElementById("auth");
 const appDiv = document.getElementById("app");
 const chatDiv = document.getElementById("chat");
-const msgAuth = document.getElementById("msg-auth");
+const authErr = document.getElementById("auth-err");
 
 // LOGIN
 async function login() {
-  msgAuth.innerText = "Verificando...";
-  const { data, error } = await db.auth.signInWithPassword({
+  const { error } = await db.auth.signInWithPassword({
     email: emailInput.value,
     password: passInput.value
   });
 
   if (error) {
-    msgAuth.innerText = error.message;
+    authErr.innerText = error.message;
   } else {
     iniciar();
   }
@@ -122,16 +113,15 @@ async function login() {
 
 // REGISTER
 async function register() {
-  msgAuth.innerText = "Creando cuenta...";
-  const { data, error } = await db.auth.signUp({
+  const { error } = await db.auth.signUp({
     email: emailInput.value,
     password: passInput.value
   });
 
   if (error) {
-    msgAuth.innerText = error.message;
+    authErr.innerText = error.message;
   } else {
-    alert("¡Cuenta creada! Revisa tu email si has activado la confirmación.");
+    alert("Cuenta creada correctamente");
   }
 }
 
@@ -159,60 +149,56 @@ function activarGPS() {
       gps_activo: true
     }).eq("id", user.id);
 
-    if(error) alert("Error GPS: " + error.message);
-    else alert("Ubicación actualizada en la base de datos 📍");
+    if (error) alert("Error al guardar GPS: " + error.message);
+    else alert("GPS activado correctamente");
   });
 }
 
 // FOTO
 async function subirFoto(file) {
-  if(!file) return;
+  if (!file) return;
   const { data: { user } } = await db.auth.getUser();
-  const fileName = `${user.id}/${Date.now()}.jpg`;
+  const path = `${user.id}/${Date.now()}.jpg`;
 
   const { data, error } = await db.storage
     .from("fotos")
-    .upload(fileName, file);
+    .upload(path, file);
 
-  if (error) return alert("Error al subir: " + error.message);
+  if (error) return alert("Error al subir foto: " + error.message);
 
   const { data: urlData } = db.storage
     .from("fotos")
-    .getPublicUrl(data.path);
+    .getPublicUrl(path);
 
   await db.from("perfiles").update({
     foto_url: urlData.publicUrl
   }).eq("id", user.id);
 
-  alert("Foto de perfil actualizada con éxito ✅");
+  alert("Foto de perfil actualizada");
 }
 
 // MENSAJE
 async function enviarMensaje() {
   const { data: { user } } = await db.auth.getUser();
 
-  // Buscamos un match activo para este usuario
   const { data: match } = await db
     .from("matches")
     .select("id")
-    .or(`usuario1_id.eq.${user.id},usuario2_id.eq.${user.id}`)
     .limit(1)
     .single();
 
-  if (!match) return alert("Aún no tienes ningún match para chatear.");
+  if (!match) return alert("Aún no tienes ningún match para enviar mensajes.");
 
-  const { error } = await db.from("mensajes").insert({
+  await db.from("mensajes").insert({
     match_id: match.id,
     emisor_id: user.id,
-    contenido: "¡Hola! ¿Qué tal? 👋"
+    contenido: "Hola desde ENLACE 👋"
   });
-  
-  if(error) alert(error.message);
 }
 
-// REALTIME (Chat en vivo)
+// REALTIME
 function escucharChat() {
-  db.channel("chat_publico")
+  db.channel("chat")
     .on("postgres_changes", {
       event: "INSERT",
       schema: "public",
@@ -220,18 +206,15 @@ function escucharChat() {
     }, (payload) => {
       const p = document.createElement("p");
       p.style.margin = "5px 0";
-      p.style.padding = "8px";
-      p.style.background = "#1A1A26";
-      p.style.borderRadius = "8px";
       p.style.fontSize = "14px";
-      p.innerHTML = `<b style="color:#E8356D">Mensaje:</b> ${payload.new.contenido}`;
+      p.innerHTML = `<b style="color: #E8356D;">Nuevo:</b> ${payload.new.contenido}`;
       chatDiv.appendChild(p);
       chatDiv.scrollTop = chatDiv.scrollHeight;
     })
     .subscribe();
 }
 
-// AUTO LOGIN (Si ya estabas logueado)
+// AUTO LOGIN
 db.auth.getSession().then(({ data }) => {
   if (data.session) iniciar();
 });
