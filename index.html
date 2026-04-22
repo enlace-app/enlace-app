@@ -7,94 +7,119 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-    /* Recupero tu Diseño Original */
+    /* TU DISEÑO ORIGINAL v14 */
     :root {
       --bg:#0A0A0F; --s1:#12121A; --s2:#1A1A26; --acc:#E8356D; --txt:#F0F0FF;
     }
     body { margin:0; background:var(--bg); color:var(--txt); font-family:'DM Sans', sans-serif; overflow:hidden; }
     
-    /* Splash con tu Logo Original */
-    #splash { position:fixed; inset:0; background:var(--bg); display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:9999; transition:0.5s; }
+    #splash { 
+      position:fixed; inset:0; background:var(--bg); 
+      display:flex; flex-direction:column; align-items:center; justify-content:center; 
+      z-index:9999; opacity: 1; transition: opacity 0.5s ease;
+    }
     .logo-anim { font-family:'Syne', sans-serif; font-weight:800; font-size:48px; letter-spacing:-2px; color:var(--acc); margin:0; }
     
-    .screen { position:fixed; inset:0; display:none; flex-direction:column; padding-top:env(safe-area-inset-top); }
+    .screen { position:fixed; inset:0; display:none; flex-direction:column; padding-top:env(safe-area-inset-top); background:var(--bg); }
     .screen.on { display:flex; }
 
-    /* Estilos de tus botones y XP */
-    .xp-badge { background:rgba(232,53,109,0.15); color:var(--acc); padding:4px 12px; border-radius:20px; font-weight:600; font-size:12px; border:1px solid rgba(232,53,109,0.3); }
-    .btn-main { background:var(--acc); color:white; border:none; padding:16px; border-radius:16px; font-weight:700; width:100%; cursor:pointer; }
+    /* Estilos Premium de tu v14 */
+    .xp-badge { background:rgba(232,53,109,0.15); color:var(--acc); padding:6px 14px; border-radius:20px; font-weight:600; font-size:12px; border:1px solid rgba(232,53,109,0.3); }
+    .btn-main { background:var(--acc); color:white; border:none; padding:18px; border-radius:18px; font-weight:700; width:90%; cursor:pointer; font-size:16px; box-shadow: 0 10px 20px rgba(232,53,109,0.2); }
     
-    input { background:var(--s2); border:1px solid rgba(255,255,255,0.1); padding:16px; border-radius:16px; color:white; margin:8px 0; width:90%; }
+    input { background:var(--s2); border:1px solid rgba(255,255,255,0.05); padding:16px; border-radius:16px; color:white; margin:10px 0; width:85%; font-size:16px; outline:none; }
+    input:focus { border-color: var(--acc); }
     
     .nav { position:fixed; bottom:0; width:100%; height:85px; background:rgba(10,10,15,0.8); backdrop-filter:blur(20px); display:none; justify-content:space-around; align-items:center; border-top:1px solid rgba(255,255,255,0.05); padding-bottom:env(safe-area-inset-bottom); }
     .nav.on { display:flex; }
+
+    .loader { width:24px; height:24px; border:3px solid rgba(232,53,109,0.2); border-top-color:var(--acc); border-radius:50%; animation:spin 1s linear infinite; margin-top:20px; }
+    @keyframes spin { to { transform:rotate(360deg); } }
 </style>
 </head>
 <body>
 
     <div id="splash">
         <h1 class="logo-anim">ENLACE</h1>
-        <div id="loader" style="width:20px; height:20px; border:2px solid #333; border-top-color:var(--acc); border-radius:50%; animation:spin 1s linear infinite; margin-top:20px"></div>
+        <div class="loader"></div>
+        <p style="font-size:10px; color:#444; margin-top:15px; letter-spacing:2px">CONECTANDO SISTEMA</p>
     </div>
 
     <div id="auth" class="screen" style="justify-content:center; align-items:center;">
-        <h2 style="font-family:Syne">Empieza algo real</h2>
-        <input type="email" id="email" placeholder="Correo electrónico">
+        <h1 style="font-family:Syne; font-size:32px; margin-bottom:5px">Bienvenido</h1>
+        <p style="color:#666; margin-bottom:30px">La app de citas real de España</p>
+        
+        <input type="email" id="email" placeholder="Email">
         <input type="password" id="pass" placeholder="Contraseña">
-        <button class="btn-main" style="width:90%" onclick="handleAuth('login')">ENTRAR</button>
-        <button onclick="handleAuth('reg')" style="background:none; border:none; color:#888; margin-top:15px">Crear cuenta nueva</button>
-        <p id="err" style="color:var(--acc); font-size:12px; margin-top:10px"></p>
+        
+        <button class="btn-main" onclick="handleAuth('login')">ENTRAR</button>
+        <button onclick="handleAuth('reg')" style="background:none; border:none; color:#888; margin-top:20px; font-weight:600">Crear cuenta nueva</button>
+        
+        <p id="err" style="color:var(--acc); font-size:12px; margin-top:20px; text-align:center; padding:0 20px"></p>
     </div>
 
     <div id="main" class="screen">
-        <header style="padding:20px; display:flex; justify-content:space-between; align-items:center">
-            <span style="font-family:Syne; font-weight:800; color:var(--acc); font-size:20px">ENLACE</span>
+        <header style="padding:20px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.03)">
+            <span style="font-family:Syne; font-weight:800; color:var(--acc); font-size:22px">ENLACE</span>
             <div class="xp-badge" id="user-xp">0 XP</div>
         </header>
-        <div id="feed" style="flex:1; display:flex; align-items:center; justify-content:center; padding:20px">
-            <div style="background:var(--s2); width:100%; height:100%; border-radius:32px; display:flex; align-items:center; justify-content:center; border:1px solid rgba(255,255,255,0.05)">
-                <p style="color:#555">Buscando perfiles cerca...</p>
+        
+        <div id="feed" style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px">
+            <div style="background:var(--s2); width:100%; height:80%; border-radius:35px; border:1px solid rgba(255,255,255,0.05); display:flex; flex-direction:column; align-items:center; justify-content:center">
+                <p style="color:#444; font-weight:600">No hay perfiles nuevos hoy</p>
+                <button onclick="location.reload()" style="background:none; color:var(--acc); border:1px solid var(--acc); padding:8px 20px; border-radius:12px; margin-top:15px; font-size:12px">Actualizar</button>
             </div>
         </div>
     </div>
 
     <nav id="navbar" class="nav">
-        <div onclick="show('main')">🔥</div>
-        <div onclick="alert('Chat')">💬</div>
-        <div onclick="alert('Perfil')">👤</div>
+        <div onclick="show('main')" style="font-size:28px">🔥</div>
+        <div onclick="alert('Chats próximamente')" style="font-size:28px; opacity:0.3">💬</div>
+        <div onclick="alert('Perfil próximamente')" style="font-size:28px; opacity:0.3">👤</div>
     </nav>
 
 <script>
-    // TUS CLAVES INTEGRADAS
+    // CREDENCIALES CONFIGURADAS
     const SB_URL = "https://nvvebzpbupqrddxcvnzk.supabase.co";
     const SB_KEY = "Sb_publishable_DHkfYtA89Cb-MAIdq2TqqA_OVjmtvuq";
     const sb = supabase.createClient(SB_URL, SB_KEY);
 
-    async function startApp() {
-        // El truco para que no se quede pensando: forzamos el cierre del splash a los 3 seg
-        const timer = setTimeout(() => {
-            document.getElementById('splash').style.opacity = '0';
-            setTimeout(() => {
-                document.getElementById('splash').style.display = 'none';
-                show('auth');
-            }, 500);
-        }, 3000);
+    async function bootstrap() {
+        console.log("Iniciando ENLACE...");
+        
+        // SALVAVIDAS: Si en 3.5 segundos no hay respuesta, forzamos la UI
+        const forceExit = setTimeout(() => {
+            console.warn("Failsafe: Forzando salida de Splash");
+            hideSplash();
+            show('auth');
+        }, 3500);
 
         try {
-            const { data: { session } } = await sb.auth.getSession();
-            if (session) {
-                clearTimeout(timer);
-                document.getElementById('splash').style.display = 'none';
-                show('main');
-            }
+            const { data: { session }, error } = await sb.auth.getSession();
+            clearTimeout(forceExit);
+            
+            hideSplash();
+            if (session) show('main'); 
+            else show('auth');
+            
         } catch (e) {
-            console.error(e);
+            console.error("Error en inicio:", e);
+            hideSplash();
+            show('auth');
         }
+    }
+
+    function hideSplash() {
+        const s = document.getElementById('splash');
+        s.style.opacity = '0';
+        setTimeout(() => s.style.display = 'none', 500);
     }
 
     function show(id) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('on'));
-        document.getElementById(id).classList.add('on');
+        const target = document.getElementById(id);
+        if(target) target.classList.add('on');
+        
         if(id === 'main') document.getElementById('navbar').classList.add('on');
         else document.getElementById('navbar').classList.remove('on');
     }
@@ -104,17 +129,22 @@
         const pass = document.getElementById('pass').value;
         const err = document.getElementById('err');
         
-        err.innerText = "Conectando...";
+        if(!email || !pass) { err.innerText = "Completa los campos"; return; }
+        
+        err.innerText = "Conectando con Supabase...";
+        
         const { error } = (type === 'login') 
             ? await sb.auth.signInWithPassword({ email, password:pass })
             : await sb.auth.signUp({ email, password:pass });
 
-        if(error) err.innerText = error.message;
-        else location.reload();
+        if(error) {
+            err.innerText = "Error: " + error.message;
+        } else {
+            location.reload();
+        }
     }
 
-    @keyframes spin { to { transform:rotate(360deg); } }
-    window.onload = startApp;
+    window.onload = bootstrap;
 </script>
 </body>
 </html>
