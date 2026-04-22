@@ -2,20 +2,18 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>ENLACE v14</title>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.42.0"></script>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ENLACE</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root { --bg:#0A0A0F; --acc:#E8356D; --txt:#F0F0FF; --card:#12121A; }
-body { margin:0; background:var(--bg); color:var(--txt); font-family: system-ui, -apple-system, sans-serif; overflow:hidden; height:100vh; text-align: center; }
-.card { background:var(--card); padding:30px; border-radius:24px; border:1px solid rgba(255,255,255,0.05); width:85%; max-width:380px; margin: 20px auto; }
-h1 { color:var(--acc); font-size: 32px; letter-spacing: -1px; margin-top: 40px; }
-input { width:100%; background:#1A1A26; border:1px solid #333; padding:16px; border-radius:14px; color:white; margin:10px 0; box-sizing:border-box; font-size:16px; }
-button { width:100%; background:var(--acc); color:white; border:none; padding:16px; border-radius:14px; font-weight:bold; font-size:16px; cursor:pointer; margin-top:10px; }
-#app { display:none; }
-.err-text { color:var(--acc); font-size:13px; margin-top:15px; min-height:18px; }
+  body { font-family: Arial, sans-serif; background: #0A0A0F; color: white; text-align: center; padding: 20px; }
+  h1 { color: #E8356D; }
+  .card { background: #111; padding: 20px; border-radius: 15px; max-width: 400px; margin: 0 auto; border: 1px solid #222; }
+  input, button { padding: 12px; margin: 8px 0; border-radius: 10px; border: none; width: 90%; }
+  input { background: #1A1A26; color: white; }
+  button { background: #E8356D; color: white; font-weight: bold; cursor: pointer; }
+  #app { display:none; }
+  .err { color: #E8356D; font-size: 14px; margin-top: 10px; }
 </style>
 </head>
 <body>
@@ -23,91 +21,68 @@ button { width:100%; background:var(--acc); color:white; border:none; padding:16
 <h1>🔗 ENLACE</h1>
 
 <div id="auth" class="card">
-  <p style="color:#888; margin-bottom:20px;">Acceso Seguro</p>
   <input id="email" type="email" placeholder="Email" value="hispanointer@gmail.com">
   <input id="pass" type="password" placeholder="Contraseña">
   <button onclick="login()">ENTRAR</button>
-  <button onclick="register()" style="background:#222; margin-top:10px;">Registrarse</button>
-  <div id="msg" class="err-text"></div>
+  <button onclick="register()" style="background:#222">Registrarse</button>
+  <div id="msg" class="err"></div>
 </div>
 
-<div id="app">
-  <div class="card">
-    <h2 id="user-title">Bienvenido 👋</h2>
-    <button onclick="activarGPS()">📍 Activar GPS</button>
-    <div style="margin:20px 0;">
-       <label style="font-size:12px; color:#666;">Actualizar foto:</label><br>
-       <input type="file" onchange="subirFoto(this.files[0])" style="background:none; border:none; padding:5px;">
-    </div>
-    <button onclick="logout()" style="background:#222;">Cerrar Sesión</button>
-  </div>
+<div id="app" class="card">
+  <h2>Bienvenido 👋</h2>
+  <button onclick="activarGPS()">📍 Activar GPS</button>
+  <button onclick="logout()" style="background:#222; margin-top:20px;">Cerrar sesión</button>
 </div>
 
 <script>
-// USAMOS TUS CLAVES REALES
+// ═══ CONFIGURACIÓN FINAL ═══
 const SB_URL = "https://nvvebzpbupqrddxcvnzk.supabase.co";
-const SB_KEY = "sb_publishable_j80UVwAIS-Va86ai1S5qbw_atZ6QTm1";
+const SB_KEY = "EyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im52dmVienBidXBxcmRkeGN2bnprIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5Nzk4NzUsImV4cCI6MjA5MTU1NTg3NX0.5Zk-Y_6tZVKuvVj6Xxwh1gZT9ZRRU3rKI-7bw8nsEcY";
 
-const sb = supabase.createClient(SB_URL, SB_KEY);
+const db = supabase.createClient(SB_URL, SB_KEY);
 
 async function login() {
   const email = document.getElementById("email").value;
   const pass = document.getElementById("pass").value;
   const msg = document.getElementById("msg");
   
-  msg.innerText = "Verificando...";
-  
-  const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
-
-  if (error) {
-    msg.innerText = error.message;
-  } else {
-    window.location.reload(); 
-  }
+  const { error } = await db.auth.signInWithPassword({ email, password: pass });
+  if (error) msg.innerText = error.message;
+  else showApp();
 }
 
 async function register() {
   const email = document.getElementById("email").value;
   const pass = document.getElementById("pass").value;
-  const { error } = await sb.auth.signUp({ email, password: pass });
+  const { error } = await db.auth.signUp({ email, password: pass });
   if (error) alert(error.message);
-  else alert("Cuenta creada. Revisa tu email.");
+  else alert("Registro completado. Verifica tu email.");
 }
 
-function start() {
+function showApp() {
   document.getElementById("auth").style.display = "none";
   document.getElementById("app").style.display = "block";
 }
 
 async function logout() {
-  await sb.auth.signOut();
-  window.location.reload();
+  await db.auth.signOut();
+  location.reload();
 }
 
 async function activarGPS() {
   navigator.geolocation.getCurrentPosition(async (pos) => {
-    const { data: { user } } = await sb.auth.getUser();
-    await sb.from("perfiles").update({
+    const { data: { user } } = await db.auth.getUser();
+    await db.from("perfiles").update({
       lat: pos.coords.latitude,
       lng: pos.coords.longitude,
       gps_activo: true
     }).eq("id", user.id);
-    alert("GPS Actualizado 📍");
+    alert("📍 Ubicación actualizada.");
   });
 }
 
-async function subirFoto(file) {
-  if(!file) return;
-  const { data: { user } } = await sb.auth.getUser();
-  const path = `fotos/${user.id}_${Date.now()}.jpg`;
-  const { error } = await sb.storage.from("fotos").upload(path, file);
-  if(error) alert(error.message);
-  else alert("Foto subida ✅");
-}
-
-// AUTO-ENTRADA
-sb.auth.getSession().then(({ data }) => {
-  if (data.session) start();
+db.auth.getSession().then(({ data }) => {
+  if (data.session) showApp();
 });
 </script>
 </body>
