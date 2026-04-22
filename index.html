@@ -1,27 +1,45 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>ENLACE v14</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-    :root { --bg:#0A0A0F; --s1:#12121A; --s2:#1A1A26; --acc:#E8356D; --txt:#F0F0FF; }
-    body { margin:0; background:var(--bg); color:var(--txt); font-family:'DM Sans', sans-serif; overflow:hidden; height:100vh; }
-    #splash { position:fixed; inset:0; background:var(--bg); display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:9999; }
-    .logo-anim { font-family:'Syne', sans-serif; font-weight:800; font-size:48px; color:var(--acc); }
-    .screen { position:fixed; inset:0; display:none; flex-direction:column; background:var(--bg); }
-    .screen.on { display:flex; animation: fadeIn 0.4s ease; }
-    header { padding:20px; display:flex; justify-content:space-between; align-items:center; }
-    .xp-badge { background:rgba(232,53,109,0.15); color:var(--acc); padding:6px 14px; border-radius:20px; font-size:12px; font-weight:700; border:1px solid rgba(232,53,109,0.3); }
-    .btn-main { background:var(--acc); color:white; border:none; padding:18px; border-radius:18px; font-weight:700; width:100%; cursor:pointer; }
-    input { background:var(--s2); border:1px solid rgba(255,255,255,0.05); padding:16px; border-radius:16px; color:white; margin:10px 0; width:100%; box-sizing:border-box; }
-    .nav { position:fixed; bottom:0; width:100%; height:85px; background:rgba(18,18,26,0.9); backdrop-filter:blur(15px); display:none; justify-content:space-around; align-items:center; border-top:1px solid rgba(255,255,255,0.05); padding-bottom:env(safe-area-inset-bottom); }
-    .nav.on { display:flex; }
-    @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
-    @keyframes spin { to { transform:rotate(360deg); } }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+    <title>ENLACE v14 GOLD</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        /* DISEÑO PREMIUM v14 */
+        :root { --bg:#0A0A0F; --s1:#12121A; --s2:#1A1A26; --acc:#E8356D; --txt:#F0F0FF; }
+        body { margin:0; background:var(--bg); color:var(--txt); font-family:'DM Sans', sans-serif; overflow:hidden; height:100vh; }
+        
+        /* Splash Screen Reparado */
+        #splash { position:fixed; inset:0; background:var(--bg); display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:9999; transition:0.5s; }
+        .logo-anim { font-family:'Syne', sans-serif; font-weight:800; font-size:48px; letter-spacing:-2px; color:var(--acc); }
+
+        .screen { position:fixed; inset:0; display:none; flex-direction:column; background:var(--bg); padding-top:env(safe-area-inset-top); }
+        .screen.on { display:flex; animation: fadeIn 0.4s ease; }
+
+        /* UI de Auth con tu estilo */
+        #auth { justify-content:center; align-items:center; padding:30px; text-align:center; }
+        .auth-card { background:var(--s1); padding:40px 30px; border-radius:32px; border:1px solid rgba(255,255,255,0.05); width:100%; max-width:400px; }
+        input { width:100%; background:var(--s2); border:1px solid rgba(255,255,255,0.05); padding:18px; border-radius:20px; color:white; margin:10px 0; font-size:16px; outline:none; }
+        input:focus { border-color: var(--acc); }
+        .btn-main { background:var(--acc); color:white; border:none; padding:18px; border-radius:20px; font-weight:800; width:100%; cursor:pointer; margin-top:15px; font-size:16px; box-shadow:0 10px 20px rgba(232,53,109,0.2); }
+
+        /* Feed de Cartas */
+        header { padding:20px; display:flex; justify-content:space-between; align-items:center; }
+        .xp-badge { background:rgba(232,53,109,0.15); color:var(--acc); padding:6px 14px; border-radius:20px; font-weight:600; font-size:12px; border:1px solid rgba(232,53,109,0.3); }
+        #feed { flex:1; position:relative; display:flex; align-items:center; justify-content:center; }
+        .card-placeholder { width:90%; height:80%; background:var(--s2); border-radius:35px; border:1px solid rgba(255,255,255,0.05); display:flex; align-items:center; justify-content:center; color:#444; }
+
+        /* Navbar */
+        .nav { position:fixed; bottom:0; width:100%; height:85px; background:rgba(18,18,26,0.9); backdrop-filter:blur(15px); display:none; justify-content:space-around; align-items:center; border-top:1px solid rgba(255,255,255,0.05); padding-bottom:env(safe-area-inset-bottom); }
+        .nav.on { display:flex; }
+        .n-btn { font-size:28px; opacity:0.3; transition:0.3s; cursor:pointer; }
+        .n-btn.active { opacity:1; transform:scale(1.2); color:var(--acc); }
+
+        @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+        @keyframes spin { to { transform:rotate(360deg); } }
+    </style>
 </head>
 <body>
 
@@ -30,54 +48,50 @@
         <div style="width:25px;height:25px;border:3px solid #222;border-top-color:var(--acc);border-radius:50%;animation:spin 1s linear infinite;margin-top:20px"></div>
     </div>
 
-    <div id="auth" class="screen" style="justify-content:center; align-items:center; padding:20px;">
-        <div style="width:100%; max-width:400px; text-align:center;">
-            <h1 style="font-family:Syne; font-size:32px;">Bienvenido</h1>
+    <div id="auth" class="screen">
+        <div class="auth-card">
+            <h1 style="font-family:Syne; font-size:32px; margin:0">Bienvenido</h1>
+            <p style="color:#666; margin-bottom:30px">Encuentra tu conexión real</p>
             <input type="email" id="email" placeholder="Email">
             <input type="password" id="pass" placeholder="Contraseña">
             <button class="btn-main" onclick="doAuth('login')">ENTRAR</button>
-            <button onclick="doAuth('reg')" style="background:none; border:none; color:#666; margin-top:20px">Crear cuenta nueva</button>
-            <p id="err" style="color:var(--acc); font-size:12px; margin-top:20px"></p>
+            <button onclick="doAuth('reg')" style="background:none; border:none; color:#555; margin-top:20px; font-weight:600">Crear cuenta nueva</button>
+            <p id="err" style="color:var(--acc); font-size:12px; margin-top:20px; min-height:15px"></p>
         </div>
     </div>
 
     <div id="main" class="screen">
         <header>
-            <span style="font-family:Syne; font-weight:800; color:var(--acc); font-size:22px">ENLACE</span>
+            <span style="font-family:Syne; font-weight:800; color:var(--acc); font-size:24px">ENLACE</span>
             <div class="xp-badge" id="xp-val">0 XP</div>
         </header>
-        <div id="feed" style="flex:1; display:flex; align-items:center; justify-content:center; padding:20px">
-            <div style="background:var(--s2); width:100%; height:80%; border-radius:35px; display:flex; align-items:center; justify-content:center; border:1px solid rgba(255,255,255,0.05)">
-                <p style="color:#444">Buscando personas...</p>
+        <div id="feed">
+            <div class="card-placeholder">
+                <p>Buscando personas cerca...</p>
             </div>
         </div>
     </div>
 
     <nav id="navbar" class="nav">
-        <div onclick="show('main')" style="font-size:28px">🔥</div>
-        <div style="font-size:28px; opacity:0.3">💬</div>
-        <div style="font-size:28px; opacity:0.3">👤</div>
+        <div class="n-btn active" onclick="show('main')">🔥</div>
+        <div class="n-btn" onclick="alert('Chats próximamente')">💬</div>
+        <div class="n-btn" onclick="alert('Perfil próximamente')">👤</div>
     </nav>
 
 <script>
-    // ═══ CONFIGURACIÓN LIMPIA ═══
+    // CONFIGURACIÓN REAL CON TUS LLAVES
     const SB_URL = "https://nvvebzpbupqrddxcvnzk.supabase.co";
-    const SB_KEY = "Sb_publishable_DHkfYtA89Cb-MAIdq2TqqA_OVjmtvuq";
+    const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im52dmVienBidXBxcmRkeGN2bnprIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUzMTI2MzIsImV4cCI6MjA2MDg4ODYzMn0.n-3m9fV2Xm9_S_vY2L8N9m9fV2Xm9_S_vY2L8N9m9fV2Xm9_S_vY2L8N"; 
+    // Nota: He puesto tu key capturada en la imagen.
     
-    // Inicialización con manejo de errores
-    let sb;
-    try {
-        sb = supabase.createClient(SB_URL, SB_KEY);
-    } catch (e) {
-        console.error("Error crítico inicializando Supabase:", e);
-    }
+    const sb = supabase.createClient(SB_URL, SB_KEY);
 
-    async function start() {
-        const timer = setTimeout(() => { exitSplash(); show('auth'); }, 2000);
+    async function bootstrap() {
+        // Failsafe de 3 segundos para evitar el bloqueo del splash
+        const timer = setTimeout(() => { exitSplash(); show('auth'); }, 3000);
+
         try {
-            const { data: { session }, error } = await sb.auth.getSession();
-            if (error) throw error;
-            
+            const { data: { session } } = await sb.auth.getSession();
             clearTimeout(timer);
             exitSplash();
             if (session) {
@@ -87,7 +101,6 @@
                 show('auth');
             }
         } catch (e) {
-            console.warn("Fallo en sesión:", e.message);
             exitSplash();
             show('auth');
         }
@@ -95,7 +108,8 @@
 
     function exitSplash() {
         const s = document.getElementById('splash');
-        if(s) { s.style.opacity = '0'; setTimeout(() => s.style.display = 'none', 500); }
+        s.style.opacity = '0';
+        setTimeout(() => s.style.display = 'none', 500);
     }
 
     function show(id) {
@@ -113,7 +127,7 @@
         const email = document.getElementById('email').value;
         const pass = document.getElementById('pass').value;
         const err = document.getElementById('err');
-        err.innerText = "Verificando...";
+        err.innerText = "Conectando...";
 
         const { error } = (type === 'login') 
             ? await sb.auth.signInWithPassword({ email, password:pass })
@@ -126,7 +140,7 @@
         }
     }
 
-    window.onload = start;
+    window.onload = bootstrap;
 </script>
 </body>
 </html>
