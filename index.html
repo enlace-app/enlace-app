@@ -8,7 +8,8 @@
 <title>ENLACE</title>
 <meta http-equiv="Cache-Control" content="no-cache,no-store,must-revalidate">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"></noscript>
 <style>
 /* ═══ VARIABLES ═══ */
 :root {
@@ -28,8 +29,11 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:var(--fb)
 
 /* ═══ SISTEMA DE PANTALLAS — REGLA ÚNICA ═══ */
 /* CRÍTICO: una sola definición, nunca sobreescribir */
-.screen{display:none !important;position:fixed;inset:0;z-index:10;flex-direction:column;background:var(--bg);}
-.screen.on{display:flex !important;}
+/* CRÍTICO: screens ocultas por defecto */
+.screen{display:none;position:fixed;inset:0;z-index:10;flex-direction:column;background:var(--bg);}
+.screen.on{display:flex;}
+/* Auth visible por defecto sin JS (fallback si JS falla) */
+#sa{display:flex;}
 
 /* ═══ CAPAS z-index (de mayor a menor) ═══ */
 /* 900: toast | 800: match | 700: IA | 600: sheets | 500: chat | 200: topbar/nav | 10: screens */
@@ -347,10 +351,10 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:var(--fb)
 <body>
 
 <div class="toast" id="toast"></div>
-<div class="debug-banner" id="debug-banner"></div>
+<div class="debug-banner" id="debug-banner"><span id="debug-msg"></span> <button onclick="window.__rescatar()" style="background:rgba(255,71,87,.3);border:1px solid var(--red);border-radius:6px;padding:.15rem .5rem;color:white;font-size:.68rem;cursor:pointer;margin-left:.5rem;">🔄 Reiniciar</button></div>
 
 <!-- ══════ LOADING ══════ -->
-<div class="screen on" id="sl">
+<div class="screen" id="sl">
   <div class="brand-big">ENLACE</div>
   <div class="ring"></div>
 </div>
@@ -666,77 +670,119 @@ const S = {
 
 // ── SISTEMA DE LOGS VISIBLE ──
 function dbg(msg, tipo) {
-  console[tipo === 'error' ? 'error' : tipo === 'warn' ? 'warn' : 'log']('[ENLACE]', msg);
-  if (tipo === 'error' || tipo === 'warn') {
-    const banner = document.getElementById('debug-banner');
-    banner.textContent = '⚠️ ' + msg;
+  const prefix = tipo==='error'?'❌':tipo==='warn'?'⚠️':'ℹ️';
+  console[tipo==='error'?'error':tipo==='warn'?'warn':'log']('[ENLACE v14]', msg);
+  const banner = document.getElementById('debug-banner');
+  const msgEl = document.getElementById('debug-msg');
+  if (banner && msgEl && (tipo==='error'||tipo==='warn')) {
+    msgEl.textContent = prefix+' '+msg;
     banner.classList.add('on');
-    setTimeout(() => banner.classList.remove('on'), 6000);
+    clearTimeout(window._dbgT);
+    window._dbgT = setTimeout(() => banner.classList.remove('on'), 8000);
   }
 }
 
-// ── FUNCIÓN SHOW — ÚNICA, NUNCA SOBREESCRIBIR ──
+// ── FUNCIÓN SHOW — ÚNICA ──
 function show(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('on'));
+  // Ocultar todas las screens
+  document.querySelectorAll('.screen').forEach(s => {
+    s.classList.remove('on');
+    s.style.display = ''; // limpiar cualquier display inline
+  });
   const el = document.getElementById(id);
   if (el) {
     el.classList.add('on');
-    dbg('Pantalla: ' + id);
+    dbg('Pantalla: '+id);
   } else {
-    dbg('Pantalla no encontrada: ' + id, 'error');
+    dbg('Pantalla no encontrada: '+id,'error');
   }
 }
 
 // ════════════════════════════════════════════════════
 // INIT — INSTANTÁNEO, NUNCA PANTALLA EN BLANCO
 // ════════════════════════════════════════════════════
+// ── RESCATE: si JS falla completamente, el botón limpia y recarga
+window.__rescatar = function() {
+  try { localStorage.clear(); sessionStorage.clear(); } catch(e) {}
+  window.location.reload(true);
+};
+
+// ── INIT BLINDADO ──
 window.addEventListener('load', () => {
-  // PASO 1: mostrar auth inmediatamente (loading solo 0.5s máximo)
-  setTimeout(() => {
-    if (document.getElementById('sl').classList.contains('on')) {
-      dbg('Timeout de loading — mostrando auth', 'warn');
-      show('sa');
-    }
-  }, 3000); // Fallback de 3s
+  // Auth ya visible por CSS — ocultar solo si hay sesión válida
 
-  // PASO 2: verificar sesión en segundo plano
-  sb.auth.getSession()
-    .then(({ data: { session }, error }) => {
-      if (error) {
-        dbg('Error al verificar sesión: ' + error.message, 'error');
-        show('sa');
-        return;
-      }
-      if (session) {
-        S.user = session.user;
-        dbg('Sesión activa: ' + session.user.email);
-        cargarPerfil();
-      } else {
-        dbg('Sin sesión — mostrando login');
-        show('sa');
-      }
-    })
-    .catch(err => {
-      dbg('Error de red al iniciar: ' + err.message, 'error');
-      show('sa');
-    });
-});
+  // Fallback 1: 2 segundos sin respuesta → asegurar auth visible
+  const t1 = setTimeout(() => { mostrarAuth('timeout_2s'); }, 2000);
 
-// Escuchar cambios de auth
-sb.auth.onAuthStateChange((event, session) => {
-  dbg('Auth event: ' + event);
-  if (event === 'SIGNED_IN' && session) {
-    S.user = session.user;
-    // Evitar doble carga si ya estamos en la app
-    if (!document.getElementById('sapp').classList.contains('on')) {
-      cargarPerfil();
+  // Fallback 2: 5 segundos → forzar con rescate
+  const t2 = setTimeout(() => {
+    mostrarAuth('timeout_5s');
+    dbg('⚠️ 5s sin respuesta de Supabase. Comprueba tu conexión.', 'error');
+  }, 5000);
+
+  // Intentar verificar sesión
+  try {
+    if (typeof sb === 'undefined') {
+      dbg('Supabase no cargó — comprueba la conexión a internet', 'error');
+      clearTimeout(t1); clearTimeout(t2);
+      mostrarAuth('supabase_missing');
+      return;
     }
-  } else if (event === 'SIGNED_OUT') {
-    S.user = null; S.perfil = null;
-    show('sa');
-    resetAuthUI();
+    sb.auth.getSession()
+      .then(({ data: { session }, error }) => {
+        clearTimeout(t1); clearTimeout(t2);
+        if (error) { dbg('getSession error: '+error.message,'error'); mostrarAuth('session_error'); return; }
+        if (session?.user) {
+          S.user = session.user;
+          dbg('Sesión activa: '+session.user.email);
+          cargarPerfil();
+        } else {
+          dbg('Sin sesión');
+          mostrarAuth('no_session');
+        }
+      })
+      .catch(err => {
+        clearTimeout(t1); clearTimeout(t2);
+        dbg('getSession catch: '+err.message,'error');
+        mostrarAuth('network_error');
+      });
+  } catch(e) {
+    clearTimeout(t1); clearTimeout(t2);
+    dbg('Init catch: '+e.message,'error');
+    mostrarAuth('init_crash');
   }
 });
+
+// Función centralizada para mostrar auth
+function mostrarAuth(razon) {
+  dbg('Mostrando auth. Razón: '+razon);
+  // Ocultar loading, mostrar auth
+  document.getElementById('sl')?.classList.remove('on');
+  const sa = document.getElementById('sa');
+  if (sa) {
+    sa.style.display = 'flex'; // forzar aunque JS falle
+    sa.classList.add('on');
+  }
+}
+
+// onAuthStateChange — blindado
+try {
+  sb.auth.onAuthStateChange((event, session) => {
+    dbg('Auth event: '+event);
+    if (event === 'SIGNED_IN' && session?.user) {
+      S.user = session.user;
+      if (!document.getElementById('sapp')?.classList.contains('on')) {
+        cargarPerfil();
+      }
+    } else if (event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED' && !session) {
+      S.user = null; S.perfil = null;
+      mostrarAuth('signed_out');
+      resetAuthUI();
+    } else if (event === 'INITIAL_SESSION') {
+      if (!session) mostrarAuth('initial_no_session');
+    }
+  });
+} catch(e) { dbg('onAuthStateChange setup error: '+e.message,'error'); }
 
 // ════════════════════════════════════════════════════
 // AUTH
@@ -870,35 +916,56 @@ async function finOb() {
 // ════════════════════════════════════════════════════
 async function cargarPerfil() {
   show('sl');
+  // Timeout de seguridad: si la DB no responde en 8s → auth
+  const cpTimeout = setTimeout(() => {
+    dbg('cargarPerfil timeout 8s → auth','error');
+    mostrarAuth('perfil_timeout');
+  }, 8000);
   try {
+    if (!S.user?.id) { clearTimeout(cpTimeout); mostrarAuth('no_user_id'); return; }
     const { data, error } = await sb.from('perfiles')
-      .select('*')
+      .select('id,nombre,edad,ciudad,bio,objetivo,foto_url,intereses,verificado,activo,puntos,reputacion')
       .eq('id', S.user.id)
-      .maybeSingle(); // maybeSingle no lanza error si no hay fila
+      .maybeSingle();
+    clearTimeout(cpTimeout);
     if (error) {
-      dbg('cargarPerfil error: '+error.message, 'error');
-      show('sa'); return;
+      // RLS error o tabla no existe → ir a onboarding igualmente
+      dbg('cargarPerfil DB error: '+error.message+' (code:'+error.code+')','warn');
+      if (error.code === '42P01') { // tabla no existe
+        dbg('Tabla perfiles no existe — ejecuta el SQL primero','error');
+        mostrarAuth('tabla_no_existe');
+        return;
+      }
+      show('sob'); return; // intentar onboarding de todas formas
     }
-    if (!data) { dbg('Perfil no existe → onboarding'); show('sob'); return; }
-    if (!data.edad || !data.ciudad) { dbg('Perfil incompleto → onboarding'); show('sob'); return; }
+    if (!data) { show('sob'); return; }
+    if (!data.edad || !data.ciudad) { show('sob'); return; }
     S.perfil = data; S.xp = data.puntos || 0;
     iniciarApp();
   } catch(e) {
-    dbg('cargarPerfil catch: '+e.message, 'error');
-    show('sa');
+    clearTimeout(cpTimeout);
+    dbg('cargarPerfil catch: '+e.message,'error');
+    mostrarAuth('perfil_crash');
   }
 }
 
 function iniciarApp() {
-  show('sapp');
-  renderUI();
-  // Cargar todo en segundo plano sin bloquear UI
-  setTimeout(() => {
-    cargarPerfiles().catch(e => dbg('cargarPerfiles: '+e.message,'warn'));
-    cargarMatches().catch(e => dbg('cargarMatches: '+e.message,'warn'));
-    simOnline();
-  }, 80);
-  setTimeout(() => simLike(), 10000);
+  try {
+    show('sapp');
+    renderUI();
+    // Todo en segundo plano — la app NUNCA se rompe si la DB falla
+    setTimeout(() => {
+      cargarPerfiles().catch(e => { dbg('cargarPerfiles: '+e.message,'warn'); mostrarVacio(); });
+      cargarMatches().catch(e => { dbg('cargarMatches: '+e.message,'warn'); renderChats(); });
+      simOnline();
+    }, 80);
+    setTimeout(() => simLike(), 10000);
+  } catch(e) {
+    dbg('iniciarApp crash: '+e.message,'error');
+    // Último recurso: mostrar sapp aunque falle renderUI
+    document.getElementById('sapp').style.display='flex';
+    document.getElementById('sapp').classList.add('on');
+  }
 }
 
 function renderUI() {
