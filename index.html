@@ -3,17 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ENLACE</title>
+<title>ENLACE Corregido</title>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
-  body { font-family: Arial, sans-serif; background: #0A0A0F; color: white; text-align: center; padding: 20px; }
-  h1 { color: #E8356D; }
-  .card { background: #111; padding: 20px; border-radius: 15px; max-width: 400px; margin: 0 auto; border: 1px solid #222; }
-  input, button { padding: 12px; margin: 8px 0; border-radius: 10px; border: none; width: 90%; }
-  input { background: #1A1A26; color: white; }
-  button { background: #E8356D; color: white; font-weight: bold; cursor: pointer; }
-  #app { display:none; }
-  .err { color: #E8356D; font-size: 14px; margin-top: 10px; }
+  body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0A0A0F; color: white; text-align: center; padding: 20px; margin: 0; }
+  h1 { color: #E8356D; font-size: 2.5rem; margin-top: 50px; }
+  .card { background: #111118; padding: 30px; border-radius: 20px; border: 1px solid #222; max-width: 400px; margin: 20px auto; }
+  input, button { padding: 14px; margin: 10px 0; border-radius: 12px; border: none; width: 90%; font-size: 16px; }
+  input { background: #1A1A26; color: white; border: 1px solid #333; }
+  button { background: #E8356D; color: white; font-weight: bold; cursor: pointer; transition: 0.3s; }
+  button:hover { opacity: 0.8; }
+  #app { display: none; }
+  .error-text { color: #E8356D; font-size: 14px; margin-top: 15px; min-height: 20px; }
 </style>
 </head>
 <body>
@@ -21,69 +24,115 @@
 <h1>🔗 ENLACE</h1>
 
 <div id="auth" class="card">
+  <p style="color: #888;">Acceso Seguro</p>
   <input id="email" type="email" placeholder="Email" value="hispanointer@gmail.com">
   <input id="pass" type="password" placeholder="Contraseña">
   <button onclick="login()">ENTRAR</button>
-  <button onclick="register()" style="background:#222">Registrarse</button>
-  <div id="msg" class="err"></div>
+  <button onclick="register()" style="background: #222;">Registrarse</button>
+  <div id="msg" class="error-text"></div>
 </div>
 
 <div id="app" class="card">
   <h2>Bienvenido 👋</h2>
-  <button onclick="activarGPS()">📍 Activar GPS</button>
-  <button onclick="logout()" style="background:#222; margin-top:20px;">Cerrar sesión</button>
+  <p style="color: #666;">Panel de Control</p>
+  
+  <button onclick="activarGPS()">📍 Actualizar Ubicación</button>
+  
+  <div style="margin: 20px 0; border-top: 1px solid #222; padding-top: 20px;">
+    <label style="font-size: 12px; color: #888; display: block; margin-bottom: 5px;">Subir foto de perfil:</label>
+    <input type="file" onchange="subirFoto(this.files[0])" style="background: none; border: none; width: auto; font-size: 12px;">
+  </div>
+
+  <button onclick="logout()" style="background: #333; margin-top: 20px;">Cerrar sesión</button>
 </div>
 
 <script>
-// ═══ CONFIGURACIÓN FINAL ═══
+// CONFIGURACIÓN CON TUS CLAVES REALES
 const SB_URL = "https://nvvebzpbupqrddxcvnzk.supabase.co";
 const SB_KEY = "EyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im52dmVienBidXBxcmRkeGN2bnprIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5Nzk4NzUsImV4cCI6MjA5MTU1NTg3NX0.5Zk-Y_6tZVKuvVj6Xxwh1gZT9ZRRU3rKI-7bw8nsEcY";
 
 const db = supabase.createClient(SB_URL, SB_KEY);
 
+// Función de Inicio de Sesión
 async function login() {
   const email = document.getElementById("email").value;
   const pass = document.getElementById("pass").value;
   const msg = document.getElementById("msg");
   
-  const { error } = await db.auth.signInWithPassword({ email, password: pass });
-  if (error) msg.innerText = error.message;
-  else showApp();
+  msg.innerText = "Verificando...";
+  
+  const { data, error } = await db.auth.signInWithPassword({ email, password: pass });
+
+  if (error) {
+    msg.innerText = error.message;
+  } else {
+    mostrarApp();
+  }
 }
 
+// Función de Registro
 async function register() {
   const email = document.getElementById("email").value;
   const pass = document.getElementById("pass").value;
   const { error } = await db.auth.signUp({ email, password: pass });
-  if (error) alert(error.message);
-  else alert("Registro completado. Verifica tu email.");
+
+  if (error) {
+    alert("Error: " + error.message);
+  } else {
+    alert("¡Cuenta creada! Revisa tu email para confirmar.");
+  }
 }
 
-function showApp() {
+// Cambiar de vista
+function mostrarApp() {
   document.getElementById("auth").style.display = "none";
   document.getElementById("app").style.display = "block";
 }
 
+// Cerrar sesión
 async function logout() {
   await db.auth.signOut();
   location.reload();
 }
 
+// Función de GPS
 async function activarGPS() {
   navigator.geolocation.getCurrentPosition(async (pos) => {
     const { data: { user } } = await db.auth.getUser();
-    await db.from("perfiles").update({
+    
+    const { error } = await db.from("perfiles").update({
       lat: pos.coords.latitude,
       lng: pos.coords.longitude,
       gps_activo: true
     }).eq("id", user.id);
-    alert("📍 Ubicación actualizada.");
+
+    if (error) alert("Error al guardar GPS: " + error.message);
+    else alert("📍 Ubicación actualizada correctamente.");
   });
 }
 
+// Función de Subida de Foto
+async function subirFoto(file) {
+  if (!file) return;
+  const { data: { user } } = await db.auth.getUser();
+  const path = `${user.id}/${Date.now()}.jpg`;
+
+  const { data, error } = await db.storage.from("fotos").upload(path, file);
+
+  if (error) {
+    alert("Error al subir: " + error.message);
+  } else {
+    const { data: urlData } = db.storage.from("fotos").getPublicUrl(path);
+    await db.from("perfiles").update({ foto_url: urlData.publicUrl }).eq("id", user.id);
+    alert("Foto de perfil actualizada ✅");
+  }
+}
+
+// Verificar sesión activa al cargar
 db.auth.getSession().then(({ data }) => {
-  if (data.session) showApp();
+  if (data.session) mostrarApp();
 });
 </script>
+
 </body>
 </html>
