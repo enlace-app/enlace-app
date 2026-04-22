@@ -8,23 +8,52 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
+/* Estilo ENLACE v14 */
 body {
-  font-family: Arial;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background: #0A0A0F;
   color: white;
   text-align: center;
   padding: 20px;
 }
-input, button {
-  padding: 10px;
-  margin: 5px;
-  border-radius: 8px;
-  border: none;
+h1 { color: #E8356D; font-size: 2.5rem; letter-spacing: -1px; }
+.card {
+  background: #12121A;
+  padding: 25px;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.05);
+  max-width: 400px;
+  margin: 0 auto;
 }
+input, button {
+  padding: 12px;
+  margin: 8px 0;
+  border-radius: 12px;
+  border: none;
+  width: 90%;
+  font-size: 16px;
+}
+input { background: #1A1A26; color: white; border: 1px solid #333; }
 button {
   background: #E8356D;
   color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
 }
+button:hover { opacity: 0.8; transform: translateY(-2px); }
+#chat {
+  background: #050507;
+  padding: 15px;
+  margin-top: 20px;
+  border-radius: 15px;
+  max-height: 250px;
+  overflow-y: auto;
+  border: 1px solid #222;
+  text-align: left;
+}
+#app { display:none; }
+.err { color: #E8356D; font-size: 12px; }
 </style>
 </head>
 
@@ -32,139 +61,179 @@ button {
 
 <h1>🔗 ENLACE</h1>
 
-<div id="auth">
-  <input id="email" placeholder="Email"><br>
+<div id="auth" class="card">
+  <p>Entra en la red de conexiones reales</p>
+  <input id="email" type="email" placeholder="Email"><br>
   <input id="pass" type="password" placeholder="Contraseña"><br>
-  <button onclick="login()">Entrar</button>
-  <button onclick="register()">Registrarse</button>
+  <button onclick="login()">ENTRAR</button>
+  <button onclick="register()" style="background:transparent; color:#666;">Crear cuenta</button>
+  <p id="msg-auth" class="err"></p>
 </div>
 
-<div id="app" style="display:none;">
-  <h2>Bienvenido</h2>
-  <button onclick="activarGPS()">Activar GPS</button>
-  <input type="file" id="foto" onchange="subirFoto(this.files[0])"><br><br>
+<div id="app" class="card">
+  <h2>¡Hola! 👋</h2>
+  <p style="color:#666">Panel de control de usuario</p>
 
-  <button onclick="enviarMensaje()">Enviar mensaje test</button>
+  <button onclick="activarGPS()">📍 Actualizar Ubicación</button><br>
 
-  <div id="chat"></div>
+  <div style="margin: 15px 0;">
+    <label style="font-size:12px; color:#888;">Subir foto de perfil:</label><br>
+    <input type="file" onchange="subirFoto(this.files[0])" style="background:none; border:none; width:auto;">
+  </div>
 
-  <button onclick="logout()">Cerrar sesión</button>
+  <button onclick="enviarMensaje()">💬 Enviar Mensaje de Prueba</button>
+
+  <div id="chat">
+    <small style="color:#444">Mensajes en tiempo real...</small>
+  </div>
+
+  <button onclick="logout()" style="background:#222; margin-top:30px;">Cerrar sesión</button>
 </div>
 
 <script>
-// 🔥 CONFIGURA ESTO
-const supabaseUrl = "https://TU-PROYECTO.supabase.co";
-const supabaseKey = "TU-ANON-KEY";
+// ═══ TUS CLAVES CONFIGURADAS ═══
+const supabaseUrl = "https://nvvebzpbupqrddxcvnzk.supabase.co";
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im52dmVienBidXBxcmRkeGN2bnprIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUzMTI2MzIsImV4cCI6MjA2MDg4ODYzMn0.n-3m9fV2Xm9_S_vY2L8N9m9fV2Xm9_S_vY2L8N9m9fV2Xm9_S_vY2L8N";
 
-const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+const db = supabase.createClient(supabaseUrl, supabaseKey);
+
+// ELEMENTOS
+const emailInput = document.getElementById("email");
+const passInput = document.getElementById("pass");
+const authDiv = document.getElementById("auth");
+const appDiv = document.getElementById("app");
+const chatDiv = document.getElementById("chat");
+const msgAuth = document.getElementById("msg-auth");
 
 // LOGIN
 async function login() {
-  const { error } = await supabase.auth.signInWithPassword({
-    email: email.value,
-    password: pass.value
+  msgAuth.innerText = "Verificando...";
+  const { data, error } = await db.auth.signInWithPassword({
+    email: emailInput.value,
+    password: passInput.value
   });
 
-  if (error) return alert(error.message);
-  iniciarApp();
+  if (error) {
+    msgAuth.innerText = error.message;
+  } else {
+    iniciar();
+  }
 }
 
-// REGISTRO
+// REGISTER
 async function register() {
-  const { error } = await supabase.auth.signUp({
-    email: email.value,
-    password: pass.value
+  msgAuth.innerText = "Creando cuenta...";
+  const { data, error } = await db.auth.signUp({
+    email: emailInput.value,
+    password: passInput.value
   });
 
-  if (error) return alert(error.message);
-  alert("Cuenta creada");
+  if (error) {
+    msgAuth.innerText = error.message;
+  } else {
+    alert("¡Cuenta creada! Revisa tu email si has activado la confirmación.");
+  }
 }
 
 // LOGOUT
 async function logout() {
-  await supabase.auth.signOut();
+  await db.auth.signOut();
   location.reload();
 }
 
-// INICIAR APP
-async function iniciarApp() {
-  auth.style.display = "none";
-  app.style.display = "block";
-
-  escucharMensajes();
+// START
+function iniciar() {
+  authDiv.style.display = "none";
+  appDiv.style.display = "block";
+  escucharChat();
 }
 
 // GPS
 function activarGPS() {
   navigator.geolocation.getCurrentPosition(async (pos) => {
-    const user = (await supabase.auth.getUser()).data.user;
+    const { data: { user } } = await db.auth.getUser();
 
-    await supabase.from("perfiles").update({
+    const { error } = await db.from("perfiles").update({
       lat: pos.coords.latitude,
       lng: pos.coords.longitude,
       gps_activo: true
     }).eq("id", user.id);
 
-    alert("GPS activado 📍");
+    if(error) alert("Error GPS: " + error.message);
+    else alert("Ubicación actualizada en la base de datos 📍");
   });
 }
 
-// SUBIR FOTO
+// FOTO
 async function subirFoto(file) {
-  const user = (await supabase.auth.getUser()).data.user;
+  if(!file) return;
+  const { data: { user } } = await db.auth.getUser();
+  const fileName = `${user.id}/${Date.now()}.jpg`;
 
-  const { data, error } = await supabase.storage
-    .from('fotos')
-    .upload(`${user.id}/${Date.now()}.jpg`, file);
+  const { data, error } = await db.storage
+    .from("fotos")
+    .upload(fileName, file);
 
-  if (error) return alert(error.message);
+  if (error) return alert("Error al subir: " + error.message);
 
-  const { data: url } = supabase.storage
-    .from('fotos')
+  const { data: urlData } = db.storage
+    .from("fotos")
     .getPublicUrl(data.path);
 
-  await supabase.from("perfiles").update({
-    foto_url: url.publicUrl
+  await db.from("perfiles").update({
+    foto_url: urlData.publicUrl
   }).eq("id", user.id);
 
-  alert("Foto subida 📸");
+  alert("Foto de perfil actualizada con éxito ✅");
 }
 
-// MENSAJE TEST
+// MENSAJE
 async function enviarMensaje() {
-  const user = (await supabase.auth.getUser()).data.user;
+  const { data: { user } } = await db.auth.getUser();
 
-  const { data: match } = await supabase
+  // Buscamos un match activo para este usuario
+  const { data: match } = await db
     .from("matches")
-    .select("*")
+    .select("id")
+    .or(`usuario1_id.eq.${user.id},usuario2_id.eq.${user.id}`)
     .limit(1)
     .single();
 
-  if (!match) return alert("No hay match");
+  if (!match) return alert("Aún no tienes ningún match para chatear.");
 
-  await supabase.from("mensajes").insert({
+  const { error } = await db.from("mensajes").insert({
     match_id: match.id,
     emisor_id: user.id,
-    contenido: "Hola 👋"
+    contenido: "¡Hola! ¿Qué tal? 👋"
   });
+  
+  if(error) alert(error.message);
 }
 
-// ESCUCHAR CHAT REALTIME
-function escucharMensajes() {
-  supabase.channel('chat')
-    .on('postgres_changes', {
-      event: 'INSERT',
-      schema: 'public',
-      table: 'mensajes'
-    }, payload => {
-      chat.innerHTML += "<p>" + payload.new.contenido + "</p>";
+// REALTIME (Chat en vivo)
+function escucharChat() {
+  db.channel("chat_publico")
+    .on("postgres_changes", {
+      event: "INSERT",
+      schema: "public",
+      table: "mensajes"
+    }, (payload) => {
+      const p = document.createElement("p");
+      p.style.margin = "5px 0";
+      p.style.padding = "8px";
+      p.style.background = "#1A1A26";
+      p.style.borderRadius = "8px";
+      p.style.fontSize = "14px";
+      p.innerHTML = `<b style="color:#E8356D">Mensaje:</b> ${payload.new.contenido}`;
+      chatDiv.appendChild(p);
+      chatDiv.scrollTop = chatDiv.scrollHeight;
     })
     .subscribe();
 }
 
-// AUTO LOGIN
-supabase.auth.getSession().then(({ data }) => {
-  if (data.session) iniciarApp();
+// AUTO LOGIN (Si ya estabas logueado)
+db.auth.getSession().then(({ data }) => {
+  if (data.session) iniciar();
 });
 </script>
 
