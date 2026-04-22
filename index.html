@@ -3,250 +3,136 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<meta name="theme-color" content="#0A0A0F">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<title>ENLACE</title>
-<meta http-equiv="Cache-Control" content="no-cache,no-store,must-revalidate">
+<title>ENLACE v14 GOLD</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-
 <style>
-/* ═══ DISEÑO PREMIUM v14 ═══ */
-:root {
-  --bg:#0A0A0F; --s1:#12121A; --s2:#1A1A26; --s3:#222232;
-  --bdr:rgba(255,255,255,.06); --txt:#F0F0FF; --dim:#6666AA;
-  --acc:#E8356D; --pur:#7C3AED; --grn:#10B981; --gld:#F59E0B; --red:#EF4444;
-  --grad:linear-gradient(135deg, #E8356D 0%, #7C3AED 100%);
-}
+    /* TU DISEÑO ORIGINAL v14 */
+    :root {
+      --bg:#0A0A0F; --s1:#12121A; --s2:#1A1A26; --acc:#E8356D; --txt:#F0F0FF;
+    }
+    body { margin:0; background:var(--bg); color:var(--txt); font-family:'DM Sans', sans-serif; overflow:hidden; height:100vh; }
+    
+    /* Splash Reparado */
+    #splash { 
+      position:fixed; inset:0; background:var(--bg); 
+      display:flex; flex-direction:column; align-items:center; justify-content:center; 
+      z-index:9999; opacity:1; transition:0.5s; 
+    }
+    .logo-anim { font-family:'Syne', sans-serif; font-weight:800; font-size:48px; letter-spacing:-2px; color:var(--acc); }
 
-* { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-body { 
-  margin:0; background:var(--bg); color:var(--txt); 
-  font-family:'DM Sans', sans-serif; overflow:hidden; height:100vh;
-}
+    .screen { position:fixed; inset:0; display:none; flex-direction:column; background:var(--bg); }
+    .screen.on { display:flex; animation: fadeIn 0.4s ease; }
+    @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
 
-/* ═══ SPLASH REPARADO ═══ */
-#splash {
-  position:fixed; inset:0; background:var(--bg);
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
-  z-index:9999; transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.logo-v14 {
-  font-family:'Syne', sans-serif; font-weight:800; font-size:52px;
-  letter-spacing:-3px; background:var(--grad); -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent; margin:0;
-}
-
-/* ═══ PANTALLAS ═══ */
-.screen { position:fixed; inset:0; display:none; flex-direction:column; background:var(--bg); z-index:10; }
-.screen.on { display:flex; animation: slideUp 0.5s ease-out; }
-@keyframes slideUp { from { transform:translateY(20px); opacity:0; } to { transform:translateY(0); opacity:1; } }
-
-/* ═══ AUTH ═══ */
-#auth { justify-content:center; align-items:center; padding:30px; text-align:center; }
-.auth-card { background:var(--s1); padding:40px 30px; border-radius:32px; border:1px solid var(--bdr); width:100%; max-width:400px; }
-input { 
-  width:100%; background:var(--s2); border:1px solid var(--bdr); 
-  padding:18px; border-radius:20px; color:white; margin:10px 0; font-size:16px;
-}
-.btn-primary { 
-  background:var(--grad); color:white; border:none; padding:18px; 
-  border-radius:20px; font-weight:800; width:100%; cursor:pointer; margin-top:15px;
-}
-
-/* ═══ INTERFAZ PRINCIPAL ═══ */
-header { 
-  padding:20px; display:flex; justify-content:space-between; align-items:center; 
-  background:rgba(10,10,15,0.8); backdrop-filter:blur(10px); z-index:50;
-}
-.xp-pill { 
-  background:var(--s2); border:1px solid var(--bdr); padding:8px 16px; 
-  border-radius:100px; font-size:13px; font-weight:700; color:var(--acc);
-}
-
-/* Feed & Cards */
-#feed { flex:1; position:relative; overflow:hidden; display:flex; align-items:center; justify-content:center; }
-.tinder-card {
-  width:92%; height:90%; position:absolute; border-radius:32px;
-  overflow:hidden; background:var(--s2); border:1px solid var(--bdr);
-  box-shadow:0 20px 50px rgba(0,0,0,0.5);
-}
-.card-img { width:100%; height:100%; object-fit:cover; }
-.card-data {
-  position:absolute; bottom:0; width:100%; padding:30px 20px;
-  background:linear-gradient(transparent, rgba(0,0,0,0.9));
-}
-
-/* Navbar */
-.nav { 
-  position:fixed; bottom:0; width:100%; height:85px; 
-  background:rgba(18,18,26,0.9); backdrop-filter:blur(15px);
-  display:none; justify-content:space-around; align-items:center;
-  border-top:1px solid var(--bdr); padding-bottom:env(safe-area-inset-bottom);
-}
-.nav.on { display:flex; }
-.nbtn { font-size:26px; opacity:0.4; transition:0.3s; }
-.nbtn.on { opacity:1; transform:scale(1.2); color:var(--acc); }
-
-/* Toast */
-#toast {
-  position:fixed; top:40px; left:50%; transform:translateX(-50%) translateY(-100px);
-  background:var(--s3); color:white; padding:12px 24px; border-radius:15px;
-  border:1px solid var(--acc); z-index:10000; transition:0.4s; font-weight:600;
-}
-#toast.on { transform:translateX(-50%) translateY(0); }
+    /* Estilos de tus componentes */
+    .xp-badge { background:rgba(232,53,109,0.15); color:var(--acc); padding:6px 14px; border-radius:20px; font-weight:600; font-size:12px; border:1px solid rgba(232,53,109,0.3); }
+    .btn-main { background:var(--acc); color:white; border:none; padding:18px; border-radius:18px; font-weight:700; width:90%; cursor:pointer; font-size:16px; }
+    input { background:var(--s2); border:1px solid rgba(255,255,255,0.05); padding:16px; border-radius:16px; color:white; margin:10px 0; width:85%; }
+    
+    .nav { position:fixed; bottom:0; width:100%; height:85px; background:rgba(18,18,26,0.9); backdrop-filter:blur(15px); display:none; justify-content:space-around; align-items:center; border-top:1px solid rgba(255,255,255,0.05); padding-bottom:env(safe-area-inset-bottom); }
+    .nav.on { display:flex; }
+    @keyframes spin { to { transform:rotate(360deg); } }
 </style>
 </head>
 <body>
 
     <div id="splash">
-        <h1 class="logo-v14">ENLACE</h1>
-        <div style="width:28px;height:28px;border:3px solid #222;border-top-color:var(--acc);border-radius:50%;animation:spin 1s linear infinite;margin-top:25px"></div>
+        <h1 class="logo-anim">ENLACE</h1>
+        <div style="width:25px;height:25px;border:3px solid #222;border-top-color:var(--acc);border-radius:50%;animation:spin 1s linear infinite;margin-top:20px"></div>
     </div>
 
-    <div id="auth" class="screen">
-        <div class="auth-card">
-            <h1 style="font-family:Syne; margin-bottom:5px">Bienvenido</h1>
-            <p style="color:var(--dim); margin-bottom:30px">La app real de conexiones.</p>
-            <input type="email" id="email" placeholder="Email">
-            <input type="password" id="pass" placeholder="Contraseña">
-            <button class="btn-primary" onclick="doAuth('login')">ENTRAR</button>
-            <button onclick="doAuth('reg')" style="background:none; border:none; color:var(--dim); margin-top:20px; font-weight:600">Crear cuenta nueva</button>
-            <p id="auth-err" style="color:var(--acc); font-size:12px; margin-top:20px; min-height:15px"></p>
-        </div>
+    <div id="auth" class="screen" style="justify-content:center; align-items:center;">
+        <h1 style="font-family:Syne; font-size:32px;">Bienvenido</h1>
+        <input type="email" id="email" placeholder="Email">
+        <input type="password" id="pass" placeholder="Contraseña">
+        <button class="btn-main" onclick="handleAuth('login')">ENTRAR</button>
+        <button onclick="handleAuth('reg')" style="background:none; border:none; color:#666; margin-top:20px">Registrarse</button>
+        <p id="err" style="color:var(--acc); font-size:12px; margin-top:20px"></p>
     </div>
 
     <div id="main" class="screen">
-        <header>
-            <span style="font-family:Syne; font-weight:800; font-size:24px; color:var(--acc)">ENLACE</span>
-            <div class="xp-pill" id="xp-display">0 XP</div>
+        <header style="padding:20px; display:flex; justify-content:space-between; align-items:center">
+            <span style="font-family:Syne; font-weight:800; color:var(--acc); font-size:22px">ENLACE</span>
+            <div class="xp-badge" id="xp-val">100 XP</div>
         </header>
-        <div id="feed">
-            <div id="empty-feed" style="text-align:center; color:var(--dim)">
-                <p>No hay más perfiles hoy.</p>
-                <button onclick="location.reload()" style="background:none; border:1px solid var(--acc); color:var(--acc); padding:8px 20px; border-radius:12px; font-size:12px">Actualizar</button>
+        <div style="flex:1; display:flex; align-items:center; justify-content:center; padding:20px">
+            <div style="background:var(--s2); width:100%; height:80%; border-radius:35px; border:1px solid rgba(255,255,255,0.05); display:flex; align-items:center; justify-content:center">
+                <p style="color:#444">Buscando conexiones...</p>
             </div>
         </div>
     </div>
 
     <nav id="navbar" class="nav">
-        <div class="nbtn on" onclick="show('main')">🔥</div>
-        <div class="nbtn" onclick="toast('Próximamente Chat')">💬</div>
-        <div class="nbtn" onclick="toast('Próximamente Perfil')">👤</div>
+        <div onclick="show('main')" style="font-size:28px">🔥</div>
+        <div onclick="alert('Próximamente')" style="font-size:28px; opacity:0.3">💬</div>
+        <div onclick="alert('Próximamente')" style="font-size:28px; opacity:0.3">👤</div>
     </nav>
 
-    <div id="toast"></div>
-
 <script>
-// ═══ CONFIGURACIÓN ═══
-const SB_URL = "https://nvvebzpbupqrddxcvnzk.supabase.co";
-const SB_KEY = "Sb_publishable_DHkfYtA89Cb-MAIdq2TqqA_OVjmtvuq";
-const sb = supabase.createClient(SB_URL, SB_KEY);
+    // 1. CONEXIÓN DIRECTA
+    const SB_URL = "https://nvvebzpbupqrddxcvnzk.supabase.co";
+    const SB_KEY = "Sb_publishable_DHkfYtA89Cb-MAIdq2TqqA_OVjmtvuq";
+    const sb = supabase.createClient(SB_URL, SB_KEY);
 
-let S = { user:null, perfil:null, xp:0 };
+    // 2. MOTOR DE ARRANQUE "BYPASS"
+    async function initApp() {
+        // Si en 2.5 segundos no ha entrado, forzamos la pantalla de Auth
+        const timer = setTimeout(() => {
+            console.log("Forzando inicio...");
+            exitSplash();
+            show('auth');
+        }, 2500);
 
-// ═══ MOTOR DE ARRANQUE (FIXED) ═══
-async function init() {
-    console.log("🚀 ENLACE v14 GOLD Iniciando...");
-    
-    // Si Supabase no responde en 3 segundos, forzamos salida de carga
-    const failsafe = setTimeout(() => {
-        if(document.getElementById('splash').style.display !== 'none') {
-            console.warn("Failsafe activado: Timeout de conexión");
+        try {
+            const { data: { session } } = await sb.auth.getSession();
+            clearTimeout(timer);
+            exitSplash();
+            if (session) {
+                cargarPerfil(session.user.id);
+                show('main');
+            } else {
+                show('auth');
+            }
+        } catch (e) {
             exitSplash();
             show('auth');
         }
-    }, 3000);
+    }
 
-    try {
-        const { data: { session } } = await sb.auth.getSession();
-        clearTimeout(failsafe);
+    function exitSplash() {
+        const s = document.getElementById('splash');
+        s.style.opacity = '0';
+        setTimeout(() => s.style.display = 'none', 500);
+    }
+
+    function show(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('on'));
+        document.getElementById(id).classList.add('on');
+        if(id === 'main') document.getElementById('navbar').classList.add('on');
+        else document.getElementById('navbar').classList.remove('on');
+    }
+
+    async function cargarPerfil(uid) {
+        const { data } = await sb.from('perfiles').select('puntos').eq('id', uid).single();
+        if(data) document.getElementById('xp-val').innerText = data.puntos + ' XP';
+    }
+
+    async function handleAuth(type) {
+        const email = document.getElementById('email').value;
+        const pass = document.getElementById('pass').value;
+        const err = document.getElementById('err');
         
-        if (session) {
-            S.user = session.user;
-            await cargarDatos();
-            exitSplash();
-            show('main');
-        } else {
-            exitSplash();
-            show('auth');
-        }
-    } catch (e) {
-        console.error(e);
-        exitSplash();
-        show('auth');
+        err.innerText = "Conectando...";
+        const { error } = (type === 'login') 
+            ? await sb.auth.signInWithPassword({ email, password:pass })
+            : await sb.auth.signUp({ email, password:pass });
+
+        if(error) err.innerText = error.message;
+        else location.reload();
     }
-}
 
-function exitSplash() {
-    const s = document.getElementById('splash');
-    s.style.opacity = '0';
-    setTimeout(() => s.style.display = 'none', 600);
-}
-
-// ═══ LÓGICA DE NEGOCIO ═══
-async function cargarDatos() {
-    try {
-        const { data, error } = await sb.from('perfiles').select('*').eq('id', S.user.id).single();
-        if (data) {
-            S.perfil = data;
-            S.xp = data.puntos || 0;
-            renderUI();
-        }
-    } catch(e) {}
-}
-
-function renderUI() {
-    document.getElementById('xp-display').innerText = S.xp + ' XP';
-}
-
-function show(id) {
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('on'));
-    const target = document.getElementById(id);
-    if(target) target.classList.add('on');
-    
-    const nav = document.getElementById('navbar');
-    if(id === 'main') nav.classList.add('on');
-    else nav.classList.remove('on');
-}
-
-async function doAuth(type) {
-    const email = document.getElementById('email').value;
-    const pass = document.getElementById('pass').value;
-    const err = document.getElementById('auth-err');
-    
-    if(!email || pass.length < 6) {
-        err.innerText = "Email o contraseña (mín. 6) inválidos";
-        return;
-    }
-    
-    err.innerText = "Procesando...";
-    const { data, error } = (type === 'login') 
-        ? await sb.auth.signInWithPassword({ email, password:pass })
-        : await sb.auth.signUp({ email, password:pass });
-
-    if(error) {
-        err.innerText = error.message;
-    } else {
-        // En registro, creamos el perfil automáticamente
-        if(type === 'reg' && data.user) {
-            await sb.from('perfiles').insert([{ id:data.user.id, puntos:100 }]);
-        }
-        location.reload();
-    }
-}
-
-function toast(msg) {
-    const t = document.getElementById('toast');
-    t.innerText = msg;
-    t.classList.add('on');
-    setTimeout(() => t.classList.remove('on'), 3000);
-}
-
-// ═══ ANIMACIONES & SISTEMA ═══
-@keyframes spin { to { transform:rotate(360deg); } }
-
-window.onload = init;
+    window.onload = initApp;
 </script>
 </body>
 </html>
