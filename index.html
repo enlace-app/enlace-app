@@ -1,266 +1,182 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<meta name="theme-color" content="#0A0A0F">
-<meta name="apple-mobile-web-app-capable" content="yes">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>ENLACE</title>
-<meta name="description" content="Conexiones reales. © 2025 Javier González Rodríguez">
-<meta http-equiv="Cache-Control" content="no-cache,no-store,must-revalidate">
-<link rel="manifest" href="/manifest.json">
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
 <style>
-/* ═══ DESIGN SYSTEM ORIGINAL ═══ */
-:root{
-  --bg:#0A0A0F; --s1:#12121A; --s2:#1A1A26; --s3:#222232;
-  --border:rgba(255,255,255,.06); --text:#F0F0FF; --muted:#666;
-  --accent:#00E5FF; --accent-rgb:0,229,255;
-  --grad:linear-gradient(135deg, #00E5FF 0%, #007AFF 100%);
-  --font-title:'Syne', sans-serif; --font-body:'DM Sans', sans-serif;
-  --safe-top:env(safe-area-inset-top); --safe-bottom:env(safe-area-inset-bottom);
+*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,sans-serif}
+body{
+  background:linear-gradient(180deg,#0f0f14,#141421);
+  color:white;
+  overflow:hidden;
 }
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-body{background:var(--bg);color:var(--text);font-family:var(--font-body);overflow:hidden;height:100vh;width:100vw;user-select:none;}
 
-/* Mantengo todos tus estilos originales de ENLACE-FINAL-1.html... */
-#loading{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .5s;}
-.l-logo{font-family:var(--font-title);font-weight:800;font-size:2.5rem;letter-spacing:-1px;background:var(--grad);-webkit-background-clip:text;color:transparent;animation:pulse 2s infinite;}
-.l-bar{width:120px;height:2px;background:var(--s3);border-radius:2px;overflow:hidden;margin-top:10px;}
-.l-prog{width:40%;height:100%;background:var(--accent);animation:load 1.5s infinite ease-in-out;}
-@keyframes load{0%{transform:translateX(-100%);}100%{transform:translateX(250%);}}
-@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.6;}}
+header{
+  height:60px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:700;
+  font-size:22px;
+  background:#12121a;
+  border-bottom:1px solid #1f1f2a;
+}
 
-.screen{position:fixed;inset:0;display:none;opacity:0;transition:opacity .4s ease;z-index:10;flex-direction:column;}
-.screen.on{display:flex;opacity:1;}
+#app{
+  height:calc(100vh - 60px);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  position:relative;
+}
 
-/* Estilos de botones y formularios idénticos a tu archivo */
-.btn-main{background:var(--grad);color:white;border:none;padding:18px;border-radius:18px;font-weight:700;font-size:1rem;cursor:pointer;box-shadow:0 10px 30px rgba(0,229,255,0.2);transition:transform .2s;}
-.btn-sec{background:var(--s2);color:white;border:1px solid var(--border);padding:18px;border-radius:18px;font-weight:600;font-size:1rem;}
-.f-group input{width:100%;background:var(--s2);border:1px solid var(--border);padding:15px;border-radius:14px;color:white;font-size:1rem;}
+.card{
+  width:90%;
+  max-width:380px;
+  height:520px;
+  background:#1b1b26;
+  border-radius:24px;
+  overflow:hidden;
+  position:absolute;
+  box-shadow:0 15px 40px rgba(0,0,0,.6);
+  transition:0.4s ease;
+}
 
-/* Stack de tarjetas original */
-.card-stack{flex:1;position:relative;perspective:1000px;margin:10px;}
-.card{position:absolute;inset:0;background:var(--s2);border-radius:32px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 20px 40px rgba(0,0,0,.4);transition:transform .5s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity .3s;}
-.card-img{flex:1;position:relative;}
-.card-img img{width:100%;height:100%;object-fit:cover;}
-.card-info{position:absolute;bottom:0;left:0;right:0;padding:25px;background:linear-gradient(to top, rgba(0,0,0,0.9), transparent);}
+.card img{
+  width:100%;
+  height:70%;
+  object-fit:cover;
+}
 
-/* Navbar original */
-.nav{height:70px;background:rgba(18,18,26,.8);backdrop-filter:blur(15px);border-top:1px solid var(--border);display:flex;justify-content:space-around;align-items:center;padding-bottom:var(--safe-bottom);}
-.nbtn{flex:1;display:flex;flex-direction:column;align-items:center;opacity:.4;color:white;background:none;border:none;font-size:0.7rem;}
-.nbtn.on{opacity:1;color:var(--accent);}
+.card-content{
+  padding:18px;
+}
 
-/* Toast y utilidades */
-#toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:white;color:black;padding:12px 25px;border-radius:20px;font-weight:700;z-index:10000;opacity:0;transition:.3s;pointer-events:none;}
-#toast.on{opacity:1;}
+.card h2{
+  font-size:20px;
+}
+
+.card p{
+  opacity:.7;
+  margin-top:6px;
+  font-size:14px;
+}
+
+.actions{
+  position:absolute;
+  bottom:20px;
+  width:100%;
+  display:flex;
+  justify-content:space-around;
+}
+
+.btn{
+  width:65px;
+  height:65px;
+  border-radius:50%;
+  border:none;
+  font-size:24px;
+  cursor:pointer;
+  box-shadow:0 5px 15px rgba(0,0,0,.4);
+}
+
+.like{background:#27d37f;color:white}
+.dislike{background:#ff4d67;color:white}
+
+.hidden{display:none}
 </style>
 </head>
+
 <body>
 
-<div id="loading"><div class="l-logo">ENLACE</div><div class="l-bar"><div class="l-prog"></div></div></div>
+<header>ENLACE</header>
 
-<section id="scr-welcome" class="screen">
-  <div style="margin:auto;text-align:center;padding:40px;">
-    <h1 style="font-family:var(--font-title);font-size:3.5rem;font-weight:800;background:var(--grad);-webkit-background-clip:text;color:transparent;">ENLACE</h1>
-    <p style="opacity:.6;margin-top:10px;">Conexiones reales en tiempo real.</p>
-    <div style="display:flex;flex-direction:column;gap:12px;margin-top:40px;">
-      <button class="btn-main" onclick="openAuth('reg')">Crear cuenta</button>
-      <button class="btn-sec" onclick="openAuth('login')">Iniciar sesión</button>
-    </div>
-  </div>
-</section>
-
-<section id="scr-auth" class="screen" style="justify-content:center;padding:30px;">
-  <div style="background:var(--s1);padding:30px;border-radius:32px;border:1px solid var(--border);">
-    <h2 id="auth-title" style="font-family:var(--font-title);margin-bottom:20px;">HOLA</h2>
-    <div class="f-group" style="margin-bottom:15px;">
-      <input type="email" id="auth-email" placeholder="Email">
-    </div>
-    <div class="f-group" style="margin-bottom:20px;">
-      <input type="password" id="auth-pass" placeholder="Contraseña">
-    </div>
-    <button id="auth-submit" class="btn-main" style="width:100%;">Continuar</button>
-    <p style="text-align:center;margin-top:20px;font-size:.9rem;opacity:.6;" id="auth-switch-text">¿No tienes cuenta? <a href="#" onclick="openAuth('reg')" style="color:var(--accent);text-decoration:none;">Regístrate</a></p>
-  </div>
-</section>
-
-<section id="scr-main" class="screen">
-  <div style="flex:1;overflow:hidden;display:flex;flex-direction:column;">
-    <div id="tab-desc" class="tab-content" style="flex:1;display:flex;flex-direction:column;padding:15px;">
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;">
-        <div style="font-family:var(--font-title);font-weight:800;font-size:1.5rem;">ENLACE<span>.</span></div>
-        <div style="background:var(--s2);padding:5px 12px;border-radius:15px;font-size:.8rem;">⭐ <span id="u-puntos">0</span></div>
-      </div>
-      <div class="card-stack" id="stack"></div>
-      <div style="display:flex;justify-content:center;gap:20px;padding:20px;">
-        <button class="btn-sec" style="width:60px;height:60px;border-radius:50%;" onclick="swipe('left')">✕</button>
-        <button class="btn-main" style="width:70px;height:70px;border-radius:50%;" onclick="swipe('right')">❤</button>
-      </div>
-    </div>
-
-    <div id="tab-chats" class="tab-content" style="display:none;flex:1;padding:20px;overflow-y:auto;">
-      <h2 style="font-family:var(--font-title);margin-bottom:20px;">Mensajes</h2>
-      <div id="chats-list"></div>
-    </div>
-
-    <div id="tab-perfil" class="tab-content" style="display:none;flex:1;padding:20px;overflow-y:auto;">
-      <div style="text-align:center;padding:20px;">
-        <img id="u-foto" src="" style="width:120px;height:120px;border-radius:30px;object-fit:cover;">
-        <h2 id="u-nombre" style="margin-top:15px;">---</h2>
-        <button class="btn-sec" onclick="cerrarSesion()" style="margin-top:30px;width:100%;color:#FF4466;">Cerrar Sesión</button>
-      </div>
-    </div>
-  </div>
-
-  <nav class="nav">
-    <button onclick="navGo('desc')" id="nb-desc" class="nbtn on">Descubrir</button>
-    <button onclick="navGo('chats')" id="nb-chats" class="nbtn">Chats</button>
-    <button onclick="navGo('perfil')" id="nb-perfil" class="nbtn">Perfil</button>
-  </nav>
-</section>
-
-<div id="toast"></div>
+<div id="app">
+  <div id="cards"></div>
+</div>
 
 <script>
-// ── CONFIGURACIÓN REAL EXTRAÍDA DE TU ARCHIVO ────────────────
-const SB_URL = "https://ndemndunubozvttqpxue.supabase.co";
-const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5kZW1uZHVudWJvenZ0dHFweHVlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzkyNTcyMjAsImV4cCI6MjA1NDgzMzIyMH0.fNlqS2r_Oon2tVn_KshWclpA9S7nIn2A7lYn6Jd0-4Y";
-const _supabase = supabase.createClient(SB_URL, SB_KEY);
 
-let miUsuarioId = null;
-let miPerfil = null;
-let currentStack = [];
+const SUPABASE_URL = "https://ndemndunubozvttqpxue.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5kZW1uZHVudWJvenZ0dHFweHVlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzkyNTcyMjAsImV4cCI6MjA1NDgzMzIyMH0.fNlqS2r_Oon2tVn_KshWclpA9S7nIn2A7lYn6Jd0-4Y";
 
-// ── LÓGICA DE INICIO (IGUAL A TU ORIGINAL) ───────────────────
-window.onload = async () => {
-  const { data: { session } } = await _supabase.auth.getSession();
-  if (session) {
-    miUsuarioId = session.user.id;
-    await cargarPerfil();
-  } else {
-    setTimeout(() => {
-      document.getElementById('loading').style.display = 'none';
-      show('scr-welcome');
-    }, 1500);
-  }
-};
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-async function cargarPerfil() {
-  const { data, error } = await _supabase.from('perfiles').select('*').eq('id', miUsuarioId).single();
-  
-  // MEJORA AÑADIDA: Sistema de Bloqueo
-  if (data && data.activo === false) {
-    document.body.innerHTML = `<div style="height:100vh;display:flex;align-items:center;justify-content:center;background:#000;color:white;text-align:center;padding:20px;"><h2>CUENTA SUSPENDIDA</h2><p>Tu perfil ha sido desactivado.</p></div>`;
+let currentUser = null;
+let profiles = [];
+
+async function init(){
+  const {data:{session}} = await supabase.auth.getSession();
+  if(!session){
+    alert("Debes iniciar sesión");
     return;
   }
-
-  if (error || !data) {
-    // Si no tiene perfil, lo mandamos a registro de datos (aquí podrías poner tu scr-setup original)
-    alert("Por favor, completa tu perfil.");
-    return;
-  }
-
-  miPerfil = data;
-  document.getElementById('u-nombre').textContent = data.nombre;
-  document.getElementById('u-foto').src = data.foto_url;
-  document.getElementById('u-puntos').textContent = data.puntos;
-
-  await cargarDescubrimiento();
-  document.getElementById('loading').style.display = 'none';
-  show('scr-main');
+  currentUser = session.user;
+  loadProfiles();
 }
 
-// ── DESCUBRIMIENTO CON FILTRO ACTIVO ─────────────────────────
-async function cargarDescubrimiento() {
-  // Filtro activo=true para que no aparezcan usuarios baneados
-  const { data } = await _supabase.from('perfiles')
-    .select('*')
-    .eq('activo', true)
-    .neq('id', miUsuarioId)
+async function loadProfiles(){
+  // Cambiado de "profiles" a "perfiles" y añadido filtro de "activo"
+  const {data} = await supabase
+    .from("perfiles")
+    .select("*")
+    .eq("activo", true)
+    .neq("id", currentUser.id)
     .limit(10);
-  
-  currentStack = data || [];
-  renderStack();
+
+  profiles = data;
+  renderCards();
 }
 
-function renderStack() {
-  const container = document.getElementById('stack');
-  container.innerHTML = '';
-  if (currentStack.length === 0) {
-    container.innerHTML = '<div style="margin:auto;opacity:.5;">Buscando más personas...</div>';
-    return;
-  }
-  currentStack.forEach((p, i) => {
-    const card = document.createElement('div');
-    card.className = 'card';
-    card.style.zIndex = currentStack.length - i;
-    card.innerHTML = `
-      <div class="card-img"><img src="${p.foto_url}"></div>
-      <div class="card-info">
-        <h3>${p.nombre}, ${p.edad}</h3>
-        <p>${p.ciudad}</p>
+function renderCards(){
+  const container = document.getElementById("cards");
+  container.innerHTML="";
+
+  profiles.reverse().forEach(profile=>{
+    const card=document.createElement("div");
+    card.className="card";
+    // Ajustado a "foto_url" y "nombre" que son tus campos reales
+    card.innerHTML=`
+      <img src="${profile.foto_url || 'https://via.placeholder.com/400'}"/>
+      <div class="card-content">
+        <h2>${profile.nombre}, ${profile.edad || ''}</h2>
+        <p>${profile.bio || ''}</p>
+      </div>
+      <div class="actions">
+        <button class="btn dislike">✕</button>
+        <button class="btn like">❤</button>
       </div>
     `;
+
+    card.querySelector(".like").onclick=()=>handleLike(profile.id,card);
+    card.querySelector(".dislike").onclick=()=>removeCard(card);
+
     container.appendChild(card);
   });
 }
 
-async function swipe(dir) {
-  if (currentStack.length === 0) return;
-  const user = currentStack.shift();
-  // Aquí iría tu lógica de likes/nopes original
-  renderStack();
-  toast(dir === 'right' ? "¡Te gusta!" : "Pasando...");
+async function handleLike(receiver, card){
+  // Cambiado a tu tabla "likes" con los nombres de columna correctos (user_id y target_id)
+  await supabase.from("likes").insert({
+    user_id: currentUser.id,
+    target_id: receiver,
+    type: 'like'
+  });
+  removeCard(card);
 }
 
-// ── AUTH (IGUAL A TU ORIGINAL) ──────────────────────────────
-function openAuth(mode) {
-  document.getElementById('auth-title').textContent = mode === 'reg' ? 'UNIRSE' : 'ENTRAR';
-  document.getElementById('auth-submit').onclick = mode === 'reg' ? registro : login;
-  show('scr-auth');
+function removeCard(card){
+  card.style.transform="translateX(500px) rotate(20deg)";
+  card.style.opacity="0";
+  setTimeout(()=>card.remove(),300);
 }
 
-async function registro() {
-  const email = document.getElementById('auth-email').value;
-  const pass = document.getElementById('auth-pass').value;
-  const { data, error } = await _supabase.auth.signUp({ email, password: pass });
-  if (error) return toast(error.message);
-  alert("Revisa tu email para confirmar");
-}
+init();
 
-async function login() {
-  const email = document.getElementById('auth-email').value;
-  const pass = document.getElementById('auth-pass').value;
-  const { data, error } = await _supabase.auth.signInWithPassword({ email, password: pass });
-  if (error) return toast("Error: " + error.message);
-  location.reload();
-}
-
-function cerrarSesion() {
-  _supabase.auth.signOut().then(() => location.reload());
-}
-
-// ── NAVEGACIÓN Y UTILS ───────────────────────────────────────
-function navGo(tab) {
-  document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
-  document.getElementById('tab-' + tab).style.display = 'flex';
-  document.querySelectorAll('.nbtn').forEach(b => b.classList.remove('on'));
-  document.getElementById('nb-' + tab).classList.add('on');
-}
-
-function show(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('on'));
-  document.getElementById(id).classList.add('on');
-}
-
-function toast(txt) {
-  const t = document.getElementById('toast');
-  t.textContent = txt;
-  t.classList.add('on');
-  setTimeout(() => t.classList.remove('on'), 2000);
-}
 </script>
 </body>
 </html>
