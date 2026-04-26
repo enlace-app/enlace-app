@@ -1114,7 +1114,7 @@ async function finOb() {
   const updates = {
     id: S.user.id, nombre, edad, ciudad, bio: bio || '',
     objetivo: S.obObj || 'ver', intereses: intereses || [],
-    activo: true, verificado: false, puntos: 100, elo_score: 1000
+    activo: true, verificado: false, puntos: 100
   };
   // Subir foto si existe
   if (S.obFotoData) {
@@ -1144,7 +1144,7 @@ async function cargarPerfil() {
   const cpTO = setTimeout(() => { dbg('DB timeout 8s', 'error'); show('sa'); }, 8000);
   try {
     const { data, error } = await sb.from('perfiles')
-      .select('id,nombre,edad,ciudad,bio,objetivo,foto_url,intereses,verificado,activo,puntos,reputacion,elo_score')
+      .select('id,nombre,edad,ciudad,bio,objetivo,foto_url,intereses,verificado,activo,puntos')
       .eq('id', S.user.id)
       .maybeSingle();
     clearTimeout(cpTO);
@@ -1156,7 +1156,7 @@ async function cargarPerfil() {
     if (!data || !data.edad || !data.ciudad) { show('sob'); return; }
     S.perfil = data;
     S.xp     = data.puntos || 0;
-    S.elo    = data.elo_score || 1000;
+    S.elo    = data.elo_score || 1000; // columna opcional
     iniciarApp();
   } catch (e) {
     clearTimeout(cpTO);
@@ -1184,7 +1184,8 @@ function iniciarApp() {
 
 function renderUI() {
   if (!S.perfil) return;
-  const { nombre, edad, ciudad, puntos = 0, reputacion = 5, foto_url } = S.perfil;
+  const { nombre, edad, ciudad, puntos = 0, foto_url } = S.perfil;
+  const reputacion = S.perfil.reputacion || S.perfil.rep_autenticidad || 5;
   S.xp = puntos;
   const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
   set('p-nombre', nombre + (edad ? `, ${edad}` : ''));
@@ -1225,7 +1226,7 @@ function ganarXP(n) {
 ────────────────────────────────────── */
 async function cargarPerfiles() {
   const { data, error } = await sb.from('perfiles')
-    .select('id,nombre,edad,ciudad,bio,foto_url,intereses,verificado,puntos,elo_score')
+    .select('id,nombre,edad,ciudad,bio,foto_url,intereses,verificado,puntos')
     .neq('id', S.user.id)
     .limit(50);
   if (error) { dbg('cargarPerfiles: ' + error.message, 'warn'); mostrarVacio(); return; }
